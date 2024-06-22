@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import { DeploymentStacksClient } from '@azure/arm-resourcesdeploymentstacks'
 import * as helper from './helper'
 import * as stack from './stack'
+import { Mode } from './types'
 
 /**
  * The main function for the action.
@@ -35,7 +36,7 @@ export async function run(): Promise<void> {
 
     // Handle the execution mode
     switch (options.mode) {
-      case 'create':
+      case Mode.Create:
         await stack.createOrUpdateDeploymentStack(
           options,
           client,
@@ -44,7 +45,7 @@ export async function run(): Promise<void> {
         )
 
         break
-      case 'delete':
+      case Mode.Delete:
         await stack.deleteDeploymentStack(options, client)
 
         break

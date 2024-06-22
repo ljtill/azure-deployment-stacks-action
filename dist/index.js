@@ -45858,6 +45858,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
 const stack = __importStar(__nccwpck_require__(7067));
+const types_1 = __nccwpck_require__(5077);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -45884,10 +45885,10 @@ async function run() {
             : {};
         // Handle the execution mode
         switch (options.mode) {
-            case 'create':
+            case types_1.Mode.Create:
                 await stack.createOrUpdateDeploymentStack(options, client, template, parameters);
                 break;
-            case 'delete':
+            case types_1.Mode.Delete:
                 await stack.deleteDeploymentStack(options, client);
                 break;
             default:

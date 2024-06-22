@@ -1,37 +1,8 @@
-import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
   DeploymentStack
 } from '@azure/arm-resourcesdeploymentstacks'
 import { Options } from './types'
-
-/**
- * Get deployment stack.
- */
-async function getDeploymentStack(
-  options: Options,
-  client: DeploymentStacksClient
-): Promise<DeploymentStack | void> {
-  core.info(`Retrieving deployment stack...`)
-
-  switch (options.scope) {
-    case 'managementGroup':
-      return await client.deploymentStacks.getAtManagementGroup(
-        options.managementGroupId,
-        options.name
-      )
-
-    case 'subscription':
-      client.subscriptionId = options.subscriptionId
-      return await client.deploymentStacks.getAtSubscription(options.name)
-
-    case 'resourceGroup':
-      return await client.deploymentStacks.getAtResourceGroup(
-        options.resourceGroupName,
-        options.name
-      )
-  }
-}
 
 /**
  * Create or update deployment stack.
@@ -42,10 +13,6 @@ export async function createOrUpdateDeploymentStack(
   template: Record<string, unknown>,
   parameters: Record<string, unknown>
 ): Promise<void> {
-  ;(await getDeploymentStack(options, client))
-    ? core.info(`Updating deployment stack...`)
-    : core.info(`Creating deployment stack...`)
-
   const deploymentStack: DeploymentStack = {
     description: options.description,
     location: options.location,
@@ -110,10 +77,6 @@ export async function deleteDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
 ): Promise<void> {
-  ;(await getDeploymentStack(options, client))
-    ? core.info(`Deleting deployment stack...`)
-    : core.info(`Skipping deployment stack...`)
-
   let operationPromise
 
   switch (options.scope) {

@@ -12,6 +12,10 @@ export async function run(): Promise<void> {
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Starting the action...`)
 
+    // Check that the Bicep binary is installed
+    core.debug(`Checking for the Bicep binary...`)
+    await helper.checkBicep()
+
     // Authenticate the session
     core.debug(`Generate new credential...`)
     const credential = helper.newCredential()
@@ -19,10 +23,6 @@ export async function run(): Promise<void> {
     // Hydrate options variable
     core.debug(`Parsing the inputs...`)
     const options = helper.parseInputs()
-
-    // Installing Bicep binary
-    // core.debug(`Installing Bicep tool...`)
-    // await helper.installBicep()
 
     // Initialize deployment stacks client
     const client = new DeploymentStacksClient(credential)
@@ -36,6 +36,7 @@ export async function run(): Promise<void> {
     // Handle the execution mode
     switch (options.mode) {
       case 'create':
+        core.info(`Creating deployment stack...`)
         await stack.createOrUpdateDeploymentStack(
           options,
           client,
@@ -45,11 +46,10 @@ export async function run(): Promise<void> {
 
         break
       case 'delete':
+        core.info(`Deleting deployment stack...`)
         await stack.deleteDeploymentStack(options, client)
 
         break
-      default:
-        throw new Error(`Invalid mode: ${options.mode}`)
     }
 
     core.debug(`Completing the action...`)

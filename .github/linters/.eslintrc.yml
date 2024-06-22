@@ -43,8 +43,6 @@ rules:
     'import/named': 'off',
     'import/no-namespace': 'off',
     'no-console': 'off',
-    'no-extra-semi': 'off',
-    'no-shadow': 'off',
     'no-unused-vars': 'off',
     'prettier/prettier': 'error',
     'semi': 'off',

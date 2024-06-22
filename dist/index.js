@@ -45632,7 +45632,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseParametersFile = exports.parseTemplateFile = exports.parseInputs = exports.newCredential = exports.installBicep = void 0;
+exports.parseInputs = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -45640,26 +45640,6 @@ const exec = __importStar(__nccwpck_require__(9990));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
 const identity_1 = __nccwpck_require__(3084);
-/**
- * Build the Bicep file.
- */
-async function buildBicepFile(filePath) {
-    const bicepPath = await io.which('bicep', true);
-    // TODO: Implement cross platform support
-    const outputPath = '/tmp/main.json';
-    await exec.exec(`"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`);
-    return outputPath;
-}
-/**
- * Build the Bicep parameters file.
- */
-async function buildBicepParametersFile(filePath) {
-    const bicepPath = await io.which('bicep', true);
-    // TODO: Implement cross platform support
-    const outputPath = '/tmp/params.json';
-    await exec.exec(`"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`);
-    return outputPath;
-}
 /**
  * Install the Bicep binary.
  */
@@ -45704,6 +45684,84 @@ async function installBicep() {
     }
 }
 exports.installBicep = installBicep;
+/**
+ * Check if the Bicep binary is installed.
+ */
+async function checkBicep() {
+    if ((await io.which('bicep', false)) === '') {
+        throw new Error('Bicep is not installed');
+    }
+    return true;
+}
+exports.checkBicep = checkBicep;
+/**
+ * Build the Bicep file.
+ */
+async function buildBicepFile(filePath) {
+    const bicepPath = await io.which('bicep', true);
+    // TODO: Implement cross platform support
+    const outputPath = '/tmp/main.json';
+    await exec.exec(`"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`);
+    return outputPath;
+}
+/**
+ * Build the Bicep parameters file.
+ */
+async function buildBicepParametersFile(filePath) {
+    const bicepPath = await io.which('bicep', true);
+    // TODO: Implement cross platform support
+    const outputPath = '/tmp/params.json';
+    await exec.exec(`"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`);
+    return outputPath;
+}
+/**
+ * Parse the template file.
+ */
+async function parseTemplateFile(options) {
+    let filePath = options.templateFile;
+    core.debug(`Parsing the template file: ${filePath}`);
+    // Parse the file extension
+    const fileExtension = path.extname(filePath);
+    // Check if the file path is valid
+    if (fs.existsSync(filePath)) {
+        if (fileExtension === '.bicep') {
+            // Build the Bicep file
+            filePath = await buildBicepFile(filePath);
+        }
+    }
+    else {
+        throw new Error('Invalid template file path');
+    }
+    // Read the file content
+    const fileContent = fs.readFileSync(filePath);
+    // Parse the file content
+    return JSON.parse(fileContent.toString());
+}
+exports.parseTemplateFile = parseTemplateFile;
+/**
+ * Parse the parameters file.
+ */
+async function parseParametersFile(options) {
+    let filePath = options.parametersFile;
+    core.debug(`Parsing the parameters file: ${filePath}`);
+    // Parse the file extension
+    const fileExtension = path.extname(filePath);
+    // Check if the file path is valid
+    if (fs.existsSync(filePath)) {
+        if (fileExtension === '.bicepparam') {
+            // Build the Bicep parameters file
+            filePath = await buildBicepParametersFile(filePath);
+        }
+    }
+    else {
+        throw new Error('Invalid parameters file path');
+    }
+    // Read the file content
+    const fileContent = fs.readFileSync(filePath);
+    // Parse the file content
+    return JSON.parse(fileContent.toString());
+}
+exports.parseParametersFile = parseParametersFile;
 /**
  * Get the Azure token.
  */
@@ -45762,54 +45820,6 @@ function parseInputs() {
     return options;
 }
 exports.parseInputs = parseInputs;
-/**
- * Parse the template file.
- */
-async function parseTemplateFile(options) {
-    let filePath = options.templateFile;
-    core.debug(`Parsing the template file: ${filePath}`);
-    // Parse the file extension
-    const fileExtension = path.extname(filePath);
-    // Check if the file path is valid
-    if (fs.existsSync(filePath)) {
-        if (fileExtension === '.bicep') {
-            // Build the Bicep file
-            filePath = await buildBicepFile(filePath);
-        }
-    }
-    else {
-        throw new Error('Invalid template file path');
-    }
-    // Read the file content
-    const fileContent = fs.readFileSync(filePath);
-    // Parse the file content
-    return JSON.parse(fileContent.toString());
-}
-exports.parseTemplateFile = parseTemplateFile;
-/**
- * Parse the parameters file.
- */
-async function parseParametersFile(options) {
-    let filePath = options.parametersFile;
-    core.debug(`Parsing the parameters file: ${filePath}`);
-    // Parse the file extension
-    const fileExtension = path.extname(filePath);
-    // Check if the file path is valid
-    if (fs.existsSync(filePath)) {
-        if (fileExtension === '.bicepparam') {
-            // Build the Bicep parameters file
-            filePath = await buildBicepParametersFile(filePath);
-        }
-    }
-    else {
-        throw new Error('Invalid parameters file path');
-    }
-    // Read the file content
-    const fileContent = fs.readFileSync(filePath);
-    // Parse the file content
-    return JSON.parse(fileContent.toString());
-}
-exports.parseParametersFile = parseParametersFile;
 
 
 /***/ }),
@@ -45856,15 +45866,15 @@ async function run() {
     try {
         // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
         core.debug(`Starting the action...`);
+        // Check that the Bicep binary is installed
+        core.debug(`Checking for the Bicep binary...`);
+        await helper.checkBicep();
         // Authenticate the session
         core.debug(`Generate new credential...`);
         const credential = helper.newCredential();
         // Hydrate options variable
         core.debug(`Parsing the inputs...`);
         const options = helper.parseInputs();
-        // Installing Bicep binary
-        // core.debug(`Installing Bicep tool...`)
-        // await helper.installBicep()
         // Initialize deployment stacks client
         const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credential);
         // Parse the template and parameters
@@ -45875,13 +45885,13 @@ async function run() {
         // Handle the execution mode
         switch (options.mode) {
             case 'create':
+                core.info(`Creating deployment stack...`);
                 await stack.createOrUpdateDeploymentStack(options, client, template, parameters);
                 break;
             case 'delete':
+                core.info(`Deleting deployment stack...`);
                 await stack.deleteDeploymentStack(options, client);
                 break;
-            default:
-                throw new Error(`Invalid mode: ${options.mode}`);
         }
         core.debug(`Completing the action...`);
     }
@@ -45897,59 +45907,16 @@ exports.run = run;
 /***/ }),
 
 /***/ 7067:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteDeploymentStack = exports.createOrUpdateDeploymentStack = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-/**
- * Get deployment stack.
- */
-async function getDeploymentStack(options, client) {
-    core.info(`Retrieving deployment stack...`);
-    switch (options.scope) {
-        case 'managementGroup':
-            return await client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
-        case 'subscription':
-            client.subscriptionId = options.subscriptionId;
-            return await client.deploymentStacks.getAtSubscription(options.name);
-        case 'resourceGroup':
-            return await client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
-    }
-}
 /**
  * Create or update deployment stack.
  */
 async function createOrUpdateDeploymentStack(options, client, template, parameters) {
-    ;
-    (await getDeploymentStack(options, client))
-        ? core.info(`Updating deployment stack...`)
-        : core.info(`Creating deployment stack...`);
     const deploymentStack = {
         description: options.description,
         location: options.location,
@@ -45984,10 +45951,6 @@ exports.createOrUpdateDeploymentStack = createOrUpdateDeploymentStack;
  * Delete deployment stack.
  */
 async function deleteDeploymentStack(options, client) {
-    ;
-    (await getDeploymentStack(options, client))
-        ? core.info(`Deleting deployment stack...`)
-        : core.info(`Skipping deployment stack...`);
     let operationPromise;
     switch (options.scope) {
         case 'managementGroup':

@@ -8,38 +8,6 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { Options } from './types'
 
 /**
- * Build the Bicep file.
- */
-async function buildBicepFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
-
-  // TODO: Implement cross platform support
-  const outputPath = '/tmp/main.json'
-
-  await exec.exec(
-    `"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`
-  )
-
-  return outputPath
-}
-
-/**
- * Build the Bicep parameters file.
- */
-async function buildBicepParametersFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
-
-  // TODO: Implement cross platform support
-  const outputPath = '/tmp/params.json'
-
-  await exec.exec(
-    `"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`
-  )
-
-  return outputPath
-}
-
-/**
  * Install the Bicep binary.
  */
 export async function installBicep(): Promise<void> {
@@ -88,6 +56,109 @@ export async function installBicep(): Promise<void> {
     default:
       throw new Error('Unsupported platform')
   }
+}
+
+/**
+ * Check if the Bicep binary is installed.
+ */
+export async function checkBicep(): Promise<boolean> {
+  if ((await io.which('bicep', false)) === '') {
+    throw new Error('Bicep is not installed')
+  }
+
+  return true
+}
+
+/**
+ * Build the Bicep file.
+ */
+async function buildBicepFile(filePath: string): Promise<string> {
+  const bicepPath = await io.which('bicep', true)
+
+  // TODO: Implement cross platform support
+  const outputPath = '/tmp/main.json'
+
+  await exec.exec(
+    `"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`
+  )
+
+  return outputPath
+}
+
+/**
+ * Build the Bicep parameters file.
+ */
+async function buildBicepParametersFile(filePath: string): Promise<string> {
+  const bicepPath = await io.which('bicep', true)
+
+  // TODO: Implement cross platform support
+  const outputPath = '/tmp/params.json'
+
+  await exec.exec(
+    `"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`
+  )
+
+  return outputPath
+}
+
+/**
+ * Parse the template file.
+ */
+export async function parseTemplateFile(
+  options: Options
+): Promise<Record<string, unknown>> {
+  let filePath = options.templateFile
+
+  core.debug(`Parsing the template file: ${filePath}`)
+
+  // Parse the file extension
+  const fileExtension = path.extname(filePath)
+
+  // Check if the file path is valid
+  if (fs.existsSync(filePath)) {
+    if (fileExtension === '.bicep') {
+      // Build the Bicep file
+      filePath = await buildBicepFile(filePath)
+    }
+  } else {
+    throw new Error('Invalid template file path')
+  }
+
+  // Read the file content
+  const fileContent = fs.readFileSync(filePath)
+
+  // Parse the file content
+  return JSON.parse(fileContent.toString())
+}
+
+/**
+ * Parse the parameters file.
+ */
+export async function parseParametersFile(
+  options: Options
+): Promise<Record<string, unknown>> {
+  let filePath = options.parametersFile
+
+  core.debug(`Parsing the parameters file: ${filePath}`)
+
+  // Parse the file extension
+  const fileExtension = path.extname(filePath)
+
+  // Check if the file path is valid
+  if (fs.existsSync(filePath)) {
+    if (fileExtension === '.bicepparam') {
+      // Build the Bicep parameters file
+      filePath = await buildBicepParametersFile(filePath)
+    }
+  } else {
+    throw new Error('Invalid parameters file path')
+  }
+
+  // Read the file content
+  const fileContent = fs.readFileSync(filePath)
+
+  // Parse the file content
+  return JSON.parse(fileContent.toString())
 }
 
 /**
@@ -155,64 +226,4 @@ export function parseInputs(): Options {
   }
 
   return options as Options
-}
-
-/**
- * Parse the template file.
- */
-export async function parseTemplateFile(
-  options: Options
-): Promise<Record<string, unknown>> {
-  let filePath = options.templateFile
-
-  core.debug(`Parsing the template file: ${filePath}`)
-
-  // Parse the file extension
-  const fileExtension = path.extname(filePath)
-
-  // Check if the file path is valid
-  if (fs.existsSync(filePath)) {
-    if (fileExtension === '.bicep') {
-      // Build the Bicep file
-      filePath = await buildBicepFile(filePath)
-    }
-  } else {
-    throw new Error('Invalid template file path')
-  }
-
-  // Read the file content
-  const fileContent = fs.readFileSync(filePath)
-
-  // Parse the file content
-  return JSON.parse(fileContent.toString())
-}
-
-/**
- * Parse the parameters file.
- */
-export async function parseParametersFile(
-  options: Options
-): Promise<Record<string, unknown>> {
-  let filePath = options.parametersFile
-
-  core.debug(`Parsing the parameters file: ${filePath}`)
-
-  // Parse the file extension
-  const fileExtension = path.extname(filePath)
-
-  // Check if the file path is valid
-  if (fs.existsSync(filePath)) {
-    if (fileExtension === '.bicepparam') {
-      // Build the Bicep parameters file
-      filePath = await buildBicepParametersFile(filePath)
-    }
-  } else {
-    throw new Error('Invalid parameters file path')
-  }
-
-  // Read the file content
-  const fileContent = fs.readFileSync(filePath)
-
-  // Parse the file content
-  return JSON.parse(fileContent.toString())
 }

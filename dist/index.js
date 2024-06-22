@@ -45877,7 +45877,9 @@ async function run() {
         const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credential);
         // Parse the template and parameters
         const template = await helper.parseTemplateFile(options);
-        const parameters = await helper.parseParametersFile(options);
+        const parameters = options.parametersFile
+            ? helper.parseParametersFile(options)
+            : {};
         // Handle the execution mode
         switch (options.mode) {
             case 'create':

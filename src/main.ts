@@ -29,7 +29,9 @@ export async function run(): Promise<void> {
 
     // Parse the template and parameters
     const template = await helper.parseTemplateFile(options)
-    const parameters = await helper.parseParametersFile(options)
+    const parameters = options.parametersFile
+      ? helper.parseParametersFile(options)
+      : {}
 
     // Handle the execution mode
     switch (options.mode) {

@@ -22,6 +22,7 @@ async function getDeploymentStack(
       )
 
     case 'subscription':
+      client.subscriptionId = options.subscriptionId
       return await client.deploymentStacks.getAtSubscription(options.name)
 
     case 'resourceGroup':
@@ -72,6 +73,7 @@ export async function createOrUpdateDeploymentStack(
       break
 
     case 'subscription':
+      client.subscriptionId = options.subscriptionId
       operationPromise = options.wait
         ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(
             options.name,
@@ -116,7 +118,6 @@ export async function deleteDeploymentStack(
 
   switch (options.scope) {
     case 'managementGroup':
-      core.debug(`Deleting deployment stack at management group...`)
       operationPromise = options.wait
         ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
             options.managementGroupId,
@@ -129,14 +130,13 @@ export async function deleteDeploymentStack(
       break
 
     case 'subscription':
-      core.debug(`Deleting deployment stack at subscription...`)
+      client.subscriptionId = options.subscriptionId
       operationPromise = options.wait
         ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name)
         : client.deploymentStacks.beginDeleteAtSubscription(options.name)
       break
 
     case 'resourceGroup':
-      core.debug(`Deleting deployment stack at resource group...`)
       operationPromise = options.wait
         ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
             options.resourceGroupName,

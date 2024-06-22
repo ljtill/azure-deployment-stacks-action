@@ -45936,6 +45936,7 @@ async function getDeploymentStack(options, client) {
         case 'managementGroup':
             return await client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
         case 'subscription':
+            client.subscriptionId = options.subscriptionId;
             return await client.deploymentStacks.getAtSubscription(options.name);
         case 'resourceGroup':
             return await client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
@@ -45965,6 +45966,7 @@ async function createOrUpdateDeploymentStack(options, client, template, paramete
                 : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(options.managementGroupId, options.name, deploymentStack);
             break;
         case 'subscription':
+            client.subscriptionId = options.subscriptionId;
             operationPromise = options.wait
                 ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(options.name, deploymentStack)
                 : client.deploymentStacks.beginCreateOrUpdateAtSubscription(options.name, deploymentStack);
@@ -45989,19 +45991,17 @@ async function deleteDeploymentStack(options, client) {
     let operationPromise;
     switch (options.scope) {
         case 'managementGroup':
-            core.debug(`Deleting deployment stack at management group...`);
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(options.managementGroupId, options.name)
                 : client.deploymentStacks.beginDeleteAtManagementGroup(options.managementGroupId, options.name);
             break;
         case 'subscription':
-            core.debug(`Deleting deployment stack at subscription...`);
+            client.subscriptionId = options.subscriptionId;
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name)
                 : client.deploymentStacks.beginDeleteAtSubscription(options.name);
             break;
         case 'resourceGroup':
-            core.debug(`Deleting deployment stack at resource group...`);
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(options.resourceGroupName, options.name)
                 : client.deploymentStacks.beginDeleteAtResourceGroup(options.resourceGroupName, options.name);

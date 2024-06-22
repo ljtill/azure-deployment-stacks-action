@@ -14,14 +14,14 @@ inputs:
     required: true
   description:
     description: 'The description of deployment stack.'
-    required: true
+    required: false
   scope:
     description: 'The scope of the deployment stack.'
     required: true
     # values: 'managementGroup', 'subscription', 'resourceGroup'
   location:
     description: 'The location to store deployment stack.'
-    required: true
+    required: false
     default: 'eastus'
   mode:
     description: 'The mode of the deployment stack action.'
@@ -55,7 +55,7 @@ inputs:
 
   templateFile:
     description: 'A path to a ARM or Bicep file in the file system.'
-    required: false
+    required: true
   parametersFile:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false

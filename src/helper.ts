@@ -17,7 +17,7 @@ async function buildBicepFile(filePath: string): Promise<string> {
   const outputPath = '/tmp/main.json'
 
   await exec.exec(
-    `"${bicepPath}" build --file "${filePath}" --outfile "${outputPath}"`
+    `"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`
   )
 
   return outputPath
@@ -33,7 +33,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   const outputPath = '/tmp/params.json'
 
   await exec.exec(
-    `"${bicepPath}" build-params --file "${filePath}" --outfile "${outputPath}"`
+    `"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`
   )
 
   return outputPath

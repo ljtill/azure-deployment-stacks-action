@@ -45648,7 +45648,7 @@ async function buildBicepFile(filePath) {
     const bicepPath = await io.which('bicep', true);
     // TODO: Implement cross platform support
     const outputPath = '/tmp/main.json';
-    await exec.exec(`"${bicepPath}" build --file "${filePath}" --outfile "${outputPath}"`);
+    await exec.exec(`"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`);
     return outputPath;
 }
 /**
@@ -45658,7 +45658,7 @@ async function buildBicepParametersFile(filePath) {
     const bicepPath = await io.which('bicep', true);
     // TODO: Implement cross platform support
     const outputPath = '/tmp/params.json';
-    await exec.exec(`"${bicepPath}" build-params --file "${filePath}" --outfile "${outputPath}"`);
+    await exec.exec(`"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`);
     return outputPath;
 }
 /**

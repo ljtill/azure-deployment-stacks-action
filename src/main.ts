@@ -21,8 +21,8 @@ export async function run(): Promise<void> {
     const options = helper.parseInputs()
 
     // Installing Bicep binary
-    core.debug(`Installing Bicep tool...`)
-    await helper.installBicep()
+    // core.debug(`Installing Bicep tool...`)
+    // await helper.installBicep()
 
     // Initialize deployment stacks client
     const client = new DeploymentStacksClient(credential)

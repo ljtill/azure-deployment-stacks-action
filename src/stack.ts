@@ -48,7 +48,7 @@ export async function createOrUpdateDeploymentStack(
   const deploymentStack: DeploymentStack = {
     description: options.description,
     location: options.location,
-    actionOnUnmanage: { resources: options.actionsOnUnmanage },
+    actionOnUnmanage: { resources: options.actionOnUnmanage },
     denySettings: { mode: options.denySettings },
     template,
     parameters

@@ -9,7 +9,7 @@ export enum Mode {
   Delete = 'delete'
 }
 
-export enum ActionsOnUnmanage {
+export enum ActionOnUnmanage {
   DeleteAll = 'deleteAll',
   DeleteResources = 'deleteResources',
   DetachAll = 'detachAll'
@@ -27,7 +27,7 @@ export type Options = {
   scope: Scope
   location: string
   mode: Mode
-  actionsOnUnmanage: ActionsOnUnmanage
+  actionOnUnmanage: ActionOnUnmanage
   denySettings: DenySettings
   managementGroupId: string
   subscriptionId: string

@@ -5,7 +5,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
-import { ActionsOnUnmanage, DenySettings, Mode, Options, Scope } from './types'
+import { ActionOnUnmanage, DenySettings, Mode, Options, Scope } from './types'
 
 /**
  * Build the Bicep file.
@@ -151,13 +151,13 @@ export function parseInputs(): Options {
     getInput('mode', true, ['create', 'delete']),
     Mode
   )
-  options.actionsOnUnmanage = convertToEnum<ActionsOnUnmanage>(
-    getInput('actionsOnUnmanage', true, [
+  options.actionOnUnmanage = convertToEnum<ActionOnUnmanage>(
+    getInput('actionOnUnmanage', true, [
       'deleteAll',
       'deleteResources',
       'detachAll'
     ]),
-    ActionsOnUnmanage
+    ActionOnUnmanage
   )
   options.denySettings = convertToEnum<DenySettings>(
     getInput('denySettings', true, [

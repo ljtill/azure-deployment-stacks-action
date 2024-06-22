@@ -45747,11 +45747,11 @@ function parseInputs() {
         'resourceGroup'
     ]), types_1.Scope);
     options.mode = convertToEnum(getInput('mode', true, ['create', 'delete']), types_1.Mode);
-    options.actionsOnUnmanage = convertToEnum(getInput('actionsOnUnmanage', true, [
+    options.actionOnUnmanage = convertToEnum(getInput('actionOnUnmanage', true, [
         'deleteAll',
         'deleteResources',
         'detachAll'
-    ]), types_1.ActionsOnUnmanage);
+    ]), types_1.ActionOnUnmanage);
     options.denySettings = convertToEnum(getInput('denySettings', true, [
         'denyDelete',
         'denyWriteAndDelete',
@@ -45959,7 +45959,7 @@ async function createOrUpdateDeploymentStack(options, client, template, paramete
     const deploymentStack = {
         description: options.description,
         location: options.location,
-        actionOnUnmanage: { resources: options.actionsOnUnmanage },
+        actionOnUnmanage: { resources: options.actionOnUnmanage },
         denySettings: { mode: options.denySettings },
         template,
         parameters
@@ -46027,7 +46027,7 @@ exports.deleteDeploymentStack = deleteDeploymentStack;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DenySettings = exports.ActionsOnUnmanage = exports.Mode = exports.Scope = void 0;
+exports.DenySettings = exports.ActionOnUnmanage = exports.Mode = exports.Scope = void 0;
 var Scope;
 (function (Scope) {
     Scope["ManagementGroup"] = "managementGroup";
@@ -46039,12 +46039,12 @@ var Mode;
     Mode["Create"] = "create";
     Mode["Delete"] = "delete";
 })(Mode || (exports.Mode = Mode = {}));
-var ActionsOnUnmanage;
-(function (ActionsOnUnmanage) {
-    ActionsOnUnmanage["DeleteAll"] = "deleteAll";
-    ActionsOnUnmanage["DeleteResources"] = "deleteResources";
-    ActionsOnUnmanage["DetachAll"] = "detachAll";
-})(ActionsOnUnmanage || (exports.ActionsOnUnmanage = ActionsOnUnmanage = {}));
+var ActionOnUnmanage;
+(function (ActionOnUnmanage) {
+    ActionOnUnmanage["DeleteAll"] = "deleteAll";
+    ActionOnUnmanage["DeleteResources"] = "deleteResources";
+    ActionOnUnmanage["DetachAll"] = "detachAll";
+})(ActionOnUnmanage || (exports.ActionOnUnmanage = ActionOnUnmanage = {}));
 var DenySettings;
 (function (DenySettings) {
     DenySettings["DenyDelete"] = "denyDelete";

@@ -133,7 +133,7 @@ export function parseInputs(): Options {
   // Gather inputs
   options.name = getInput('name', true)
   options.templateFile = getInput('templateFile', true)
-  options.parametersFile = getInput('parametersFile', true)
+  options.parametersFile = getInput('parametersFile', false)
   options.description = getInput('description', false)
   options.location = getInput('location', false)
   options.wait = getInput('wait', false) === 'true'

@@ -5,7 +5,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
-import { ActionOnUnmanage, DenySettings, Mode, Options, Scope } from './types'
+import { Options } from './types'
 
 /**
  * Build the Bicep file.
@@ -117,66 +117,39 @@ export function parseInputs(): Options {
     return value
   }
 
-  // Convert a string to an enum.
-  function convertToEnum<T extends string>(
-    value: string,
-    enumType: { [key: string]: T }
-  ): T {
-    const enumValues = Object.values(enumType)
-    if (!enumValues.includes(value as unknown as T)) {
-      throw new Error(`Invalid value for enum conversion: ${value}`)
-    }
-
-    return enumType[value as keyof typeof enumType]
-  }
-
   // Gather inputs
   options.name = getInput('name', true)
-  options.templateFile = getInput('templateFile', true)
-  options.parametersFile = getInput('parametersFile', false)
   options.description = getInput('description', false)
   options.location = getInput('location', false)
+  options.mode = getInput('mode', true, ['create', 'delete'])
+  options.scope = getInput('scope', true, [
+    'managementGroup',
+    'subscription',
+    'resourceGroup'
+  ])
+  options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+    'deleteAll',
+    'deleteResources',
+    'detachAll'
+  ])
+  options.denySettings = getInput('denySettings', true, [
+    'denyDelete',
+    'denyWriteAndDelete',
+    'none'
+  ])
+  options.templateFile = getInput('templateFile', true)
+  options.parametersFile = getInput('parametersFile', false)
   options.wait = getInput('wait', false) === 'true'
-
-  // Parse enums
-  options.scope = convertToEnum<Scope>(
-    getInput('scope', true, [
-      'managementGroup',
-      'subscription',
-      'resourceGroup'
-    ]),
-    Scope
-  )
-  options.mode = convertToEnum<Mode>(
-    getInput('mode', true, ['create', 'delete']),
-    Mode
-  )
-  options.actionOnUnmanage = convertToEnum<ActionOnUnmanage>(
-    getInput('actionOnUnmanage', true, [
-      'deleteAll',
-      'deleteResources',
-      'detachAll'
-    ]),
-    ActionOnUnmanage
-  )
-  options.denySettings = convertToEnum<DenySettings>(
-    getInput('denySettings', true, [
-      'denyDelete',
-      'denyWriteAndDelete',
-      'none'
-    ]),
-    DenySettings
-  )
 
   // Handle scope-specific inputs
   switch (options.scope) {
-    case Scope.ManagementGroup:
+    case 'managementGroup':
       options.managementGroupId = getInput('managementGroupId', true)
       break
-    case Scope.Subscription:
+    case 'subscription':
       options.subscriptionId = getInput('subscriptionId', true)
       break
-    case Scope.ResourceGroup:
+    case 'resourceGroup':
       options.resourceGroupName = getInput('resourceGroupName', true)
       break
   }

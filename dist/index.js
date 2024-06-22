@@ -45640,7 +45640,6 @@ const exec = __importStar(__nccwpck_require__(9990));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
 const identity_1 = __nccwpck_require__(3084);
-const types_1 = __nccwpck_require__(5077);
 /**
  * Build the Bicep file.
  */
@@ -45725,47 +45724,38 @@ function parseInputs() {
         }
         return value;
     }
-    // Convert a string to an enum.
-    function convertToEnum(value, enumType) {
-        const enumValues = Object.values(enumType);
-        if (!enumValues.includes(value)) {
-            throw new Error(`Invalid value for enum conversion: ${value}`);
-        }
-        return enumType[value];
-    }
     // Gather inputs
     options.name = getInput('name', true);
-    options.templateFile = getInput('templateFile', true);
-    options.parametersFile = getInput('parametersFile', false);
     options.description = getInput('description', false);
     options.location = getInput('location', false);
-    options.wait = getInput('wait', false) === 'true';
-    // Parse enums
-    options.scope = convertToEnum(getInput('scope', true, [
+    options.mode = getInput('mode', true, ['create', 'delete']);
+    options.scope = getInput('scope', true, [
         'managementGroup',
         'subscription',
         'resourceGroup'
-    ]), types_1.Scope);
-    options.mode = convertToEnum(getInput('mode', true, ['create', 'delete']), types_1.Mode);
-    options.actionOnUnmanage = convertToEnum(getInput('actionOnUnmanage', true, [
+    ]);
+    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
         'deleteAll',
         'deleteResources',
         'detachAll'
-    ]), types_1.ActionOnUnmanage);
-    options.denySettings = convertToEnum(getInput('denySettings', true, [
+    ]);
+    options.denySettings = getInput('denySettings', true, [
         'denyDelete',
         'denyWriteAndDelete',
         'none'
-    ]), types_1.DenySettings);
+    ]);
+    options.templateFile = getInput('templateFile', true);
+    options.parametersFile = getInput('parametersFile', false);
+    options.wait = getInput('wait', false) === 'true';
     // Handle scope-specific inputs
     switch (options.scope) {
-        case types_1.Scope.ManagementGroup:
+        case 'managementGroup':
             options.managementGroupId = getInput('managementGroupId', true);
             break;
-        case types_1.Scope.Subscription:
+        case 'subscription':
             options.subscriptionId = getInput('subscriptionId', true);
             break;
-        case types_1.Scope.ResourceGroup:
+        case 'resourceGroup':
             options.resourceGroupName = getInput('resourceGroupName', true);
             break;
     }
@@ -45858,7 +45848,6 @@ const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
 const stack = __importStar(__nccwpck_require__(7067));
-const types_1 = __nccwpck_require__(5077);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -45885,10 +45874,10 @@ async function run() {
             : {};
         // Handle the execution mode
         switch (options.mode) {
-            case types_1.Mode.Create:
+            case 'create':
                 await stack.createOrUpdateDeploymentStack(options, client, template, parameters);
                 break;
-            case types_1.Mode.Delete:
+            case 'delete':
                 await stack.deleteDeploymentStack(options, client);
                 break;
             default:
@@ -45938,18 +45927,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteDeploymentStack = exports.createOrUpdateDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const types_1 = __nccwpck_require__(5077);
 /**
  * Get deployment stack.
  */
 async function getDeploymentStack(options, client) {
     core.info(`Retrieving deployment stack...`);
     switch (options.scope) {
-        case types_1.Scope.ManagementGroup:
+        case 'managementGroup':
             return await client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
-        case types_1.Scope.Subscription:
+        case 'subscription':
             return await client.deploymentStacks.getAtSubscription(options.name);
-        case types_1.Scope.ResourceGroup:
+        case 'resourceGroup':
             return await client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
     }
 }
@@ -45971,17 +45959,17 @@ async function createOrUpdateDeploymentStack(options, client, template, paramete
     };
     let operationPromise;
     switch (options.scope) {
-        case types_1.Scope.ManagementGroup:
+        case 'managementGroup':
             operationPromise = options.wait
                 ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(options.managementGroupId, options.name, deploymentStack)
                 : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(options.managementGroupId, options.name, deploymentStack);
             break;
-        case types_1.Scope.Subscription:
+        case 'subscription':
             operationPromise = options.wait
                 ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(options.name, deploymentStack)
                 : client.deploymentStacks.beginCreateOrUpdateAtSubscription(options.name, deploymentStack);
             break;
-        case types_1.Scope.ResourceGroup:
+        case 'resourceGroup':
             operationPromise = options.wait
                 ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(options.resourceGroupName, options.name, deploymentStack)
                 : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(options.resourceGroupName, options.name, deploymentStack);
@@ -46000,19 +45988,19 @@ async function deleteDeploymentStack(options, client) {
         : core.info(`Skipping deployment stack...`);
     let operationPromise;
     switch (options.scope) {
-        case types_1.Scope.ManagementGroup:
+        case 'managementGroup':
             core.debug(`Deleting deployment stack at management group...`);
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(options.managementGroupId, options.name)
                 : client.deploymentStacks.beginDeleteAtManagementGroup(options.managementGroupId, options.name);
             break;
-        case types_1.Scope.Subscription:
+        case 'subscription':
             core.debug(`Deleting deployment stack at subscription...`);
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name)
                 : client.deploymentStacks.beginDeleteAtSubscription(options.name);
             break;
-        case types_1.Scope.ResourceGroup:
+        case 'resourceGroup':
             core.debug(`Deleting deployment stack at resource group...`);
             operationPromise = options.wait
                 ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(options.resourceGroupName, options.name)
@@ -46022,40 +46010,6 @@ async function deleteDeploymentStack(options, client) {
     await operationPromise;
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
-
-
-/***/ }),
-
-/***/ 5077:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DenySettings = exports.ActionOnUnmanage = exports.Mode = exports.Scope = void 0;
-var Scope;
-(function (Scope) {
-    Scope["ManagementGroup"] = "managementGroup";
-    Scope["Subscription"] = "subscription";
-    Scope["ResourceGroup"] = "resourceGroup";
-})(Scope || (exports.Scope = Scope = {}));
-var Mode;
-(function (Mode) {
-    Mode["Create"] = "create";
-    Mode["Delete"] = "delete";
-})(Mode || (exports.Mode = Mode = {}));
-var ActionOnUnmanage;
-(function (ActionOnUnmanage) {
-    ActionOnUnmanage["DeleteAll"] = "deleteAll";
-    ActionOnUnmanage["DeleteResources"] = "deleteResources";
-    ActionOnUnmanage["DetachAll"] = "detachAll";
-})(ActionOnUnmanage || (exports.ActionOnUnmanage = ActionOnUnmanage = {}));
-var DenySettings;
-(function (DenySettings) {
-    DenySettings["DenyDelete"] = "denyDelete";
-    DenySettings["DenyWriteAndDelete"] = "denyWriteAndDelete";
-    DenySettings["None"] = "none";
-})(DenySettings || (exports.DenySettings = DenySettings = {}));
 
 
 /***/ }),

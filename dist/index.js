@@ -45781,7 +45781,7 @@ async function parseTemplateFile(options) {
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
-    if (path.isAbsolute(filePath)) {
+    if (fs.existsSync(filePath)) {
         if (fileExtension === '.bicep') {
             // Build the Bicep file
             filePath = await buildBicepFile(filePath);
@@ -45805,7 +45805,7 @@ async function parseParametersFile(options) {
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
-    if (path.isAbsolute(filePath)) {
+    if (fs.existsSync(filePath)) {
         if (fileExtension === '.bicepparam') {
             // Build the Bicep parameters file
             filePath = await buildBicepParametersFile(filePath);

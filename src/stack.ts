@@ -1,7 +1,9 @@
 import {
   DeploymentStacksClient,
-  DeploymentStack
+  DeploymentStack,
+  DeploymentStackPropertiesActionOnUnmanage
 } from '@azure/arm-resourcesdeploymentstacks'
+import * as helper from './helper'
 import { Options } from './types'
 
 /**
@@ -16,7 +18,7 @@ export async function createOrUpdateDeploymentStack(
   const deploymentStack: DeploymentStack = {
     description: options.description,
     location: options.location,
-    actionOnUnmanage: { resources: options.actionOnUnmanage },
+    actionOnUnmanage: helper.parseUnmanageProperties(options.actionOnUnmanage),
     denySettings: { mode: options.denySettings },
     template,
     parameters

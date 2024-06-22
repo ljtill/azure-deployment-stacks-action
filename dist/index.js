@@ -45632,7 +45632,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseInputs = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.parseUnmanageProperties = exports.parseInputs = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -45820,6 +45820,31 @@ function parseInputs() {
     return options;
 }
 exports.parseInputs = parseInputs;
+function parseUnmanageProperties(value) {
+    switch (value) {
+        case 'deleteResources':
+            return {
+                managementGroups: 'detach',
+                resourceGroups: 'detach',
+                resources: 'delete'
+            };
+        case 'deleteAll':
+            return {
+                managementGroups: 'delete',
+                resourceGroups: 'delete',
+                resources: 'delete'
+            };
+        case 'detachAll':
+            return {
+                managementGroups: 'detach',
+                resourceGroups: 'detach',
+                resources: 'detach'
+            };
+        default:
+            throw new Error(`Invalid actionOnUnmanage: ${value}`);
+    }
+}
+exports.parseUnmanageProperties = parseUnmanageProperties;
 
 
 /***/ }),
@@ -45907,12 +45932,36 @@ exports.run = run;
 /***/ }),
 
 /***/ 7067:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteDeploymentStack = exports.createOrUpdateDeploymentStack = void 0;
+const helper = __importStar(__nccwpck_require__(2707));
 /**
  * Create or update deployment stack.
  */
@@ -45920,7 +45969,7 @@ async function createOrUpdateDeploymentStack(options, client, template, paramete
     const deploymentStack = {
         description: options.description,
         location: options.location,
-        actionOnUnmanage: { resources: options.actionOnUnmanage },
+        actionOnUnmanage: helper.parseUnmanageProperties(options.actionOnUnmanage),
         denySettings: { mode: options.denySettings },
         template,
         parameters

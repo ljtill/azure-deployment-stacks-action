@@ -5,6 +5,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
+import { DeploymentStackPropertiesActionOnUnmanage } from '@azure/arm-resourcesdeploymentstacks'
 import { Options } from './types'
 
 /**
@@ -226,4 +227,31 @@ export function parseInputs(): Options {
   }
 
   return options as Options
+}
+
+export function parseUnmanageProperties(
+  value: string
+): DeploymentStackPropertiesActionOnUnmanage {
+  switch (value) {
+    case 'deleteResources':
+      return {
+        managementGroups: 'detach',
+        resourceGroups: 'detach',
+        resources: 'delete'
+      }
+    case 'deleteAll':
+      return {
+        managementGroups: 'delete',
+        resourceGroups: 'delete',
+        resources: 'delete'
+      }
+    case 'detachAll':
+      return {
+        managementGroups: 'detach',
+        resourceGroups: 'detach',
+        resources: 'detach'
+      }
+    default:
+      throw new Error(`Invalid actionOnUnmanage: ${value}`)
+  }
 }

@@ -45777,6 +45777,7 @@ exports.parseInputs = parseInputs;
  */
 async function parseTemplateFile(options) {
     let filePath = options.templateFile;
+    core.debug(`Parsing the template file: ${filePath}`);
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
@@ -45800,6 +45801,7 @@ exports.parseTemplateFile = parseTemplateFile;
  */
 async function parseParametersFile(options) {
     let filePath = options.parametersFile;
+    core.debug(`Parsing the parameters file: ${filePath}`);
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid

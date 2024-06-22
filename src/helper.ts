@@ -192,6 +192,8 @@ export async function parseTemplateFile(
 ): Promise<Record<string, unknown>> {
   let filePath = options.templateFile
 
+  core.debug(`Parsing the template file: ${filePath}`)
+
   // Parse the file extension
   const fileExtension = path.extname(filePath)
 
@@ -219,6 +221,8 @@ export async function parseParametersFile(
   options: Options
 ): Promise<Record<string, unknown>> {
   let filePath = options.parametersFile
+
+  core.debug(`Parsing the parameters file: ${filePath}`)
 
   // Parse the file extension
   const fileExtension = path.extname(filePath)

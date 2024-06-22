@@ -1,23 +1,69 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Azure Deployment Stacks Action'
+description: 'GitHub Actions for deploying to Azure Deployment Stacks'
+author: 'Lyon Till'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'cloud'
+  color: 'blue'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  name:
+    description: 'The name of the deployment stack.'
     required: true
-    default: '1000'
+  description:
+    description: 'The description of deployment stack.'
+    required: true
+  scope:
+    description: 'The scope of the deployment stack.'
+    required: true
+    # values: 'managementGroup', 'subscription', 'resourceGroup'
+  location:
+    description: 'The location to store deployment stack.'
+    required: true
+    default: 'eastus'
+  mode:
+    description: 'The mode of the deployment stack action.'
+    required: true
+    # values: 'create', 'delete'
 
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  actionOnUnmanage:
+    description:
+      'Defines what happens to resources that are no longer managed after the
+      stack is updated or deleted.'
+    required: true
+    # values: 'deleteAll', 'deleteResources', detachAll
+  denySettings:
+    description:
+      'Define which operations are denied on resources managed by the stack.'
+    required: true
+    # values: 'denyDelete', 'denyWriteAndDelete', 'none'
+
+  managementGroupId:
+    description:
+      'The management group id where the deployment stack will be created.'
+    required: false
+  subscriptionId:
+    description:
+      'The subscription id where the deployment stack will be created.'
+    required: false
+  resourceGroupName:
+    description:
+      'The resource group name where the deployment stack will be created.'
+    required: false
+
+  templateFile:
+    description: 'A path to a ARM or Bicep file in the file system.'
+    required: false
+  parametersFile:
+    description: 'A path to a ARM or Bicep paramter file in the file system.'
+    required: false
+
+  wait:
+    description: 'Wait for the deployment to complete.'
+    required: false
+    default: 'false'
 
 runs:
   using: node20

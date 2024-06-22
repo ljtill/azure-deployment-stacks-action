@@ -1,5 +1,7 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import { DeploymentStacksClient } from '@azure/arm-resourcesdeploymentstacks'
+import * as helper from './helper'
+import * as stack from './stack'
 
 /**
  * The main function for the action.
@@ -7,18 +9,48 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    core.debug(`Starting the action...`)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    // Authenticate the session
+    core.debug(`Generate new credential...`)
+    const credential = helper.newCredential()
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    // Hydrate options variable
+    core.debug(`Parsing the inputs...`)
+    const options = helper.parseInputs()
+
+    // Installing Bicep binary
+    core.debug(`Installing Bicep tool...`)
+    await helper.installBicep()
+
+    // Initialize deployment stacks client
+    const client = new DeploymentStacksClient(credential)
+
+    // Parse the template and parameters
+    const template = await helper.parseTemplateFile(options)
+    const parameters = await helper.parseParametersFile(options)
+
+    // Handle the execution mode
+    switch (options.mode) {
+      case 'create':
+        await stack.createOrUpdateDeploymentStack(
+          options,
+          client,
+          template,
+          parameters
+        )
+
+        break
+      case 'delete':
+        await stack.deleteDeploymentStack(options, client)
+
+        break
+      default:
+        throw new Error(`Invalid mode: ${options.mode}`)
+    }
+
+    core.debug(`Completing the action...`)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

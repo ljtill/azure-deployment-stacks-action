@@ -1,229 +1,146 @@
-# Create a GitHub Action Using TypeScript
+# Azure Deployment Stacks Action
 
-[![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
-[![Check dist/](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml)
-[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+This repository contains a GitHub Action that allows engineers to create,
+update, and delete Azure Deployment Stacks directly from their GitHub workflows.
+It supports a variety of inputs for scopes and options, making it flexible and
+easy to use for managing Azure resources. Whether you need to define the scope
+at the management group, subscription, or resource group level, this action
+provides the necessary parameters to tailor deployments to your specific needs.
+Additionally, it includes options for setting the location, mode, and handling
+unmanaged resources, as well as configuring deny settings and specifying ARM or
+Bicep templates. This GitHub Action streamlines the process of managing Azure
+infrastructure, enabling efficient and automated deployments
 
-Use this template to bootstrap the creation of a TypeScript action. :rocket:
+## Getting Started
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+Create Mode
 
-If you are new, there's also a simpler introduction in the
-[Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
-
-## Create Your Own Action
-
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
-
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
-
-> [!IMPORTANT]
->
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For
-> details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
-
-## Initial Setup
-
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
-
-> [!NOTE]
->
-> You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
-> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
-> [`nvm`](https://github.com/nvm-sh/nvm), this template has a `.node-version`
-> file at the root of the repository that will be used to automatically switch
-> to the correct version when you `cd` into the repository. Additionally, this
-> `.node-version` file is used by GitHub Actions in any `actions/setup-node`
-> actions.
-
-1. :hammer_and_wrench: Install the dependencies
-
-   ```bash
-   npm install
-   ```
-
-1. :building_construction: Package the TypeScript for distribution
-
-   ```bash
-   npm run bundle
-   ```
-
-1. :white_check_mark: Run the tests
-
-   ```bash
-   $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
-
-   ...
-   ```
-
-## Update the Action Metadata
-
-The [`action.yml`](action.yml) file defines metadata about your action, such as
-input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
-
-When you copy this repository, update `action.yml` with the name, description,
-inputs, and outputs for your action.
-
-## Update the Action Code
-
-The [`src/`](./src/) directory is the heart of your action! This contains the
-source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
-
-There are a few things to keep in mind when writing your action code:
-
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously.
-  In `main.ts`, you will see that the action is run in an `async` function.
-
-  ```javascript
-  import * as core from '@actions/core'
-  //...
-
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
-
-  For more information about the GitHub Actions toolkit, see the
-  [documentation](https://github.com/actions/toolkit/blob/master/README.md).
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
-1. Create a new branch
-
-   ```bash
-   git checkout -b releases/v1
-   ```
-
-1. Replace the contents of `src/` with your action code
-1. Add tests to `__tests__/` for your source code
-1. Format, test, and build the action
-
-   ```bash
-   npm run all
-   ```
-
-   > This step is important! It will run [`ncc`](https://github.com/vercel/ncc)
-   > to build the final JavaScript action code with all dependencies included.
-   > If you do not run this step, your action will not work correctly when it is
-   > used in a workflow. This step also includes the `--license` option for
-   > `ncc`, which will create a license file for all of the production node
-   > modules used in your project.
-
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
+The following example demonstrates how to set up the action in create mode,
+which is recommended to be used with push triggers:
 
 ```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
+name: Creation
 
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
+on:
+  push:
+    branches:
+      - main
 
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deployment
+        uses: ljtill/azure-deployment-stacks-action@v1
+        with:
+          name: development
+          scope: subscription
+          mode: create
+          actionOnUnmanage: deleteAll
+          denySettings: denyWriteAndDelete
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          templateFile: ./main.bicep
+          parametersFile: ./main.bicepparam
+          wait: true
 ```
 
-For example workflow runs, check out the
-[Actions tab](https://github.com/actions/typescript-action/actions)! :rocket:
+Delete Mode
 
-## Usage
-
-After testing, you can create version tag(s) that developers can use to
-reference different stable versions of your action. For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-To include the action in a workflow in another repository, you can use the
-`uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
+The following example demonstrates how to set up the action in delete mode,
+which is recommended to be used with workflow_dispatch triggers:
 
 ```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
+name: Deletion
 
-  - name: Test Local Action
-    id: test-action
-    uses: actions/typescript-action@v1 # Commit with the `v1` tag
-    with:
-      milliseconds: 1000
+on: workflow_dispatch
 
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deployment
+        uses: ljtill/azure-deployment-stacks-action@v1
+        with:
+          name: development
+          scope: subscription
+          mode: delete
+          wait: true
 ```
 
-## Publishing a New Release
+## Parameters
 
-This project includes a helper script, [`script/release`](./script/release)
-designed to streamline the process of tagging and pushing new releases for
-GitHub Actions.
+| Parameter         | Required | Type   | Description                                                                                         | Default | Values                                       |
+| ----------------- | -------- | ------ | --------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------- |
+| name              | true     | string | The name of the deployment stack.                                                                   |         |                                              |
+| description       | false    | string | The description of the deployment stack.                                                            |         |                                              |
+| scope             | true     | string | The scope of the deployment stack.                                                                  |         | managementGroup, subscription, resourceGroup |
+| location          | false    | string | The location to store deployment stack.                                                             | eastus  |                                              |
+| mode              | true     | string | The mode of the deployment stack action.                                                            |         | create, delete                               |
+| actionOnUnmanage  | true     | string | Defines what happens to resources that are no longer managed after the stack is updated or deleted. |         | deleteAll, deleteResources, detachAll        |
+| denySettings      | true     | string | Define which operations are denied on resources managed by the stack.                               |         | denyDelete, denyWriteAndDelete, none         |
+| managementGroupId | false    | string | The management group id where the deployment stack will be created.                                 |         |                                              |
+| subscriptionId    | false    | string | The subscription id where the deployment stack will be created.                                     |         |                                              |
+| resourceGroupName | false    | string | The resource group name where the deployment stack will be created.                                 |         |                                              |
+| templateFile      | true     | string | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
+| parametersFile    | false    | string | A path to a ARM or Bicep paramter file in the file system.                                          |         |                                              |
+| wait              | false    | string | Wait for the deployment to complete.                                                                | false   | true, false                                  |
 
-GitHub Actions allows users to select a specific version of the action to use,
-based on release tags. This script simplifies this process by performing the
-following steps:
+## Authentication
 
-1. **Retrieving the latest release tag:** The script starts by fetching the most
-   recent release tag by looking at the local data available in your repository.
-1. **Prompting for a new release tag:** The user is then prompted to enter a new
-   release tag. To assist with this, the script displays the latest release tag
-   and provides a regular expression to validate the format of the new tag.
-1. **Tagging the new release:** Once a valid new tag is entered, the script tags
-   the new release.
-1. **Pushing the new tag to the remote:** Finally, the script pushes the new tag
-   to the remote repository. From here, you will need to create a new release in
-   GitHub and users can easily reference the new tag in their workflows.
+The action supports multiple authentication methods. The simplest approach is to
+use azure/login@v2. However, if the action runs on Self-Hosted Runners, it can
+also use Managed Identity for authentication.
+
+## Modes
+
+The action supports two modes: `create` and `delete`.
+
+For `create` mode, it is recommended to use it with `push` triggers. This setup
+ensures that whenever changes are pushed to the repository, the action
+automatically creates or updates the Azure Deployment Stack accordingly. This is
+ideal for continuous integration and deployment workflows, where infrastructure
+changes should be applied seamlessly as part of the development process.
+
+For `delete` mode, it is recommended to use it with `workflow_dispatch`
+triggers. This allows for manual initiation of the delete process through the
+GitHub Actions interface. Using `workflow_dispatch` triggers provides greater
+control and prevents accidental deletions, ensuring that stacks are only deleted
+when explicitly requested by an authorized user. This setup is particularly
+useful for maintenance tasks or cleanup operations where automated deletion
+could pose risks.
+
+## Documentation
+
+- [Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)

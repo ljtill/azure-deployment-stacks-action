@@ -15,6 +15,7 @@ export type Options = {
   templateFile: string
   parametersFile: string
   wait: boolean
+  repository: string
   commit: string
   branch: string
 }

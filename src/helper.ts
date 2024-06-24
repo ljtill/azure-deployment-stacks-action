@@ -254,6 +254,8 @@ export function newOptions(): Options {
       break
   }
 
+  // Repository metadata
+  options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
   options.commit = github.context.sha
   options.branch = github.context.ref
 

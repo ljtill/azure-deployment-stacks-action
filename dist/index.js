@@ -45644,7 +45644,7 @@ const identity_1 = __nccwpck_require__(3084);
  * Install Bicep binary.
  */
 async function installBicep() {
-    core.debug(`Installing the Bicep binary`);
+    core.debug(`Installing Bicep binary`);
     const url = 'https://github.com/azure/bicep/releases/latest/download/';
     switch (process.platform) {
         case 'win32':
@@ -45686,22 +45686,22 @@ async function installBicep() {
 }
 exports.installBicep = installBicep;
 /**
- * Check Bicep binary is installed.
+ * Check Bicep is installed.
  */
 async function checkBicep() {
-    core.debug(`Checking for the Bicep binary`);
+    core.debug(`Checking Bicep installation`);
     if ((await io.which('bicep', false)) === '') {
         throw new Error('Bicep is not installed');
     }
-    await printBicepVersion();
+    await displayBicepVersion();
     return true;
 }
 exports.checkBicep = checkBicep;
 /**
  * Print Bicep version.
  */
-async function printBicepVersion() {
-    core.debug(`Printing the Bicep version`);
+async function displayBicepVersion() {
+    core.debug(`Displaying Bicep version`);
     const bicepPath = await io.which('bicep', true);
     await exec.exec(`"${bicepPath}" --version`);
 }
@@ -45709,7 +45709,7 @@ async function printBicepVersion() {
  * Build Bicep file.
  */
 async function buildBicepFile(filePath) {
-    core.debug(`Building Bicep file: ${filePath}`);
+    core.debug(`Building Bicep file`);
     const bicepPath = await io.which('bicep', true);
     // TODO(ljtill): Implement cross platform support
     const outputPath = '/tmp/main.json';
@@ -45720,7 +45720,7 @@ async function buildBicepFile(filePath) {
  * Build Bicep parameters file.
  */
 async function buildBicepParametersFile(filePath) {
-    core.debug(`Building Bicep parameters file: ${filePath}`);
+    core.debug(`Building Bicep parameters file`);
     const bicepPath = await io.which('bicep', true);
     // TODO(ljtill): Implement cross platform support
     const outputPath = '/tmp/params.json';
@@ -45731,7 +45731,7 @@ async function buildBicepParametersFile(filePath) {
  * Parse template file.
  */
 async function parseTemplateFile(options) {
-    core.debug(`Parsing template file: ${options.templateFile}`);
+    core.debug(`Parsing template file`);
     let filePath = options.templateFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
@@ -45755,7 +45755,7 @@ exports.parseTemplateFile = parseTemplateFile;
  * Parse parameters file.
  */
 async function parseParametersFile(options) {
-    core.debug(`Parsing the parameters file: ${options.parametersFile}`);
+    core.debug(`Parsing parameters file`);
     let filePath = options.parametersFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
@@ -45954,7 +45954,7 @@ const stack = __importStar(__nccwpck_require__(7067));
  */
 async function run() {
     try {
-        core.debug(`Starting the action`);
+        core.debug(`Starting action`);
         // Check that the Bicep binary is installed
         await helper.checkBicep();
         // Authenticate the session
@@ -45977,7 +45977,7 @@ async function run() {
                 await stack.deleteDeploymentStack(options, client);
                 break;
         }
-        core.debug(`Completing the action`);
+        core.debug(`Finishing action`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs

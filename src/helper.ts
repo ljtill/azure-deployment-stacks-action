@@ -12,7 +12,7 @@ import { Options } from './types'
  * Install Bicep binary.
  */
 export async function installBicep(): Promise<void> {
-  core.debug(`Installing the Bicep binary`)
+  core.debug(`Installing Bicep binary`)
 
   const url = 'https://github.com/azure/bicep/releases/latest/download/'
 
@@ -62,16 +62,16 @@ export async function installBicep(): Promise<void> {
 }
 
 /**
- * Check Bicep binary is installed.
+ * Check Bicep is installed.
  */
 export async function checkBicep(): Promise<boolean> {
-  core.debug(`Checking for the Bicep binary`)
+  core.debug(`Checking Bicep installation`)
 
   if ((await io.which('bicep', false)) === '') {
     throw new Error('Bicep is not installed')
   }
 
-  await printBicepVersion()
+  await displayBicepVersion()
 
   return true
 }
@@ -79,8 +79,8 @@ export async function checkBicep(): Promise<boolean> {
 /**
  * Print Bicep version.
  */
-async function printBicepVersion(): Promise<void> {
-  core.debug(`Printing the Bicep version`)
+async function displayBicepVersion(): Promise<void> {
+  core.debug(`Displaying Bicep version`)
 
   const bicepPath = await io.which('bicep', true)
 
@@ -91,7 +91,7 @@ async function printBicepVersion(): Promise<void> {
  * Build Bicep file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  core.debug(`Building Bicep file: ${filePath}`)
+  core.debug(`Building Bicep file`)
 
   const bicepPath = await io.which('bicep', true)
 
@@ -109,7 +109,7 @@ async function buildBicepFile(filePath: string): Promise<string> {
  * Build Bicep parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
-  core.debug(`Building Bicep parameters file: ${filePath}`)
+  core.debug(`Building Bicep parameters file`)
 
   const bicepPath = await io.which('bicep', true)
 
@@ -129,7 +129,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 export async function parseTemplateFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing template file: ${options.templateFile}`)
+  core.debug(`Parsing template file`)
 
   let filePath = options.templateFile
 
@@ -159,7 +159,7 @@ export async function parseTemplateFile(
 export async function parseParametersFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing the parameters file: ${options.parametersFile}`)
+  core.debug(`Parsing parameters file`)
 
   let filePath = options.parametersFile
 

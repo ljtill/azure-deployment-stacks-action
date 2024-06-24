@@ -9,7 +9,7 @@ import * as stack from './stack'
  */
 export async function run(): Promise<void> {
   try {
-    core.debug(`Starting the action`)
+    core.debug(`Starting action`)
 
     // Check that the Bicep binary is installed
     await helper.checkBicep()
@@ -46,7 +46,7 @@ export async function run(): Promise<void> {
         break
     }
 
-    core.debug(`Completing the action`)
+    core.debug(`Finishing action`)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

@@ -1,22 +1,47 @@
 # Azure Deployment Stacks Action
 
 This repository contains a GitHub Action that allows engineers to create,
-update, and delete Azure Deployment Stacks directly from their GitHub workflows.
-It supports a variety of inputs for scopes and options, making it flexible and
-easy to use for managing Azure resources. Whether you need to define the scope
-at the management group, subscription, or resource group level, this action
-provides the necessary parameters to tailor deployments to your specific needs.
-Additionally, it includes options for setting the location, mode, and handling
-unmanaged resources, as well as configuring deny settings and specifying ARM or
-Bicep templates. This GitHub Action streamlines the process of managing Azure
-infrastructure, enabling efficient and automated deployments
+update, delete, validate and export Azure Deployment Stacks directly from their
+GitHub workflows. It supports a variety of inputs for scopes and options, making
+it flexible and easy to use for managing Azure resources. Whether you need to
+define the scope at the management group, subscription, or resource group level,
+this action provides the necessary parameters to tailor deployments to your
+specific needs. Additionally, it includes options for setting the location,
+mode, and handling unmanaged resources, as well as configuring deny settings and
+specifying ARM or Bicep templates. This GitHub Action streamlines the process of
+managing Azure infrastructure, enabling efficient and automated deployments
+
+## Authentication
+
+The action supports multiple authentication methods. The simplest approach is to
+use [`azure/login@v2`](https://github.com/azure/login). However, if the action
+runs on Self-Hosted Runners, it can also use Managed Identity for
+authentication.
+
+## Modes
+
+The action supports two modes: `create` and `delete`.
+
+For `create` mode, it is recommended to use it with `push` triggers. This setup
+ensures that whenever changes are pushed to the repository, the action
+automatically creates or updates the Azure Deployment Stack accordingly. This is
+ideal for continuous integration and deployment workflows, where infrastructure
+changes should be applied seamlessly as part of the development process.
+
+For `delete` mode, it is recommended to use it with `workflow_dispatch`
+triggers. This allows for manual initiation of the delete process through the
+GitHub Actions interface. Using `workflow_dispatch` triggers provides greater
+control and prevents accidental deletions, ensuring that stacks are only deleted
+when explicitly requested by an authorized user. This setup is particularly
+useful for maintenance tasks or cleanup operations where automated deletion
+could pose risks.
 
 ## Getting Started
 
-Create Mode
+### Create Mode
 
 The following example demonstrates how to set up the action in create mode,
-which is recommended to be used with push triggers:
+which is recommended to be used with `push` triggers:
 
 ```yaml
 name: Creation
@@ -60,10 +85,10 @@ jobs:
           wait: true
 ```
 
-Delete Mode
+### Delete Mode
 
 The following example demonstrates how to set up the action in delete mode,
-which is recommended to be used with workflow_dispatch triggers:
+which is recommended to be used with `workflow_dispatch` triggers:
 
 ```yaml
 name: Deletion
@@ -99,6 +124,19 @@ jobs:
           wait: true
 ```
 
+### Validate Mode
+
+The following example demonstrates how to set up the action in delete mode,
+which is recommended to be used with `pull_request` triggers:
+
+```yaml
+
+```
+
+### Export Mode
+
+_Upcoming feature_
+
 ## Parameters
 
 | Parameter         | Required | Type   | Description                                                                                         | Default | Values                                       |
@@ -116,30 +154,6 @@ jobs:
 | templateFile      | true     | string | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
 | parametersFile    | false    | string | A path to a ARM or Bicep paramter file in the file system.                                          |         |                                              |
 | wait              | false    | string | Wait for the deployment to complete.                                                                | false   | true, false                                  |
-
-## Authentication
-
-The action supports multiple authentication methods. The simplest approach is to
-use azure/login@v2. However, if the action runs on Self-Hosted Runners, it can
-also use Managed Identity for authentication.
-
-## Modes
-
-The action supports two modes: `create` and `delete`.
-
-For `create` mode, it is recommended to use it with `push` triggers. This setup
-ensures that whenever changes are pushed to the repository, the action
-automatically creates or updates the Azure Deployment Stack accordingly. This is
-ideal for continuous integration and deployment workflows, where infrastructure
-changes should be applied seamlessly as part of the development process.
-
-For `delete` mode, it is recommended to use it with `workflow_dispatch`
-triggers. This allows for manual initiation of the delete process through the
-GitHub Actions interface. Using `workflow_dispatch` triggers provides greater
-control and prevents accidental deletions, ensuring that stacks are only deleted
-when explicitly requested by an authorized user. This setup is particularly
-useful for maintenance tasks or cleanup operations where automated deletion
-could pose risks.
 
 ## Documentation
 

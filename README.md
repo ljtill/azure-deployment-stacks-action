@@ -142,9 +142,7 @@ jobs:
 The following example demonstrates how to set up the action in delete mode,
 which is recommended to be used with `pull_request` triggers:
 
-```yaml
-
-```
+// TODO(ljtill): Documentation
 
 ## Parameters
 
@@ -152,15 +150,15 @@ which is recommended to be used with `pull_request` triggers:
 | ----------------- | -------- | ------ | --------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------- |
 | name              | true     | string | The name of the deployment stack.                                                                   |         |                                              |
 | description       | false    | string | The description of the deployment stack.                                                            |         |                                              |
-| scope             | true     | string | The scope of the deployment stack.                                                                  |         | managementGroup, subscription, resourceGroup |
 | location          | false    | string | The location to store deployment stack.                                                             | eastus  |                                              |
-| mode              | true     | string | The mode of the deployment stack action.                                                            |         | create, delete                               |
-| actionOnUnmanage  | true     | string | Defines what happens to resources that are no longer managed after the stack is updated or deleted. |         | deleteAll, deleteResources, detachAll        |
-| denySettings      | true     | string | Define which operations are denied on resources managed by the stack.                               |         | denyDelete, denyWriteAndDelete, none         |
+| scope             | true     | string | The scope of the deployment stack.                                                                  |         | managementGroup, subscription, resourceGroup |
+| mode              | true     | string | The mode of the deployment stack action.                                                            |         | create, delete, validate                     |
+| actionOnUnmanage  | false    | string | Defines what happens to resources that are no longer managed after the stack is updated or deleted. |         | deleteAll, deleteResources, detachAll        |
+| denySettings      | false    | string | Define which operations are denied on resources managed by the stack.                               |         | denyDelete, denyWriteAndDelete, none         |
 | managementGroupId | false    | string | The management group id where the deployment stack will be created.                                 |         |                                              |
 | subscriptionId    | false    | string | The subscription id where the deployment stack will be created.                                     |         |                                              |
 | resourceGroupName | false    | string | The resource group name where the deployment stack will be created.                                 |         |                                              |
-| templateFile      | true     | string | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
+| templateFile      | false    | string | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
 | parametersFile    | false    | string | A path to a ARM or Bicep paramter file in the file system.                                          |         |                                              |
 | wait              | false    | string | Wait for the deployment to complete.                                                                | false   | true, false                                  |
 

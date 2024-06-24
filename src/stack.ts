@@ -240,5 +240,70 @@ export async function validateDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
 ): Promise<void> {
-  // TODO(ljtill): Implement
+  core.info(`Validating deployment stack`)
+
+  // Parse template and parameter files
+  const template = await helper.parseTemplateFile(options)
+  const parameters = options.parametersFile
+    ? helper.parseParametersFile(options)
+    : {}
+
+  // Initialize deployment stack
+  const deploymentStack: DeploymentStack = {
+    location: options.location,
+    properties: {
+      description: options.description,
+      actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
+      denySettings: helper.newDenySettings(options.denySettings),
+      template,
+      parameters
+    }
+  }
+
+  let operationPromise
+
+  switch (options.scope) {
+    case 'managementGroup':
+      operationPromise = options.wait
+        ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(
+            options.managementGroupId,
+            options.name,
+            deploymentStack
+          )
+        : client.deploymentStacks.beginValidateStackAtManagementGroup(
+            options.managementGroupId,
+            options.name,
+            deploymentStack
+          )
+      break
+
+    case 'subscription':
+      client.subscriptionId = options.subscriptionId
+      operationPromise = options.wait
+        ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(
+            options.name,
+            deploymentStack
+          )
+        : client.deploymentStacks.beginValidateStackAtSubscription(
+            options.name,
+            deploymentStack
+          )
+      break
+
+    case 'resourceGroup':
+      operationPromise = options.wait
+        ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(
+            options.resourceGroupName,
+            options.name,
+            deploymentStack
+          )
+        : client.deploymentStacks.beginValidateStackAtResourceGroup(
+            options.resourceGroupName,
+            options.name,
+            deploymentStack
+          )
+      break
+  }
+
+  await operationPromise
 }

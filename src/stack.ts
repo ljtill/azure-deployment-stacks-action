@@ -7,6 +7,15 @@ import * as helper from './helper'
 import { Options } from './types'
 
 /**
+ * Check if object is instance of DeploymentStack.
+ */
+export function instanceOfDeploymentStack(
+  object: any
+): object is DeploymentStack {
+  return 'location' in object
+}
+
+/**
  * Get deployment stack.
  */
 async function getDeploymentStack(
@@ -167,7 +176,22 @@ export async function createDeploymentStack(
       break
   }
 
-  await operationPromise
+  const result = await operationPromise
+
+  // TODO(ljtill): Pass output
+
+  if (result) {
+    if (instanceOfDeploymentStack(result)) {
+      core.info(`Deployment stack created`)
+
+      core.info(`Resources:`)
+      result.properties?.resources?.forEach(resource => {
+        core.info(`Status: ${resource.status}`)
+        core.info(`DenyStatus: ${resource.denyStatus}`)
+        core.info(`Id: ${resource.id}`)
+      })
+    }
+  }
 }
 
 /**

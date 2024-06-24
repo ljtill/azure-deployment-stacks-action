@@ -45820,6 +45820,9 @@ function parseInputs() {
     return options;
 }
 exports.parseInputs = parseInputs;
+/**
+ * Parse the actionOnUnmanage property.
+ */
 function parseUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':

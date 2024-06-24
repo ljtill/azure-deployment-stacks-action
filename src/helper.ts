@@ -9,9 +9,11 @@ import { DeploymentStackPropertiesActionOnUnmanage } from '@azure/arm-resourcesd
 import { Options } from './types'
 
 /**
- * Install the Bicep binary.
+ * Install Bicep binary.
  */
 export async function installBicep(): Promise<void> {
+  core.debug(`Installing the Bicep binary...`)
+
   const url = 'https://github.com/azure/bicep/releases/latest/download/'
 
   switch (process.platform) {
@@ -60,23 +62,40 @@ export async function installBicep(): Promise<void> {
 }
 
 /**
- * Check if the Bicep binary is installed.
+ * Check Bicep binary is installed.
  */
 export async function checkBicep(): Promise<boolean> {
+  core.debug(`Checking for the Bicep binary...`)
+
   if ((await io.which('bicep', false)) === '') {
     throw new Error('Bicep is not installed')
   }
+
+  await printBicepVersion()
 
   return true
 }
 
 /**
- * Build the Bicep file.
+ * Print Bicep version.
+ */
+async function printBicepVersion(): Promise<void> {
+  core.debug(`Printing the Bicep version...`)
+
+  const bicepPath = io.which('bicep', true)
+
+  await exec.exec(`"${bicepPath}" --version`)
+}
+
+/**
+ * Build Bicep file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
+  core.debug(`Building Bicep file: ${filePath}`)
+
   const bicepPath = await io.which('bicep', true)
 
-  // TODO: Implement cross platform support
+  // TODO(ljtill): Implement cross platform support
   const outputPath = '/tmp/main.json'
 
   await exec.exec(
@@ -87,12 +106,14 @@ async function buildBicepFile(filePath: string): Promise<string> {
 }
 
 /**
- * Build the Bicep parameters file.
+ * Build Bicep parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
+  core.debug(`Building Bicep parameters file: ${filePath}`)
+
   const bicepPath = await io.which('bicep', true)
 
-  // TODO: Implement cross platform support
+  // TODO(ljtill): Implement cross platform support
   const outputPath = '/tmp/params.json'
 
   await exec.exec(
@@ -103,14 +124,14 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 }
 
 /**
- * Parse the template file.
+ * Parse template file.
  */
 export async function parseTemplateFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  let filePath = options.templateFile
+  core.debug(`Parsing template file: ${options.templateFile}`)
 
-  core.debug(`Parsing the template file: ${filePath}`)
+  let filePath = options.templateFile
 
   // Parse the file extension
   const fileExtension = path.extname(filePath)
@@ -133,14 +154,14 @@ export async function parseTemplateFile(
 }
 
 /**
- * Parse the parameters file.
+ * Parse parameters file.
  */
 export async function parseParametersFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  let filePath = options.parametersFile
+  core.debug(`Parsing the parameters file: ${options.parametersFile}`)
 
-  core.debug(`Parsing the parameters file: ${filePath}`)
+  let filePath = options.parametersFile
 
   // Parse the file extension
   const fileExtension = path.extname(filePath)
@@ -163,16 +184,20 @@ export async function parseParametersFile(
 }
 
 /**
- * Get the Azure token.
+ * Initialize Azure Credential.
  */
 export function newCredential(): DefaultAzureCredential {
+  core.debug(`Generate new credential...`)
+
   return new DefaultAzureCredential()
 }
 
 /**
- * Parse the inputs.
+ * Initiliaze Options.
  */
-export function parseInputs(): Options {
+export function newOptions(): Options {
+  core.debug(`Initializing options...`)
+
   const options: Partial<Options> = {}
 
   // Get the input if it's required and validate it.
@@ -229,9 +254,14 @@ export function parseInputs(): Options {
   return options as Options
 }
 
+/**
+ * Parse actionOnUnmanage property.
+ */
 export function parseUnmanageProperties(
   value: string
 ): DeploymentStackPropertiesActionOnUnmanage {
+  core.debug(`Parsing actionOnUnmanage: ${value}`)
+
   switch (value) {
     case 'deleteResources':
       return {
@@ -254,4 +284,11 @@ export function parseUnmanageProperties(
     default:
       throw new Error(`Invalid actionOnUnmanage: ${value}`)
   }
+}
+
+/**
+ * Parse denySettings property.
+ */
+export function parseDenySettings(): void {
+  core.debug(`Parsing denySettings...`)
 }

@@ -1,7 +1,7 @@
+import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
-  DeploymentStack,
-  DeploymentStackPropertiesActionOnUnmanage
+  DeploymentStack
 } from '@azure/arm-resourcesdeploymentstacks'
 import * as helper from './helper'
 import { Options } from './types'
@@ -15,6 +15,8 @@ export async function createOrUpdateDeploymentStack(
   template: Record<string, unknown>,
   parameters: Record<string, unknown>
 ): Promise<void> {
+  core.info(`Creating deployment stack...`)
+
   const deploymentStack: DeploymentStack = {
     description: options.description,
     location: options.location,
@@ -79,6 +81,8 @@ export async function deleteDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
 ): Promise<void> {
+  core.info(`Deleting deployment stack...`)
+
   let operationPromise
 
   switch (options.scope) {

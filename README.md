@@ -87,7 +87,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deployment
+      - name: Stack
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'
@@ -134,7 +134,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deployment
+      - name: Stack
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'
@@ -147,7 +147,7 @@ jobs:
 
 ### Validate Mode
 
-The following example demonstrates how to set up the action in delete mode,
+The following example demonstrates how to set up the action in validate mode,
 which is recommended to be used with `pull_request` triggers:
 
 ```yaml
@@ -181,7 +181,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deployment
+      - name: Stack
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'

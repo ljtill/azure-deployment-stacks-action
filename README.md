@@ -1,5 +1,11 @@
 # Azure Deployment Stacks Action
 
+[![GitHub Super-Linter](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
+![CI](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/ci.yml/badge.svg)
+[![Check dist/](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml)
+[![CodeQL](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/codeql-analysis.yml)
+[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+
 This repository contains a [GitHub Action](https://docs.github.com/actions) that
 allows engineers to create, update, delete, validate and export
 [Azure Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)

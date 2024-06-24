@@ -226,8 +226,7 @@ jobs:
 | wait               | create, delete, validate | false    | boolean | Wait for the deployment to complete.                                                                | true, false                                  |
 
 > The `excludedActions` and `excludedPrincipals` parameters are defined by comma
-> separation
-> (000000000-0000-0000-0000-000000000000,000000000-0000-0000-0000-000000000000,000000000-0000-0000-0000-000000000000).
+> separation - 000000000,000000000,000000000
 
 > The `wait` parameter is set to false by default to avoid long-running GitHub
 > Action jobs.

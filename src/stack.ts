@@ -261,6 +261,10 @@ export async function validateDeploymentStack(
       denySettings: helper.newDenySettings(options.denySettings),
       template,
       parameters
+    },
+    tags: {
+      Commit: options.commit,
+      Branch: options.branch
     }
   }
 

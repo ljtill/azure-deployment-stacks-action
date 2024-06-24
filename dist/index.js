@@ -46311,7 +46311,7 @@ function getValidateInputs(options) {
     return options;
 }
 /**
- * Generate actionOnUnmanage property.
+ * Initialize actionOnUnmanage property.
  */
 function newUnmanageProperties(value) {
     switch (value) {
@@ -46342,7 +46342,7 @@ function newUnmanageProperties(value) {
 }
 exports.newUnmanageProperties = newUnmanageProperties;
 /**
- * Generate denySettings property.
+ * Initialize denySettings property.
  */
 function newDenySettings(value) {
     return {

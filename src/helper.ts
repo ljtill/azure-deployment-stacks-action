@@ -391,7 +391,7 @@ function getValidateInputs(options: Partial<Options>): Partial<Options> {
 }
 
 /**
- * Generate actionOnUnmanage property.
+ * Initialize actionOnUnmanage property.
  */
 export function newUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
@@ -422,7 +422,7 @@ export function newUnmanageProperties(value: string): ActionOnUnmanage {
 }
 
 /**
- * Generate denySettings property.
+ * Initialize denySettings property.
  */
 export function newDenySettings(value: string): DenySettings {
   return {

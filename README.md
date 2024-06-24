@@ -1,15 +1,17 @@
 # Azure Deployment Stacks Action
 
 This repository contains a GitHub Action that allows engineers to create,
-update, delete, validate and export Azure Deployment Stacks directly from their
-GitHub workflows. It supports a variety of inputs for scopes and options, making
-it flexible and easy to use for managing Azure resources. Whether you need to
-define the scope at the management group, subscription, or resource group level,
-this action provides the necessary parameters to tailor deployments to your
-specific needs. Additionally, it includes options for setting the location,
-mode, and handling unmanaged resources, as well as configuring deny settings and
-specifying ARM or Bicep templates. This GitHub Action streamlines the process of
-managing Azure infrastructure, enabling efficient and automated deployments
+update, delete, validate and export
+[Azure Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)
+directly from their GitHub workflows. It supports a variety of inputs for scopes
+and options, making it flexible and easy to use for managing Azure resources.
+Whether you need to define the scope at the management group, subscription, or
+resource group level, this action provides the necessary parameters to tailor
+deployments to your specific needs. Additionally, it includes options for
+setting the location, mode, and handling unmanaged resources, as well as
+configuring deny settings and specifying ARM or Bicep templates. This GitHub
+Action streamlines the process of managing Azure infrastructure, enabling
+efficient and automated deployments
 
 ## Authentication
 
@@ -20,7 +22,7 @@ authentication.
 
 ## Modes
 
-The action supports two modes: `create` and `delete`.
+The action supports three modes: `create`, `delete` and `validate`.
 
 For `create` mode, it is recommended to use it with `push` triggers. This setup
 ensures that whenever changes are pushed to the repository, the action
@@ -35,6 +37,17 @@ control and prevents accidental deletions, ensuring that stacks are only deleted
 when explicitly requested by an authorized user. This setup is particularly
 useful for maintenance tasks or cleanup operations where automated deletion
 could pose risks.
+
+For `validate` mode, it is recommended to use it with pull_request triggers.
+This ensures that the Azure Deployment Stack is validated whenever a pull
+request is created or updated. By integrating validation into the pull request
+workflow, you can catch any potential issues or misconfigurations before they
+are merged into the main branch. This setup is ideal for ensuring the quality
+and integrity of infrastructure changes, as it allows for early detection of
+errors and provides an opportunity to review and address any issues in a
+collaborative manner. This approach helps maintain a stable and reliable
+infrastructure by preventing problematic changes from being integrated into the
+production environment.
 
 ## Getting Started
 
@@ -132,10 +145,6 @@ which is recommended to be used with `pull_request` triggers:
 ```yaml
 
 ```
-
-### Export Mode
-
-_Upcoming feature_
 
 ## Parameters
 

@@ -115,6 +115,10 @@ export async function createDeploymentStack(
       denySettings: helper.newDenySettings(options.denySettings),
       template,
       parameters
+    },
+    tags: {
+      Commit: options.commit,
+      Branch: options.branch
     }
   }
 

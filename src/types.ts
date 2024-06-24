@@ -12,6 +12,8 @@ export type Options = {
   templateFile: string
   parametersFile: string
   wait: boolean
+  commit: string
+  branch: string
 }
 
 export type ActionOnUnmanage = {

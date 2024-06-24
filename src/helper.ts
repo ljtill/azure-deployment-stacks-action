@@ -2,6 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as github from '@actions/github'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
@@ -221,7 +222,7 @@ export async function parseParametersFile(
 }
 
 /**
- * Initialize Azure Credential.
+ * Initialize Azure credential.
  */
 export function newCredential(): DefaultAzureCredential {
   core.debug(`Generate new credential`)
@@ -251,6 +252,9 @@ export function newOptions(): Options {
       options = getValidateInputs(options)
       break
   }
+
+  options.commit = github.context.sha
+  options.branch = github.context.ref
 
   return options as Options
 }

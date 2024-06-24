@@ -46630,7 +46630,7 @@ async function validateDeploymentStack(options, client) {
     }
     // TODO(ljtill): Parse error messages
     await operationPromise;
-    core.info(`Valid deployment stack`);
+    core.info(`No validation errors found`);
 }
 exports.validateDeploymentStack = validateDeploymentStack;
 

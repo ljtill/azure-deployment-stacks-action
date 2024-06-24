@@ -46193,6 +46193,9 @@ function newOptions() {
         case 'delete':
             options = getDeleteInputs(options);
             break;
+        case 'validate':
+            options = getValidateInputs(options);
+            break;
     }
     return options;
 }
@@ -46267,6 +46270,44 @@ function getDeleteInputs(options) {
             options.resourceGroupName = getInput('resourceGroupName', true);
             break;
     }
+    return options;
+}
+/**
+ * Parse validate inputs.
+ */
+function getValidateInputs(options) {
+    core.debug(`Retrieving validate inputs`);
+    options.name = getInput('name', true);
+    options.description = getInput('description', false);
+    options.location = getInput('location', false);
+    options.scope = getInput('scope', true, [
+        'managementGroup',
+        'subscription',
+        'resourceGroup'
+    ]);
+    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+        'deleteAll',
+        'deleteResources',
+        'detachAll'
+    ]);
+    options.denySettings = getInput('denySettings', true, [
+        'denyDelete',
+        'denyWriteAndDelete',
+        'none'
+    ]);
+    switch (options.scope) {
+        case 'managementGroup':
+            options.managementGroupId = getInput('managementGroupId', true);
+            break;
+        case 'subscription':
+            options.subscriptionId = getInput('subscriptionId', true);
+            break;
+        case 'resourceGroup':
+            options.resourceGroupName = getInput('resourceGroupName', true);
+            break;
+    }
+    options.templateFile = getInput('templateFile', true);
+    options.parametersFile = getInput('parametersFile', false);
     return options;
 }
 /**

@@ -46256,11 +46256,6 @@ function getDeleteInputs(options) {
         'subscription',
         'resourceGroup'
     ]);
-    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-        'deleteAll',
-        'deleteResources',
-        'detachAll'
-    ]);
     switch (options.scope) {
         case 'managementGroup':
             options.managementGroupId = getInput('managementGroupId', true);

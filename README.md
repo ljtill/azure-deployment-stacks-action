@@ -64,7 +64,7 @@ production environment.
   uses: ljtill/azure-deployment-stacks-action@v1
   with:
     name: 'Microsoft.Samples'
-    description: 'Sample description for my Deployment Stack'
+    description: 'Sample description for the Deployment Stack'
     location: uksouth
     scope: subscription
     mode: create
@@ -75,26 +75,14 @@ production environment.
     wait: true
 ```
 
-### Create Mode
+## Workflows
 
-The following example demonstrates how to set up the action in create mode,
-which is recommended to be used with `push` triggers:
+The following samples provide end-to-end implementations of the Azure Deployment
+Stamps Action:
 
-- [Documentation](./docs/README.md#create)
-
-### Delete Mode
-
-The following example demonstrates how to set up the action in delete mode,
-which is recommended to be used with `workflow_dispatch` triggers:
-
-- [Documentation](./docs/README.md#delete)
-
-### Validate Mode
-
-The following example demonstrates how to set up the action in validate mode,
-which is recommended to be used with `pull_request` triggers:
-
-- [Documentation](./docs/README.md#validate)
+- [Create](./docs/README.md#create)
+- [Delete](./docs/README.md#delete)
+- [Validate](./docs/README.md#validate)
 
 ## Parameters
 

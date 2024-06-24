@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newDenySettings = exports.newUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.instanceOfDeploymentStack = exports.newDenySettings = exports.newUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50647,6 +50647,17 @@ function newDenySettings(options) {
     };
 }
 exports.newDenySettings = newDenySettings;
+/**
+ * Check if object is instance of DeploymentStack.
+ */
+function instanceOfDeploymentStack(object) {
+    return (typeof object === 'object' &&
+        object !== null &&
+        'location' in object &&
+        'tags' in object &&
+        'properties' in object);
+}
+exports.instanceOfDeploymentStack = instanceOfDeploymentStack;
 
 
 /***/ }),
@@ -50758,16 +50769,6 @@ exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.create
 const core = __importStar(__nccwpck_require__(2186));
 const helper = __importStar(__nccwpck_require__(2707));
 /**
- * Check if object is instance of DeploymentStack.
- */
-function instanceOfDeploymentStack(object) {
-    return (typeof object === 'object' &&
-        object !== null &&
-        'location' in object &&
-        'tags' in object &&
-        'properties' in object);
-}
-/**
  * Get deployment stack.
  */
 async function getDeploymentStack(options, client) {
@@ -50865,7 +50866,7 @@ async function createDeploymentStack(options, client) {
     }
     const result = await operationPromise;
     if (result) {
-        if (instanceOfDeploymentStack(result)) {
+        if (helper.instanceOfDeploymentStack(result)) {
             core.info(`Deployment stack created`);
             core.info(`Resources:`);
             for (const item of result.properties?.resources || []) {

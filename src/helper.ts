@@ -7,6 +7,7 @@ import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
 import { Options, ActionOnUnmanage, DenySettings } from './types'
+import { DeploymentStack } from '@azure/arm-resourcesdeploymentstacks'
 
 /**
  * Install Bicep binary.
@@ -459,4 +460,19 @@ export function newDenySettings(options: Options): DenySettings {
     excludedActions: options.excludedActions,
     excludedPrincipals: options.excludedPrincipals
   }
+}
+
+/**
+ * Check if object is instance of DeploymentStack.
+ */
+export function instanceOfDeploymentStack(
+  object: unknown
+): object is DeploymentStack {
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    'location' in object &&
+    'tags' in object &&
+    'properties' in object
+  )
 }

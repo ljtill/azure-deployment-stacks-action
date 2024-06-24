@@ -7,19 +7,6 @@ import * as helper from './helper'
 import { Options } from './types'
 
 /**
- * Check if object is instance of DeploymentStack.
- */
-function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
-  return (
-    typeof object === 'object' &&
-    object !== null &&
-    'location' in object &&
-    'tags' in object &&
-    'properties' in object
-  )
-}
-
-/**
  * Get deployment stack.
  */
 async function getDeploymentStack(
@@ -183,7 +170,7 @@ export async function createDeploymentStack(
   const result = await operationPromise
 
   if (result) {
-    if (instanceOfDeploymentStack(result)) {
+    if (helper.instanceOfDeploymentStack(result)) {
       core.info(`Deployment stack created`)
 
       core.info(`Resources:`)

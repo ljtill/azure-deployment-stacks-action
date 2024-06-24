@@ -13,11 +13,13 @@ async function getDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
 ): Promise<DeploymentStack> {
-  let operationPromise
+  core.debug(`Retrieving deployment stack`)
+
+  let deploymentStack: DeploymentStack | undefined
 
   switch (options.scope) {
     case 'managementGroup':
-      operationPromise = client.deploymentStacks.getAtManagementGroup(
+      deploymentStack = await client.deploymentStacks.getAtManagementGroup(
         options.managementGroupId,
         options.name
       )
@@ -25,24 +27,63 @@ async function getDeploymentStack(
 
     case 'subscription':
       client.subscriptionId = options.subscriptionId
-      operationPromise = client.deploymentStacks.getAtSubscription(options.name)
+      deploymentStack = await client.deploymentStacks.getAtSubscription(
+        options.name
+      )
       break
 
     case 'resourceGroup':
-      operationPromise = client.deploymentStacks.getAtResourceGroup(
+      deploymentStack = await client.deploymentStacks.getAtResourceGroup(
         options.resourceGroupName,
         options.name
       )
       break
   }
 
-  const deploymentStack = await operationPromise
-
   if (!deploymentStack) {
     throw new Error(`Deployment stack not found`)
   }
 
   return deploymentStack
+}
+
+/**
+ * List deployment stacks.
+ */
+async function listDeploymentStacks(
+  options: Options,
+  client: DeploymentStacksClient
+): Promise<DeploymentStack[]> {
+  core.debug(`Listing deployment stacks`)
+
+  const deploymentStacks = []
+
+  switch (options.scope) {
+    case 'managementGroup':
+      for await (const item of client.deploymentStacks.listAtManagementGroup(
+        options.managementGroupId
+      )) {
+        deploymentStacks.push(item)
+      }
+      break
+
+    case 'subscription':
+      client.subscriptionId = options.subscriptionId
+      for await (const item of client.deploymentStacks.listAtSubscription()) {
+        deploymentStacks.push(item)
+      }
+      break
+
+    case 'resourceGroup':
+      for await (const item of client.deploymentStacks.listAtResourceGroup(
+        options.resourceGroupName
+      )) {
+        deploymentStacks.push(item)
+      }
+      break
+  }
+
+  return deploymentStacks
 }
 
 /**
@@ -53,7 +94,9 @@ export async function createDeploymentStack(
   client: DeploymentStacksClient
 ): Promise<void> {
   // Display operation message
-  !(await getDeploymentStack(options, client))
+  !(await listDeploymentStacks(options, client)).some(
+    stack => stack.name === options.name
+  )
     ? core.info(`Creating deployment stack`)
     : core.info(`Updating deployment stack`)
 

@@ -46423,31 +46423,57 @@ const helper = __importStar(__nccwpck_require__(2707));
  * Get deployment stack.
  */
 async function getDeploymentStack(options, client) {
-    let operationPromise;
+    core.debug(`Retrieving deployment stack`);
+    let deploymentStack;
     switch (options.scope) {
         case 'managementGroup':
-            operationPromise = client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
+            deploymentStack = await client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
             break;
         case 'subscription':
             client.subscriptionId = options.subscriptionId;
-            operationPromise = client.deploymentStacks.getAtSubscription(options.name);
+            deploymentStack = await client.deploymentStacks.getAtSubscription(options.name);
             break;
         case 'resourceGroup':
-            operationPromise = client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
+            deploymentStack = await client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
             break;
     }
-    const deploymentStack = await operationPromise;
     if (!deploymentStack) {
         throw new Error(`Deployment stack not found`);
     }
     return deploymentStack;
 }
 /**
+ * List deployment stacks.
+ */
+async function listDeploymentStacks(options, client) {
+    core.debug(`Listing deployment stacks`);
+    const deploymentStacks = [];
+    switch (options.scope) {
+        case 'managementGroup':
+            for await (const item of client.deploymentStacks.listAtManagementGroup(options.managementGroupId)) {
+                deploymentStacks.push(item);
+            }
+            break;
+        case 'subscription':
+            client.subscriptionId = options.subscriptionId;
+            for await (const item of client.deploymentStacks.listAtSubscription()) {
+                deploymentStacks.push(item);
+            }
+            break;
+        case 'resourceGroup':
+            for await (const item of client.deploymentStacks.listAtResourceGroup(options.resourceGroupName)) {
+                deploymentStacks.push(item);
+            }
+            break;
+    }
+    return deploymentStacks;
+}
+/**
  * Create deployment stack.
  */
 async function createDeploymentStack(options, client) {
     // Display operation message
-    !(await getDeploymentStack(options, client))
+    !(await listDeploymentStacks(options, client)).some(stack => stack.name === options.name)
         ? core.info(`Creating deployment stack`)
         : core.info(`Updating deployment stack`);
     // Parse template and parameter files

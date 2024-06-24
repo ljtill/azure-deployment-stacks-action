@@ -309,5 +309,5 @@ export async function validateDeploymentStack(
 
   await operationPromise
 
-  core.info(`No validation errors found`)
+  core.info(`No validation errors detected`)
 }

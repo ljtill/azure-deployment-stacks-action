@@ -45703,14 +45703,16 @@ exports.checkBicep = checkBicep;
 async function displayBicepVersion() {
     core.debug(`Displaying Bicep version`);
     const bicepPath = await io.which('bicep', true);
-    const execOptions = {};
-    execOptions.listeners = {
-        stdout: (data) => {
-            core.debug(data.toString());
+    const execOptions = {
+        listeners: {
+            stdout: (data) => {
+                core.debug(data.toString());
+            },
+            stderr: (data) => {
+                core.error(data.toString());
+            }
         },
-        stderr: (data) => {
-            core.error(data.toString());
-        }
+        silent: true
     };
     await exec.exec(bicepPath, ['--version'], execOptions);
 }
@@ -45722,14 +45724,16 @@ async function buildBicepFile(filePath) {
     // TODO(ljtill): Implement cross platform support
     const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/main.json';
-    const execOptions = {};
-    execOptions.listeners = {
-        stdout: (data) => {
-            core.debug(data.toString());
+    const execOptions = {
+        listeners: {
+            stdout: (data) => {
+                core.debug(data.toString());
+            },
+            stderr: (data) => {
+                core.error(data.toString());
+            }
         },
-        stderr: (data) => {
-            core.error(data.toString());
-        }
+        silent: true
     };
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
@@ -45742,14 +45746,16 @@ async function buildBicepParametersFile(filePath) {
     // TODO(ljtill): Implement cross platform support
     const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/params.json';
-    const execOptions = {};
-    execOptions.listeners = {
-        stdout: (data) => {
-            core.debug(data.toString());
+    const execOptions = {
+        listeners: {
+            stdout: (data) => {
+                core.debug(data.toString());
+            },
+            stderr: (data) => {
+                core.error(data.toString());
+            }
         },
-        stderr: (data) => {
-            core.error(data.toString());
-        }
+        silent: true
     };
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;

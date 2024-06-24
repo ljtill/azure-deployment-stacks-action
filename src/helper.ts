@@ -84,14 +84,16 @@ async function displayBicepVersion(): Promise<void> {
 
   const bicepPath = await io.which('bicep', true)
 
-  const execOptions: exec.ExecOptions = {}
-  execOptions.listeners = {
-    stdout: (data: Buffer) => {
-      core.debug(data.toString())
+  const execOptions: exec.ExecOptions = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString())
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString())
+      }
     },
-    stderr: (data: Buffer) => {
-      core.error(data.toString())
-    }
+    silent: true
   }
 
   await exec.exec(bicepPath, ['--version'], execOptions)
@@ -107,14 +109,16 @@ async function buildBicepFile(filePath: string): Promise<string> {
   const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/main.json'
 
-  const execOptions: exec.ExecOptions = {}
-  execOptions.listeners = {
-    stdout: (data: Buffer) => {
-      core.debug(data.toString())
+  const execOptions: exec.ExecOptions = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString())
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString())
+      }
     },
-    stderr: (data: Buffer) => {
-      core.error(data.toString())
-    }
+    silent: true
   }
 
   await exec.exec(
@@ -136,14 +140,16 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/params.json'
 
-  const execOptions: exec.ExecOptions = {}
-  execOptions.listeners = {
-    stdout: (data: Buffer) => {
-      core.debug(data.toString())
+  const execOptions: exec.ExecOptions = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString())
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString())
+      }
     },
-    stderr: (data: Buffer) => {
-      core.error(data.toString())
-    }
+    silent: true
   }
 
   await exec.exec(

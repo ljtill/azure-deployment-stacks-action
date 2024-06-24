@@ -309,12 +309,12 @@ function getCreateInputs(options: Partial<Options>): Partial<Options> {
   const excludedActions = getInput('excludedActions', false)
   excludedActions
     ? (options.excludedActions = excludedActions.split(','))
-    : (options.excludedActions = ['action'])
+    : null
 
   const excludedPrincipals = getInput('excludedPrincipals', false)
   excludedPrincipals
     ? (options.excludedPrincipals = excludedPrincipals.split(','))
-    : (options.excludedPrincipals = ['principal'])
+    : null
 
   options.excludedPrincipals = getInput('excludedPrincipals', false).split(',')
 
@@ -396,12 +396,12 @@ function getValidateInputs(options: Partial<Options>): Partial<Options> {
   const excludedActions = getInput('excludedActions', false)
   excludedActions
     ? (options.excludedActions = excludedActions.split(','))
-    : (options.excludedActions = ['action'])
+    : null
 
   const excludedPrincipals = getInput('excludedPrincipals', false)
   excludedPrincipals
     ? (options.excludedPrincipals = excludedPrincipals.split(','))
-    : (options.excludedPrincipals = ['principal'])
+    : null
 
   switch (options.scope) {
     case 'managementGroup':

@@ -46457,8 +46457,7 @@ async function getDeploymentStack(options, client) {
  */
 async function createDeploymentStack(options, client) {
     // Display operation message
-    ;
-    (await getDeploymentStack(options, client))
+    !(await getDeploymentStack(options, client))
         ? core.info(`Creating deployment stack`)
         : core.info(`Updating deployment stack`);
     // Parse template and parameter files

@@ -53,7 +53,7 @@ export async function createDeploymentStack(
   client: DeploymentStacksClient
 ): Promise<void> {
   // Display operation message
-  ;(await getDeploymentStack(options, client))
+  !(await getDeploymentStack(options, client))
     ? core.info(`Creating deployment stack`)
     : core.info(`Updating deployment stack`)
 

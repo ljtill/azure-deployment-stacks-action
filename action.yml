@@ -15,30 +15,28 @@ inputs:
   description:
     description: 'The description of deployment stack.'
     required: false
-  scope:
-    description: 'The scope of the deployment stack.'
-    required: true
-    # values: 'managementGroup', 'subscription', 'resourceGroup'
+
   location:
     description: 'The location to store deployment stack.'
     required: false
     default: 'eastus'
+
+  scope:
+    description: 'The scope of the deployment stack.'
+    required: true
   mode:
     description: 'The mode of the deployment stack action.'
     required: true
-    # values: 'create', 'delete'
 
   actionOnUnmanage:
     description:
       'Defines what happens to resources that are no longer managed after the
       stack is updated or deleted.'
-    required: true
-    # values: 'deleteAll', 'deleteResources', detachAll
+    required: false
   denySettings:
     description:
       'Define which operations are denied on resources managed by the stack.'
-    required: true
-    # values: 'denyDelete', 'denyWriteAndDelete', 'none'
+    required: false
 
   managementGroupId:
     description:
@@ -55,7 +53,7 @@ inputs:
 
   templateFile:
     description: 'A path to a ARM or Bicep file in the file system.'
-    required: true
+    required: false
   parametersFile:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false

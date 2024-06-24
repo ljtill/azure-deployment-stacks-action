@@ -198,32 +198,55 @@ export function newCredential(): DefaultAzureCredential {
 export function newOptions(): Options {
   core.debug(`Initializing options...`)
 
-  const options: Partial<Options> = {}
+  let options: Partial<Options> = {}
 
-  // Get the input if it's required and validate it.
-  function getInput(
-    key: string,
-    required: boolean,
-    validValues?: string[]
-  ): string {
-    const value = core.getInput(key, { required, trimWhitespace: true })
-    if (validValues && !validValues.includes(value)) {
-      throw new Error(`Invalid ${key}`)
-    }
+  options.mode = getInput('mode', true, ['create', 'delete'])
+  options.wait = getInput('wait', false) === 'true'
 
-    return value
+  switch (options.mode) {
+    case 'create':
+      options = getCreateInputs(options)
+      break
+    case 'delete':
+      options = getDeleteInputs(options)
+      break
   }
 
-  // Gather inputs
+  return options as Options
+}
+
+/**
+ * Get input from the workflow.
+ */
+function getInput(
+  key: string,
+  required: boolean,
+  validValues?: string[]
+): string {
+  const value = core.getInput(key, { required, trimWhitespace: true })
+  if (validValues && !validValues.includes(value)) {
+    throw new Error(`Invalid ${key}`)
+  }
+
+  return value
+}
+
+/**
+ * Parse create inputs.
+ */
+function getCreateInputs(options: Partial<Options>): Partial<Options> {
+  core.debug(`Retrieving create inputs...`)
+
   options.name = getInput('name', true)
   options.description = getInput('description', false)
   options.location = getInput('location', false)
-  options.mode = getInput('mode', true, ['create', 'delete'])
+
   options.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
     'resourceGroup'
   ])
+
   options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
     'deleteAll',
     'deleteResources',
@@ -234,11 +257,7 @@ export function newOptions(): Options {
     'denyWriteAndDelete',
     'none'
   ])
-  options.templateFile = getInput('templateFile', true)
-  options.parametersFile = getInput('parametersFile', false)
-  options.wait = getInput('wait', false) === 'true'
 
-  // Handle scope-specific inputs
   switch (options.scope) {
     case 'managementGroup':
       options.managementGroupId = getInput('managementGroupId', true)
@@ -251,7 +270,39 @@ export function newOptions(): Options {
       break
   }
 
-  return options as Options
+  options.templateFile = getInput('templateFile', true)
+  options.parametersFile = getInput('parametersFile', false)
+
+  return options
+}
+
+/**
+ * Parse delete inputs.
+ */
+function getDeleteInputs(options: Partial<Options>): Partial<Options> {
+  core.debug(`Retrieving delete inputs...`)
+
+  options.name = getInput('name', true)
+
+  options.scope = getInput('scope', true, [
+    'managementGroup',
+    'subscription',
+    'resourceGroup'
+  ])
+
+  switch (options.scope) {
+    case 'managementGroup':
+      options.managementGroupId = getInput('managementGroupId', true)
+      break
+    case 'subscription':
+      options.subscriptionId = getInput('subscriptionId', true)
+      break
+    case 'resourceGroup':
+      options.resourceGroupName = getInput('resourceGroupName', true)
+      break
+  }
+
+  return options
 }
 
 /**

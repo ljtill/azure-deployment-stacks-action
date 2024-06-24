@@ -237,7 +237,7 @@ export function newOptions(): Options {
 
   let options: Partial<Options> = {}
 
-  options.mode = getInput('mode', true, ['create', 'delete'])
+  options.mode = getInput('mode', true, ['create', 'delete', 'validate'])
   options.wait = getInput('wait', false) === 'true'
 
   switch (options.mode) {

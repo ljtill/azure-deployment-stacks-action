@@ -46184,7 +46184,7 @@ exports.newCredential = newCredential;
 function newOptions() {
     core.debug(`Initializing options`);
     let options = {};
-    options.mode = getInput('mode', true, ['create', 'delete']);
+    options.mode = getInput('mode', true, ['create', 'delete', 'validate']);
     options.wait = getInput('wait', false) === 'true';
     switch (options.mode) {
         case 'create':

@@ -45706,10 +45706,10 @@ async function displayBicepVersion() {
     const execOptions = {
         listeners: {
             stdout: (data) => {
-                core.debug(data.toString());
+                core.debug(data.toString().trim());
             },
             stderr: (data) => {
-                core.error(data.toString());
+                core.error(data.toString().trim());
             }
         },
         silent: true
@@ -45727,10 +45727,10 @@ async function buildBicepFile(filePath) {
     const execOptions = {
         listeners: {
             stdout: (data) => {
-                core.debug(data.toString());
+                core.debug(data.toString().trim());
             },
             stderr: (data) => {
-                core.error(data.toString());
+                core.error(data.toString().trim());
             }
         },
         silent: true
@@ -45749,10 +45749,10 @@ async function buildBicepParametersFile(filePath) {
     const execOptions = {
         listeners: {
             stdout: (data) => {
-                core.debug(data.toString());
+                core.debug(data.toString().trim());
             },
             stderr: (data) => {
-                core.error(data.toString());
+                core.error(data.toString().trim());
             }
         },
         silent: true

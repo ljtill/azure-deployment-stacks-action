@@ -87,10 +87,10 @@ async function displayBicepVersion(): Promise<void> {
   const execOptions: exec.ExecOptions = {
     listeners: {
       stdout: (data: Buffer) => {
-        core.debug(data.toString())
+        core.debug(data.toString().trim())
       },
       stderr: (data: Buffer) => {
-        core.error(data.toString())
+        core.error(data.toString().trim())
       }
     },
     silent: true
@@ -112,10 +112,10 @@ async function buildBicepFile(filePath: string): Promise<string> {
   const execOptions: exec.ExecOptions = {
     listeners: {
       stdout: (data: Buffer) => {
-        core.debug(data.toString())
+        core.debug(data.toString().trim())
       },
       stderr: (data: Buffer) => {
-        core.error(data.toString())
+        core.error(data.toString().trim())
       }
     },
     silent: true
@@ -143,10 +143,10 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   const execOptions: exec.ExecOptions = {
     listeners: {
       stdout: (data: Buffer) => {
-        core.debug(data.toString())
+        core.debug(data.toString().trim())
       },
       stderr: (data: Buffer) => {
-        core.error(data.toString())
+        core.error(data.toString().trim())
       }
     },
     silent: true

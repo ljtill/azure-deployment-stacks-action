@@ -26,23 +26,13 @@ export async function run(): Promise<void> {
     // Perform action
     switch (options.mode) {
       case 'create':
-        // Parse template and parameter files
-        const template = await helper.parseTemplateFile(options)
-        const parameters = options.parametersFile
-          ? helper.parseParametersFile(options)
-          : {}
-
-        await stack.createOrUpdateDeploymentStack(
-          options,
-          client,
-          template,
-          parameters
-        )
-
+        await stack.createDeploymentStack(options, client)
         break
       case 'delete':
         await stack.deleteDeploymentStack(options, client)
-
+        break
+      case 'validate':
+        await stack.validateDeploymentStack(options, client)
         break
     }
 

@@ -7,23 +7,72 @@ import * as helper from './helper'
 import { Options } from './types'
 
 /**
- * Create or update deployment stack.
+ * Get deployment stack.
  */
-export async function createOrUpdateDeploymentStack(
+async function getDeploymentStack(
   options: Options,
-  client: DeploymentStacksClient,
-  template: Record<string, unknown>,
-  parameters: Record<string, unknown>
-): Promise<void> {
-  core.info(`Creating deployment stack`)
+  client: DeploymentStacksClient
+): Promise<DeploymentStack> {
+  let operationPromise
 
+  switch (options.scope) {
+    case 'managementGroup':
+      operationPromise = client.deploymentStacks.getAtManagementGroup(
+        options.managementGroupId,
+        options.name
+      )
+      break
+
+    case 'subscription':
+      client.subscriptionId = options.subscriptionId
+      operationPromise = client.deploymentStacks.getAtSubscription(options.name)
+      break
+
+    case 'resourceGroup':
+      operationPromise = client.deploymentStacks.getAtResourceGroup(
+        options.resourceGroupName,
+        options.name
+      )
+      break
+  }
+
+  const deploymentStack = await operationPromise
+
+  if (!deploymentStack) {
+    throw new Error(`Deployment stack not found`)
+  }
+
+  return deploymentStack
+}
+
+/**
+ * Create deployment stack.
+ */
+export async function createDeploymentStack(
+  options: Options,
+  client: DeploymentStacksClient
+): Promise<void> {
+  // Display operation message
+  ;(await getDeploymentStack(options, client))
+    ? core.info(`Creating deployment stack`)
+    : core.info(`Updating deployment stack`)
+
+  // Parse template and parameter files
+  const template = await helper.parseTemplateFile(options)
+  const parameters = options.parametersFile
+    ? helper.parseParametersFile(options)
+    : {}
+
+  // Initialize deployment stack
   const deploymentStack: DeploymentStack = {
-    description: options.description,
     location: options.location,
-    actionOnUnmanage: helper.parseUnmanageProperties(options.actionOnUnmanage),
-    denySettings: { mode: options.denySettings },
-    template,
-    parameters
+    properties: {
+      description: options.description,
+      actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
+      denySettings: helper.newDenySettings(options.denySettings),
+      template,
+      parameters
+    }
   }
 
   let operationPromise
@@ -83,14 +132,17 @@ export async function deleteDeploymentStack(
 ): Promise<void> {
   core.info(`Deleting deployment stack`)
 
-  let operationPromise
-
-  const properties = helper.parseUnmanageProperties(options.actionOnUnmanage)
+  const deploymentStack = await getDeploymentStack(options, client)
   const params = {
-    unmanageActionManagementGroups: properties.managementGroups,
-    unmanageActionResourceGroups: properties.resourceGroups,
-    unmanageActionResources: properties.resources
+    unmanageActionManagementGroups:
+      deploymentStack.properties?.actionOnUnmanage.managementGroups,
+    unmanageActionResourceGroups:
+      deploymentStack.properties?.actionOnUnmanage.resourceGroups,
+    unmanageActionResources:
+      deploymentStack.properties?.actionOnUnmanage.resources
   }
+
+  let operationPromise
 
   switch (options.scope) {
     case 'managementGroup':
@@ -136,4 +188,14 @@ export async function deleteDeploymentStack(
   }
 
   await operationPromise
+}
+
+/**
+ * Validate deployment stack.
+ */
+export async function validateDeploymentStack(
+  options: Options,
+  client: DeploymentStacksClient
+): Promise<void> {
+  // TODO(ljtill): Implement
 }

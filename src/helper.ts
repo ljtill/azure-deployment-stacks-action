@@ -5,8 +5,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { DefaultAzureCredential } from '@azure/identity'
-import { DeploymentStackPropertiesActionOnUnmanage } from '@azure/arm-resourcesdeploymentstacks'
-import { Options } from './types'
+import { Options, ActionOnUnmanage, DenySettings } from './types'
 
 /**
  * Install Bicep binary.
@@ -350,13 +349,9 @@ function getDeleteInputs(options: Partial<Options>): Partial<Options> {
 }
 
 /**
- * Parse actionOnUnmanage property.
+ * Generate actionOnUnmanage property.
  */
-export function parseUnmanageProperties(
-  value: string
-): DeploymentStackPropertiesActionOnUnmanage {
-  core.debug(`Parsing actionOnUnmanage option: ${value}`)
-
+export function newUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
       return {
@@ -385,8 +380,10 @@ export function parseUnmanageProperties(
 }
 
 /**
- * Parse denySettings property.
+ * Generate denySettings property.
  */
-export function parseDenySettings(): void {
-  core.debug(`Parsing denySettings`)
+export function newDenySettings(value: string): DenySettings {
+  return {
+    mode: value
+  }
 }

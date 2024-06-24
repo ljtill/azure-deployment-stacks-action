@@ -5956,8 +5956,7 @@ var coreClient = __nccwpck_require__(7611);
 var coreRestPipeline = __nccwpck_require__(9146);
 var coreLro = __nccwpck_require__(334);
 
-function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
+function _interopNamespaceDefault(e) {
     var n = Object.create(null);
     if (e) {
         Object.keys(e).forEach(function (k) {
@@ -5970,12 +5969,12 @@ function _interopNamespace(e) {
             }
         });
     }
-    n["default"] = e;
+    n.default = e;
     return Object.freeze(n);
 }
 
-var coreClient__namespace = /*#__PURE__*/_interopNamespace(coreClient);
-var coreRestPipeline__namespace = /*#__PURE__*/_interopNamespace(coreRestPipeline);
+var coreClient__namespace = /*#__PURE__*/_interopNamespaceDefault(coreClient);
+var coreRestPipeline__namespace = /*#__PURE__*/_interopNamespaceDefault(coreRestPipeline);
 
 /*
  * Copyright (c) Microsoft Corporation.
@@ -6029,7 +6028,7 @@ exports.KnownDenySettingsMode = void 0;
 (function (KnownDenySettingsMode) {
     /** Authorized users are able to read and modify the resources, but cannot delete. */
     KnownDenySettingsMode["DenyDelete"] = "denyDelete";
-    /** Authorized users can only read from a resource, but cannot modify or delete it. */
+    /** Authorized users can read from a resource, but cannot modify or delete it. */
     KnownDenySettingsMode["DenyWriteAndDelete"] = "denyWriteAndDelete";
     /** No denyAssignments have been applied. */
     KnownDenySettingsMode["None"] = "none";
@@ -6038,39 +6037,37 @@ exports.KnownDenySettingsMode = void 0;
 exports.KnownDeploymentStackProvisioningState = void 0;
 (function (KnownDeploymentStackProvisioningState) {
     /** Creating */
-    KnownDeploymentStackProvisioningState["Creating"] = "Creating";
+    KnownDeploymentStackProvisioningState["Creating"] = "creating";
     /** Validating */
-    KnownDeploymentStackProvisioningState["Validating"] = "Validating";
+    KnownDeploymentStackProvisioningState["Validating"] = "validating";
     /** Waiting */
-    KnownDeploymentStackProvisioningState["Waiting"] = "Waiting";
+    KnownDeploymentStackProvisioningState["Waiting"] = "waiting";
     /** Deploying */
-    KnownDeploymentStackProvisioningState["Deploying"] = "Deploying";
+    KnownDeploymentStackProvisioningState["Deploying"] = "deploying";
     /** Canceling */
-    KnownDeploymentStackProvisioningState["Canceling"] = "Canceling";
-    /** Locking */
-    KnownDeploymentStackProvisioningState["Locking"] = "Locking";
+    KnownDeploymentStackProvisioningState["Canceling"] = "canceling";
+    /** UpdatingDenyAssignments */
+    KnownDeploymentStackProvisioningState["UpdatingDenyAssignments"] = "updatingDenyAssignments";
     /** DeletingResources */
-    KnownDeploymentStackProvisioningState["DeletingResources"] = "DeletingResources";
+    KnownDeploymentStackProvisioningState["DeletingResources"] = "deletingResources";
     /** Succeeded */
-    KnownDeploymentStackProvisioningState["Succeeded"] = "Succeeded";
+    KnownDeploymentStackProvisioningState["Succeeded"] = "succeeded";
     /** Failed */
-    KnownDeploymentStackProvisioningState["Failed"] = "Failed";
+    KnownDeploymentStackProvisioningState["Failed"] = "failed";
     /** Canceled */
-    KnownDeploymentStackProvisioningState["Canceled"] = "Canceled";
+    KnownDeploymentStackProvisioningState["Canceled"] = "canceled";
     /** Deleting */
-    KnownDeploymentStackProvisioningState["Deleting"] = "Deleting";
+    KnownDeploymentStackProvisioningState["Deleting"] = "deleting";
 })(exports.KnownDeploymentStackProvisioningState || (exports.KnownDeploymentStackProvisioningState = {}));
 /** Known values of {@link ResourceStatusMode} that the service accepts. */
 exports.KnownResourceStatusMode = void 0;
 (function (KnownResourceStatusMode) {
     /** This resource is managed by the deployment stack. */
-    KnownResourceStatusMode["Managed"] = "Managed";
+    KnownResourceStatusMode["Managed"] = "managed";
     /** Unable to remove the deny assignment on resource. */
     KnownResourceStatusMode["RemoveDenyFailed"] = "removeDenyFailed";
     /** Unable to delete the resource from Azure. The delete will be retried on the next stack deployment, or can be deleted manually. */
     KnownResourceStatusMode["DeleteFailed"] = "deleteFailed";
-    /** No denyAssignments have been applied. */
-    KnownResourceStatusMode["None"] = "None";
 })(exports.KnownResourceStatusMode || (exports.KnownResourceStatusMode = {}));
 /** Known values of {@link DenyStatusMode} that the service accepts. */
 exports.KnownDenyStatusMode = void 0;
@@ -6086,7 +6083,7 @@ exports.KnownDenyStatusMode = void 0;
     /** Deny assignment has been removed by Azure due to a resource management change (management group move, etc.) */
     KnownDenyStatusMode["RemovedBySystem"] = "removedBySystem";
     /** No denyAssignments have been applied. */
-    KnownDenyStatusMode["None"] = "None";
+    KnownDenyStatusMode["None"] = "none";
 })(exports.KnownDenyStatusMode || (exports.KnownDenyStatusMode = {}));
 /** Known values of {@link CreatedByType} that the service accepts. */
 exports.KnownCreatedByType = void 0;
@@ -6144,20 +6141,20 @@ const DeploymentStackListResult = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "DeploymentStack"
-                        }
-                    }
-                }
+                            className: "DeploymentStack",
+                        },
+                    },
+                },
             },
             nextLink: {
                 serializedName: "nextLink",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksTemplateLink = {
     type: {
@@ -6167,35 +6164,105 @@ const DeploymentStacksTemplateLink = {
             uri: {
                 serializedName: "uri",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             id: {
                 serializedName: "id",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             relativePath: {
                 serializedName: "relativePath",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             queryString: {
                 serializedName: "queryString",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             contentVersion: {
                 serializedName: "contentVersion",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
+};
+const DeploymentParameter = {
+    type: {
+        name: "Composite",
+        className: "DeploymentParameter",
+        modelProperties: {
+            value: {
+                serializedName: "value",
+                type: {
+                    name: "any",
+                },
+            },
+            type: {
+                serializedName: "type",
+                type: {
+                    name: "String",
+                },
+            },
+            reference: {
+                serializedName: "reference",
+                type: {
+                    name: "Composite",
+                    className: "KeyVaultParameterReference",
+                },
+            },
+        },
+    },
+};
+const KeyVaultParameterReference = {
+    type: {
+        name: "Composite",
+        className: "KeyVaultParameterReference",
+        modelProperties: {
+            keyVault: {
+                serializedName: "keyVault",
+                type: {
+                    name: "Composite",
+                    className: "KeyVaultReference",
+                },
+            },
+            secretName: {
+                serializedName: "secretName",
+                required: true,
+                type: {
+                    name: "String",
+                },
+            },
+            secretVersion: {
+                serializedName: "secretVersion",
+                type: {
+                    name: "String",
+                },
+            },
+        },
+    },
+};
+const KeyVaultReference = {
+    type: {
+        name: "Composite",
+        className: "KeyVaultReference",
+        modelProperties: {
+            id: {
+                serializedName: "id",
+                required: true,
+                type: {
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksParametersLink = {
     type: {
@@ -6206,44 +6273,44 @@ const DeploymentStacksParametersLink = {
                 serializedName: "uri",
                 required: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             contentVersion: {
                 serializedName: "contentVersion",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
-const DeploymentStackPropertiesActionOnUnmanage = {
+const ActionOnUnmanage = {
     type: {
         name: "Composite",
-        className: "DeploymentStackPropertiesActionOnUnmanage",
+        className: "ActionOnUnmanage",
         modelProperties: {
             resources: {
                 serializedName: "resources",
                 required: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             resourceGroups: {
                 serializedName: "resourceGroups",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             managementGroups: {
                 serializedName: "managementGroups",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksDebugSetting = {
     type: {
@@ -6253,11 +6320,11 @@ const DeploymentStacksDebugSetting = {
             detailLevel: {
                 serializedName: "detailLevel",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DenySettings = {
     type: {
@@ -6268,8 +6335,8 @@ const DenySettings = {
                 serializedName: "mode",
                 required: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             excludedPrincipals: {
                 serializedName: "excludedPrincipals",
@@ -6277,10 +6344,10 @@ const DenySettings = {
                     name: "Sequence",
                     element: {
                         type: {
-                            name: "String"
-                        }
-                    }
-                }
+                            name: "String",
+                        },
+                    },
+                },
             },
             excludedActions: {
                 serializedName: "excludedActions",
@@ -6288,19 +6355,19 @@ const DenySettings = {
                     name: "Sequence",
                     element: {
                         type: {
-                            name: "String"
-                        }
-                    }
-                }
+                            name: "String",
+                        },
+                    },
+                },
             },
             applyToChildScopes: {
                 serializedName: "applyToChildScopes",
                 type: {
-                    name: "Boolean"
-                }
-            }
-        }
-    }
+                    name: "Boolean",
+                },
+            },
+        },
+    },
 };
 const ResourceReference = {
     type: {
@@ -6311,11 +6378,11 @@ const ResourceReference = {
                 serializedName: "id",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksError = {
     type: {
@@ -6326,26 +6393,11 @@ const DeploymentStacksError = {
                 serializedName: "error",
                 type: {
                     name: "Composite",
-                    className: "ErrorResponse"
-                }
-            }
-        }
-    }
-};
-const ErrorResponse = {
-    type: {
-        name: "Composite",
-        className: "ErrorResponse",
-        modelProperties: {
-            error: {
-                serializedName: "error",
-                type: {
-                    name: "Composite",
-                    className: "ErrorDetail"
-                }
-            }
-        }
-    }
+                    className: "ErrorDetail",
+                },
+            },
+        },
+    },
 };
 const ErrorDetail = {
     type: {
@@ -6356,22 +6408,22 @@ const ErrorDetail = {
                 serializedName: "code",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             message: {
                 serializedName: "message",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             target: {
                 serializedName: "target",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             details: {
                 serializedName: "details",
@@ -6381,10 +6433,10 @@ const ErrorDetail = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ErrorDetail"
-                        }
-                    }
-                }
+                            className: "ErrorDetail",
+                        },
+                    },
+                },
             },
             additionalInfo: {
                 serializedName: "additionalInfo",
@@ -6394,13 +6446,13 @@ const ErrorDetail = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ErrorAdditionalInfo"
-                        }
-                    }
-                }
-            }
-        }
-    }
+                            className: "ErrorAdditionalInfo",
+                        },
+                    },
+                },
+            },
+        },
+    },
 };
 const ErrorAdditionalInfo = {
     type: {
@@ -6411,19 +6463,19 @@ const ErrorAdditionalInfo = {
                 serializedName: "type",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             info: {
                 serializedName: "info",
                 readOnly: true,
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
-            }
-        }
-    }
+                    value: { type: { name: "any" } },
+                },
+            },
+        },
+    },
 };
 const AzureResourceBase = {
     type: {
@@ -6434,32 +6486,32 @@ const AzureResourceBase = {
                 serializedName: "id",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             name: {
                 serializedName: "name",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             type: {
                 serializedName: "type",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             systemData: {
                 serializedName: "systemData",
                 type: {
                     name: "Composite",
-                    className: "SystemData"
-                }
-            }
-        }
-    }
+                    className: "SystemData",
+                },
+            },
+        },
+    },
 };
 const SystemData = {
     type: {
@@ -6469,41 +6521,41 @@ const SystemData = {
             createdBy: {
                 serializedName: "createdBy",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             createdByType: {
                 serializedName: "createdByType",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             createdAt: {
                 serializedName: "createdAt",
                 type: {
-                    name: "DateTime"
-                }
+                    name: "DateTime",
+                },
             },
             lastModifiedBy: {
                 serializedName: "lastModifiedBy",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             lastModifiedByType: {
                 serializedName: "lastModifiedByType",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             },
             lastModifiedAt: {
                 serializedName: "lastModifiedAt",
                 type: {
-                    name: "DateTime"
-                }
-            }
-        }
-    }
+                    name: "DateTime",
+                },
+            },
+        },
+    },
 };
 const DeploymentStackTemplateDefinition = {
     type: {
@@ -6514,44 +6566,111 @@ const DeploymentStackTemplateDefinition = {
                 serializedName: "template",
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
+                    value: { type: { name: "any" } },
+                },
             },
             templateLink: {
                 serializedName: "templateLink",
                 type: {
                     name: "Composite",
-                    className: "DeploymentStacksTemplateLink"
-                }
-            }
-        }
-    }
+                    className: "DeploymentStacksTemplateLink",
+                },
+            },
+        },
+    },
+};
+const DeploymentStackValidateProperties = {
+    type: {
+        name: "Composite",
+        className: "DeploymentStackValidateProperties",
+        modelProperties: {
+            actionOnUnmanage: {
+                serializedName: "actionOnUnmanage",
+                type: {
+                    name: "Composite",
+                    className: "ActionOnUnmanage",
+                },
+            },
+            correlationId: {
+                serializedName: "correlationId",
+                type: {
+                    name: "String",
+                },
+            },
+            denySettings: {
+                serializedName: "denySettings",
+                type: {
+                    name: "Composite",
+                    className: "DenySettings",
+                },
+            },
+            deploymentScope: {
+                serializedName: "deploymentScope",
+                type: {
+                    name: "String",
+                },
+            },
+            description: {
+                serializedName: "description",
+                type: {
+                    name: "String",
+                },
+            },
+            parameters: {
+                serializedName: "parameters",
+                type: {
+                    name: "Dictionary",
+                    value: {
+                        type: { name: "Composite", className: "DeploymentParameter" },
+                    },
+                },
+            },
+            templateLink: {
+                serializedName: "templateLink",
+                type: {
+                    name: "Composite",
+                    className: "DeploymentStacksTemplateLink",
+                },
+            },
+            validatedResources: {
+                serializedName: "validatedResources",
+                type: {
+                    name: "Sequence",
+                    element: {
+                        type: {
+                            name: "Composite",
+                            className: "ResourceReference",
+                        },
+                    },
+                },
+            },
+        },
+    },
 };
 const ResourceReferenceExtended = {
     type: {
         name: "Composite",
         className: "ResourceReferenceExtended",
-        modelProperties: Object.assign(Object.assign({}, ResourceReference.type.modelProperties), DeploymentStacksError.type.modelProperties)
-    }
+        modelProperties: Object.assign(Object.assign({}, ResourceReference.type.modelProperties), DeploymentStacksError.type.modelProperties),
+    },
 };
 const ManagedResourceReference = {
     type: {
         name: "Composite",
         className: "ManagedResourceReference",
         modelProperties: Object.assign(Object.assign({}, ResourceReference.type.modelProperties), { status: {
-                defaultValue: "None",
                 serializedName: "status",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             }, denyStatus: {
-                defaultValue: "None",
+                defaultValue: "none",
                 serializedName: "denyStatus",
                 type: {
-                    name: "String"
-                }
-            } })
-    }
+                    name: "String",
+                },
+            } }),
+    },
 };
 const DeploymentStackProperties = {
     type: {
@@ -6561,63 +6680,76 @@ const DeploymentStackProperties = {
                 serializedName: "template",
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
+                    value: { type: { name: "any" } },
+                },
             }, templateLink: {
                 serializedName: "templateLink",
                 type: {
                     name: "Composite",
-                    className: "DeploymentStacksTemplateLink"
-                }
+                    className: "DeploymentStacksTemplateLink",
+                },
             }, parameters: {
                 serializedName: "parameters",
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
+                    value: {
+                        type: { name: "Composite", className: "DeploymentParameter" },
+                    },
+                },
             }, parametersLink: {
                 serializedName: "parametersLink",
                 type: {
                     name: "Composite",
-                    className: "DeploymentStacksParametersLink"
-                }
+                    className: "DeploymentStacksParametersLink",
+                },
             }, actionOnUnmanage: {
                 serializedName: "actionOnUnmanage",
                 type: {
                     name: "Composite",
-                    className: "DeploymentStackPropertiesActionOnUnmanage"
-                }
+                    className: "ActionOnUnmanage",
+                },
             }, debugSetting: {
                 serializedName: "debugSetting",
                 type: {
                     name: "Composite",
-                    className: "DeploymentStacksDebugSetting"
-                }
+                    className: "DeploymentStacksDebugSetting",
+                },
+            }, bypassStackOutOfSyncError: {
+                serializedName: "bypassStackOutOfSyncError",
+                type: {
+                    name: "Boolean",
+                },
             }, deploymentScope: {
                 serializedName: "deploymentScope",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             }, description: {
                 constraints: {
-                    MaxLength: 4096
+                    MaxLength: 4096,
                 },
                 serializedName: "description",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             }, denySettings: {
                 serializedName: "denySettings",
                 type: {
                     name: "Composite",
-                    className: "DenySettings"
-                }
+                    className: "DenySettings",
+                },
             }, provisioningState: {
                 serializedName: "provisioningState",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
+            }, correlationId: {
+                serializedName: "correlationId",
+                readOnly: true,
+                type: {
+                    name: "String",
+                },
             }, detachedResources: {
                 serializedName: "detachedResources",
                 readOnly: true,
@@ -6626,10 +6758,10 @@ const DeploymentStackProperties = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ResourceReference"
-                        }
-                    }
-                }
+                            className: "ResourceReference",
+                        },
+                    },
+                },
             }, deletedResources: {
                 serializedName: "deletedResources",
                 readOnly: true,
@@ -6638,10 +6770,10 @@ const DeploymentStackProperties = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ResourceReference"
-                        }
-                    }
-                }
+                            className: "ResourceReference",
+                        },
+                    },
+                },
             }, failedResources: {
                 serializedName: "failedResources",
                 readOnly: true,
@@ -6650,10 +6782,10 @@ const DeploymentStackProperties = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ResourceReferenceExtended"
-                        }
-                    }
-                }
+                            className: "ResourceReferenceExtended",
+                        },
+                    },
+                },
             }, resources: {
                 serializedName: "resources",
                 readOnly: true,
@@ -6662,31 +6794,44 @@ const DeploymentStackProperties = {
                     element: {
                         type: {
                             name: "Composite",
-                            className: "ManagedResourceReference"
-                        }
-                    }
-                }
+                            className: "ManagedResourceReference",
+                        },
+                    },
+                },
             }, deploymentId: {
                 serializedName: "deploymentId",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             }, outputs: {
                 serializedName: "outputs",
                 readOnly: true,
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
+                    value: { type: { name: "any" } },
+                },
             }, duration: {
                 serializedName: "duration",
                 readOnly: true,
                 type: {
-                    name: "String"
-                }
-            } })
-    }
+                    name: "String",
+                },
+            } }),
+    },
+};
+const DeploymentStackValidateResult = {
+    type: {
+        name: "Composite",
+        className: "DeploymentStackValidateResult",
+        modelProperties: Object.assign(Object.assign(Object.assign({}, AzureResourceBase.type.modelProperties), DeploymentStacksError.type.modelProperties), { properties: {
+                serializedName: "properties",
+                type: {
+                    name: "Composite",
+                    className: "DeploymentStackValidateProperties",
+                },
+            } }),
+    },
 };
 const DeploymentStack = {
     type: {
@@ -6695,150 +6840,22 @@ const DeploymentStack = {
         modelProperties: Object.assign(Object.assign({}, AzureResourceBase.type.modelProperties), { location: {
                 serializedName: "location",
                 type: {
-                    name: "String"
-                }
+                    name: "String",
+                },
             }, tags: {
                 serializedName: "tags",
                 type: {
                     name: "Dictionary",
-                    value: { type: { name: "String" } }
-                }
-            }, error: {
-                serializedName: "properties.error",
-                type: {
-                    name: "Composite",
-                    className: "ErrorResponse"
-                }
-            }, template: {
-                serializedName: "properties.template",
-                type: {
-                    name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
-            }, templateLink: {
-                serializedName: "properties.templateLink",
-                type: {
-                    name: "Composite",
-                    className: "DeploymentStacksTemplateLink"
-                }
-            }, parameters: {
-                serializedName: "properties.parameters",
-                type: {
-                    name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
-            }, parametersLink: {
-                serializedName: "properties.parametersLink",
-                type: {
-                    name: "Composite",
-                    className: "DeploymentStacksParametersLink"
-                }
-            }, actionOnUnmanage: {
-                serializedName: "properties.actionOnUnmanage",
-                type: {
-                    name: "Composite",
-                    className: "DeploymentStackPropertiesActionOnUnmanage"
-                }
-            }, debugSetting: {
-                serializedName: "properties.debugSetting",
-                type: {
-                    name: "Composite",
-                    className: "DeploymentStacksDebugSetting"
-                }
-            }, deploymentScope: {
-                serializedName: "properties.deploymentScope",
-                type: {
-                    name: "String"
-                }
-            }, description: {
-                constraints: {
-                    MaxLength: 4096
+                    value: { type: { name: "String" } },
                 },
-                serializedName: "properties.description",
-                type: {
-                    name: "String"
-                }
-            }, denySettings: {
-                serializedName: "properties.denySettings",
+            }, properties: {
+                serializedName: "properties",
                 type: {
                     name: "Composite",
-                    className: "DenySettings"
-                }
-            }, provisioningState: {
-                serializedName: "properties.provisioningState",
-                readOnly: true,
-                type: {
-                    name: "String"
-                }
-            }, detachedResources: {
-                serializedName: "properties.detachedResources",
-                readOnly: true,
-                type: {
-                    name: "Sequence",
-                    element: {
-                        type: {
-                            name: "Composite",
-                            className: "ResourceReference"
-                        }
-                    }
-                }
-            }, deletedResources: {
-                serializedName: "properties.deletedResources",
-                readOnly: true,
-                type: {
-                    name: "Sequence",
-                    element: {
-                        type: {
-                            name: "Composite",
-                            className: "ResourceReference"
-                        }
-                    }
-                }
-            }, failedResources: {
-                serializedName: "properties.failedResources",
-                readOnly: true,
-                type: {
-                    name: "Sequence",
-                    element: {
-                        type: {
-                            name: "Composite",
-                            className: "ResourceReferenceExtended"
-                        }
-                    }
-                }
-            }, resources: {
-                serializedName: "properties.resources",
-                readOnly: true,
-                type: {
-                    name: "Sequence",
-                    element: {
-                        type: {
-                            name: "Composite",
-                            className: "ManagedResourceReference"
-                        }
-                    }
-                }
-            }, deploymentId: {
-                serializedName: "properties.deploymentId",
-                readOnly: true,
-                type: {
-                    name: "String"
-                }
-            }, outputs: {
-                serializedName: "properties.outputs",
-                readOnly: true,
-                type: {
-                    name: "Dictionary",
-                    value: { type: { name: "any" } }
-                }
-            }, duration: {
-                serializedName: "properties.duration",
-                readOnly: true,
-                type: {
-                    name: "String"
-                }
-            } })
-    }
+                    className: "DeploymentStackProperties",
+                },
+            } }),
+    },
 };
 const DeploymentStacksDeleteAtResourceGroupHeaders = {
     type: {
@@ -6848,11 +6865,11 @@ const DeploymentStacksDeleteAtResourceGroupHeaders = {
             location: {
                 serializedName: "location",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksDeleteAtSubscriptionHeaders = {
     type: {
@@ -6862,11 +6879,11 @@ const DeploymentStacksDeleteAtSubscriptionHeaders = {
             location: {
                 serializedName: "location",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 const DeploymentStacksDeleteAtManagementGroupHeaders = {
     type: {
@@ -6876,36 +6893,103 @@ const DeploymentStacksDeleteAtManagementGroupHeaders = {
             location: {
                 serializedName: "location",
                 type: {
-                    name: "String"
-                }
-            }
-        }
-    }
+                    name: "String",
+                },
+            },
+        },
+    },
+};
+const DeploymentStacksValidateStackAtResourceGroupHeaders = {
+    type: {
+        name: "Composite",
+        className: "DeploymentStacksValidateStackAtResourceGroupHeaders",
+        modelProperties: {
+            location: {
+                serializedName: "location",
+                type: {
+                    name: "String",
+                },
+            },
+            retryAfter: {
+                serializedName: "retry-after",
+                type: {
+                    name: "String",
+                },
+            },
+        },
+    },
+};
+const DeploymentStacksValidateStackAtSubscriptionHeaders = {
+    type: {
+        name: "Composite",
+        className: "DeploymentStacksValidateStackAtSubscriptionHeaders",
+        modelProperties: {
+            location: {
+                serializedName: "location",
+                type: {
+                    name: "String",
+                },
+            },
+            retryAfter: {
+                serializedName: "retry-after",
+                type: {
+                    name: "String",
+                },
+            },
+        },
+    },
+};
+const DeploymentStacksValidateStackAtManagementGroupHeaders = {
+    type: {
+        name: "Composite",
+        className: "DeploymentStacksValidateStackAtManagementGroupHeaders",
+        modelProperties: {
+            location: {
+                serializedName: "location",
+                type: {
+                    name: "String",
+                },
+            },
+            retryAfter: {
+                serializedName: "retry-after",
+                type: {
+                    name: "String",
+                },
+            },
+        },
+    },
 };
 
 var Mappers = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    DeploymentStackListResult: DeploymentStackListResult,
-    DeploymentStacksTemplateLink: DeploymentStacksTemplateLink,
-    DeploymentStacksParametersLink: DeploymentStacksParametersLink,
-    DeploymentStackPropertiesActionOnUnmanage: DeploymentStackPropertiesActionOnUnmanage,
-    DeploymentStacksDebugSetting: DeploymentStacksDebugSetting,
-    DenySettings: DenySettings,
-    ResourceReference: ResourceReference,
-    DeploymentStacksError: DeploymentStacksError,
-    ErrorResponse: ErrorResponse,
-    ErrorDetail: ErrorDetail,
-    ErrorAdditionalInfo: ErrorAdditionalInfo,
+    ActionOnUnmanage: ActionOnUnmanage,
     AzureResourceBase: AzureResourceBase,
-    SystemData: SystemData,
-    DeploymentStackTemplateDefinition: DeploymentStackTemplateDefinition,
-    ResourceReferenceExtended: ResourceReferenceExtended,
-    ManagedResourceReference: ManagedResourceReference,
-    DeploymentStackProperties: DeploymentStackProperties,
+    DenySettings: DenySettings,
+    DeploymentParameter: DeploymentParameter,
     DeploymentStack: DeploymentStack,
+    DeploymentStackListResult: DeploymentStackListResult,
+    DeploymentStackProperties: DeploymentStackProperties,
+    DeploymentStackTemplateDefinition: DeploymentStackTemplateDefinition,
+    DeploymentStackValidateProperties: DeploymentStackValidateProperties,
+    DeploymentStackValidateResult: DeploymentStackValidateResult,
+    DeploymentStacksDebugSetting: DeploymentStacksDebugSetting,
+    DeploymentStacksDeleteAtManagementGroupHeaders: DeploymentStacksDeleteAtManagementGroupHeaders,
     DeploymentStacksDeleteAtResourceGroupHeaders: DeploymentStacksDeleteAtResourceGroupHeaders,
     DeploymentStacksDeleteAtSubscriptionHeaders: DeploymentStacksDeleteAtSubscriptionHeaders,
-    DeploymentStacksDeleteAtManagementGroupHeaders: DeploymentStacksDeleteAtManagementGroupHeaders
+    DeploymentStacksError: DeploymentStacksError,
+    DeploymentStacksParametersLink: DeploymentStacksParametersLink,
+    DeploymentStacksTemplateLink: DeploymentStacksTemplateLink,
+    DeploymentStacksValidateStackAtManagementGroupHeaders: DeploymentStacksValidateStackAtManagementGroupHeaders,
+    DeploymentStacksValidateStackAtResourceGroupHeaders: DeploymentStacksValidateStackAtResourceGroupHeaders,
+    DeploymentStacksValidateStackAtSubscriptionHeaders: DeploymentStacksValidateStackAtSubscriptionHeaders,
+    ErrorAdditionalInfo: ErrorAdditionalInfo,
+    ErrorDetail: ErrorDetail,
+    KeyVaultParameterReference: KeyVaultParameterReference,
+    KeyVaultReference: KeyVaultReference,
+    ManagedResourceReference: ManagedResourceReference,
+    ResourceReference: ResourceReference,
+    ResourceReferenceExtended: ResourceReferenceExtended,
+    SystemData: SystemData
 });
 
 /*
@@ -6922,9 +7006,9 @@ const accept = {
         isConstant: true,
         serializedName: "Accept",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const $host = {
     parameterPath: "$host",
@@ -6932,48 +7016,45 @@ const $host = {
         serializedName: "$host",
         required: true,
         type: {
-            name: "String"
-        }
+            name: "String",
+        },
     },
-    skipEncoding: true
+    skipEncoding: true,
 };
 const subscriptionId = {
     parameterPath: "subscriptionId",
     mapper: {
-        constraints: {
-            MinLength: 1
-        },
         serializedName: "subscriptionId",
         required: true,
         type: {
-            name: "String"
-        }
-    }
+            name: "Uuid",
+        },
+    },
 };
 const resourceGroupName = {
     parameterPath: "resourceGroupName",
     mapper: {
         constraints: {
             MaxLength: 90,
-            MinLength: 1
+            MinLength: 1,
         },
         serializedName: "resourceGroupName",
         required: true,
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const apiVersion = {
     parameterPath: "apiVersion",
     mapper: {
-        defaultValue: "2022-08-01-preview",
+        defaultValue: "2024-03-01",
         isConstant: true,
         serializedName: "api-version",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const managementGroupId = {
     parameterPath: "managementGroupId",
@@ -6981,14 +7062,14 @@ const managementGroupId = {
         constraints: {
             Pattern: new RegExp("^[-\\w\\._\\(\\)]+$"),
             MaxLength: 90,
-            MinLength: 1
+            MinLength: 1,
         },
         serializedName: "managementGroupId",
         required: true,
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const contentType = {
     parameterPath: ["options", "contentType"],
@@ -6997,13 +7078,13 @@ const contentType = {
         isConstant: true,
         serializedName: "Content-Type",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const deploymentStack = {
     parameterPath: "deploymentStack",
-    mapper: DeploymentStack
+    mapper: DeploymentStack,
 };
 const deploymentStackName = {
     parameterPath: "deploymentStackName",
@@ -7011,41 +7092,50 @@ const deploymentStackName = {
         constraints: {
             Pattern: new RegExp("^[-\\w\\._\\(\\)]+$"),
             MaxLength: 90,
-            MinLength: 1
+            MinLength: 1,
         },
         serializedName: "deploymentStackName",
         required: true,
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const unmanageActionResources = {
     parameterPath: ["options", "unmanageActionResources"],
     mapper: {
         serializedName: "unmanageAction.Resources",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const unmanageActionResourceGroups = {
     parameterPath: ["options", "unmanageActionResourceGroups"],
     mapper: {
         serializedName: "unmanageAction.ResourceGroups",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
 };
 const unmanageActionManagementGroups = {
     parameterPath: ["options", "unmanageActionManagementGroups"],
     mapper: {
         serializedName: "unmanageAction.ManagementGroups",
         type: {
-            name: "String"
-        }
-    }
+            name: "String",
+        },
+    },
+};
+const bypassStackOutOfSyncError = {
+    parameterPath: ["options", "bypassStackOutOfSyncError"],
+    mapper: {
+        serializedName: "bypassStackOutOfSyncError",
+        type: {
+            name: "Boolean",
+        },
+    },
 };
 const nextLink = {
     parameterPath: "nextLink",
@@ -7053,10 +7143,10 @@ const nextLink = {
         serializedName: "nextLink",
         required: true,
         type: {
-            name: "String"
-        }
+            name: "String",
+        },
     },
-    skipEncoding: true
+    skipEncoding: true,
 };
 
 /*
@@ -7075,7 +7165,7 @@ function createLroSpec(inputs) {
         sendPollRequest: (path, options) => {
             const restSpec = tslib.__rest(spec, ["requestBody"]);
             return sendOperationFn(args, Object.assign(Object.assign({}, restSpec), { httpMethod: "GET", path, abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal }));
-        }
+        },
     };
 }
 
@@ -7097,7 +7187,7 @@ class DeploymentStacksImpl {
         this.client = client;
     }
     /**
-     * Lists all the Deployment Stacks within the specified resource group.
+     * Lists all the Deployment stacks within the specified Resource Group.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param options The options parameters.
      */
@@ -7115,7 +7205,7 @@ class DeploymentStacksImpl {
                     throw new Error("maxPageSize is not supported by this operation.");
                 }
                 return this.listAtResourceGroupPagingPage(resourceGroupName, options, settings);
-            }
+            },
         };
     }
     listAtResourceGroupPagingPage(resourceGroupName, options, settings) {
@@ -7142,16 +7232,11 @@ class DeploymentStacksImpl {
         return tslib.__asyncGenerator(this, arguments, function* listAtResourceGroupPagingAll_1() {
             var _a, e_1, _b, _c;
             try {
-                for (var _d = true, _e = tslib.__asyncValues(this.listAtResourceGroupPagingPage(resourceGroupName, options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a;) {
+                for (var _d = true, _e = tslib.__asyncValues(this.listAtResourceGroupPagingPage(resourceGroupName, options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a; _d = true) {
                     _c = _f.value;
                     _d = false;
-                    try {
-                        const page = _c;
-                        yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
-                    }
-                    finally {
-                        _d = true;
-                    }
+                    const page = _c;
+                    yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -7164,7 +7249,7 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Lists all the Deployment Stacks within the specified subscription.
+     * Lists all the Deployment stacks within the specified Subscription.
      * @param options The options parameters.
      */
     listAtSubscription(options) {
@@ -7181,7 +7266,7 @@ class DeploymentStacksImpl {
                     throw new Error("maxPageSize is not supported by this operation.");
                 }
                 return this.listAtSubscriptionPagingPage(options, settings);
-            }
+            },
         };
     }
     listAtSubscriptionPagingPage(options, settings) {
@@ -7208,16 +7293,11 @@ class DeploymentStacksImpl {
         return tslib.__asyncGenerator(this, arguments, function* listAtSubscriptionPagingAll_1() {
             var _a, e_2, _b, _c;
             try {
-                for (var _d = true, _e = tslib.__asyncValues(this.listAtSubscriptionPagingPage(options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a;) {
+                for (var _d = true, _e = tslib.__asyncValues(this.listAtSubscriptionPagingPage(options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a; _d = true) {
                     _c = _f.value;
                     _d = false;
-                    try {
-                        const page = _c;
-                        yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
-                    }
-                    finally {
-                        _d = true;
-                    }
+                    const page = _c;
+                    yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -7230,8 +7310,8 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Lists all the Deployment Stacks within the specified management group.
-     * @param managementGroupId Management Group.
+     * Lists all the Deployment stacks within the specified Management Group.
+     * @param managementGroupId Management Group id.
      * @param options The options parameters.
      */
     listAtManagementGroup(managementGroupId, options) {
@@ -7248,7 +7328,7 @@ class DeploymentStacksImpl {
                     throw new Error("maxPageSize is not supported by this operation.");
                 }
                 return this.listAtManagementGroupPagingPage(managementGroupId, options, settings);
-            }
+            },
         };
     }
     listAtManagementGroupPagingPage(managementGroupId, options, settings) {
@@ -7275,16 +7355,11 @@ class DeploymentStacksImpl {
         return tslib.__asyncGenerator(this, arguments, function* listAtManagementGroupPagingAll_1() {
             var _a, e_3, _b, _c;
             try {
-                for (var _d = true, _e = tslib.__asyncValues(this.listAtManagementGroupPagingPage(managementGroupId, options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a;) {
+                for (var _d = true, _e = tslib.__asyncValues(this.listAtManagementGroupPagingPage(managementGroupId, options)), _f; _f = yield tslib.__await(_e.next()), _a = _f.done, !_a; _d = true) {
                     _c = _f.value;
                     _d = false;
-                    try {
-                        const page = _c;
-                        yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
-                    }
-                    finally {
-                        _d = true;
-                    }
+                    const page = _c;
+                    yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
                 }
             }
             catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -7297,7 +7372,7 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Lists all the Deployment Stacks within the specified resource group.
+     * Lists all the Deployment stacks within the specified Resource Group.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param options The options parameters.
      */
@@ -7305,25 +7380,25 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ resourceGroupName, options }, listAtResourceGroupOperationSpec);
     }
     /**
-     * Lists all the Deployment Stacks within the specified subscription.
+     * Lists all the Deployment stacks within the specified Subscription.
      * @param options The options parameters.
      */
     _listAtSubscription(options) {
         return this.client.sendOperationRequest({ options }, listAtSubscriptionOperationSpec);
     }
     /**
-     * Lists all the Deployment Stacks within the specified management group.
-     * @param managementGroupId Management Group.
+     * Lists all the Deployment stacks within the specified Management Group.
+     * @param managementGroupId Management Group id.
      * @param options The options parameters.
      */
     _listAtManagementGroup(managementGroupId, options) {
         return this.client.sendOperationRequest({ managementGroupId, options }, listAtManagementGroupOperationSpec);
     }
     /**
-     * Creates or updates a Deployment Stack.
+     * Creates or updates a Deployment stack at Resource Group scope.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtResourceGroup(resourceGroupName, deploymentStackName, deploymentStack, options) {
@@ -7346,8 +7421,8 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
@@ -7356,24 +7431,24 @@ class DeploymentStacksImpl {
                     resourceGroupName,
                     deploymentStackName,
                     deploymentStack,
-                    options
+                    options,
                 },
-                spec: createOrUpdateAtResourceGroupOperationSpec
+                spec: createOrUpdateAtResourceGroupOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "azure-async-operation"
+                resourceLocationConfig: "azure-async-operation",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Creates or updates a Deployment Stack.
+     * Creates or updates a Deployment stack at Resource Group scope.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtResourceGroupAndWait(resourceGroupName, deploymentStackName, deploymentStack, options) {
@@ -7383,7 +7458,7 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Gets a Deployment Stack with a given name.
+     * Gets a Deployment stack with a given name at Resource Group scope.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
@@ -7392,8 +7467,8 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ resourceGroupName, deploymentStackName, options }, getAtResourceGroupOperationSpec);
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
+     * Deletes a Deployment stack by name at Resource Group scope. When operation completes, status code
+     * 200 returned without content.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
@@ -7418,27 +7493,27 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
                 sendOperationFn,
                 args: { resourceGroupName, deploymentStackName, options },
-                spec: deleteAtResourceGroupOperationSpec
+                spec: deleteAtResourceGroupOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "location"
+                resourceLocationConfig: "location",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
+     * Deletes a Deployment stack by name at Resource Group scope. When operation completes, status code
+     * 200 returned without content.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
@@ -7450,9 +7525,9 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Creates or updates a Deployment Stack.
+     * Creates or updates a Deployment stack at Subscription scope.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtSubscription(deploymentStackName, deploymentStack, options) {
@@ -7475,28 +7550,28 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
                 sendOperationFn,
                 args: { deploymentStackName, deploymentStack, options },
-                spec: createOrUpdateAtSubscriptionOperationSpec
+                spec: createOrUpdateAtSubscriptionOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "azure-async-operation"
+                resourceLocationConfig: "azure-async-operation",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Creates or updates a Deployment Stack.
+     * Creates or updates a Deployment stack at Subscription scope.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtSubscriptionAndWait(deploymentStackName, deploymentStack, options) {
@@ -7506,7 +7581,7 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Gets a Deployment Stack with a given name.
+     * Gets a Deployment stack with a given name at Subscription scope.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7514,8 +7589,8 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ deploymentStackName, options }, getAtSubscriptionOperationSpec);
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
+     * Deletes a Deployment stack by name at Subscription scope. When operation completes, status code 200
+     * returned without content.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7539,27 +7614,27 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
                 sendOperationFn,
                 args: { deploymentStackName, options },
-                spec: deleteAtSubscriptionOperationSpec
+                spec: deleteAtSubscriptionOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "location"
+                resourceLocationConfig: "location",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
+     * Deletes a Deployment stack by name at Subscription scope. When operation completes, status code 200
+     * returned without content.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7570,10 +7645,10 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Creates or updates a Deployment Stack.
-     * @param managementGroupId Management Group.
+     * Creates or updates a Deployment stack at Management Group scope.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtManagementGroup(managementGroupId, deploymentStackName, deploymentStack, options) {
@@ -7596,8 +7671,8 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
@@ -7606,24 +7681,24 @@ class DeploymentStacksImpl {
                     managementGroupId,
                     deploymentStackName,
                     deploymentStack,
-                    options
+                    options,
                 },
-                spec: createOrUpdateAtManagementGroupOperationSpec
+                spec: createOrUpdateAtManagementGroupOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "azure-async-operation"
+                resourceLocationConfig: "azure-async-operation",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Creates or updates a Deployment Stack.
-     * @param managementGroupId Management Group.
+     * Creates or updates a Deployment stack at Management Group scope.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
-     * @param deploymentStack Deployment Stack supplied to the operation.
+     * @param deploymentStack Deployment stack supplied to the operation.
      * @param options The options parameters.
      */
     beginCreateOrUpdateAtManagementGroupAndWait(managementGroupId, deploymentStackName, deploymentStack, options) {
@@ -7633,8 +7708,8 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Gets a Deployment Stack with a given name.
-     * @param managementGroupId Management Group.
+     * Gets a Deployment stack with a given name at Management Group scope.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7642,9 +7717,9 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ managementGroupId, deploymentStackName, options }, getAtManagementGroupOperationSpec);
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
-     * @param managementGroupId Management Group.
+     * Deletes a Deployment stack by name at Management Group scope. When operation completes, status code
+     * 200 returned without content.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7668,28 +7743,28 @@ class DeploymentStacksImpl {
                     rawResponse: {
                         statusCode: currentRawResponse.status,
                         body: currentRawResponse.parsedBody,
-                        headers: currentRawResponse.headers.toJSON()
-                    }
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
                 };
             });
             const lro = createLroSpec({
                 sendOperationFn,
                 args: { managementGroupId, deploymentStackName, options },
-                spec: deleteAtManagementGroupOperationSpec
+                spec: deleteAtManagementGroupOperationSpec,
             });
             const poller = yield coreLro.createHttpPoller(lro, {
                 restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
                 intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
-                resourceLocationConfig: "location"
+                resourceLocationConfig: "location",
             });
             yield poller.poll();
             return poller;
         });
     }
     /**
-     * Deletes a Deployment Stack by name. When operation completes, status code 200 returned without
-     * content.
-     * @param managementGroupId Management Group.
+     * Deletes a Deployment stack by name at Management Group scope. When operation completes, status code
+     * 200 returned without content.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7700,7 +7775,7 @@ class DeploymentStacksImpl {
         });
     }
     /**
-     * Exports the template used to create the deployment stack.
+     * Exports the template used to create the Deployment stack at Resource Group scope.
      * @param resourceGroupName The name of the resource group. The name is case insensitive.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
@@ -7709,7 +7784,7 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ resourceGroupName, deploymentStackName, options }, exportTemplateAtResourceGroupOperationSpec);
     }
     /**
-     * Exports the template used to create the deployment stack.
+     * Exports the template used to create the Deployment stack at Subscription scope.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
@@ -7717,13 +7792,201 @@ class DeploymentStacksImpl {
         return this.client.sendOperationRequest({ deploymentStackName, options }, exportTemplateAtSubscriptionOperationSpec);
     }
     /**
-     * Exports the template used to create the deployment stack.
-     * @param managementGroupId Management Group.
+     * Exports the template used to create the Deployment stack at Management Group scope.
+     * @param managementGroupId Management Group id.
      * @param deploymentStackName Name of the deployment stack.
      * @param options The options parameters.
      */
     exportTemplateAtManagementGroup(managementGroupId, deploymentStackName, options) {
         return this.client.sendOperationRequest({ managementGroupId, deploymentStackName, options }, exportTemplateAtManagementGroupOperationSpec);
+    }
+    /**
+     * Runs preflight validation on the Resource Group scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param resourceGroupName The name of the resource group. The name is case insensitive.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtResourceGroup(resourceGroupName, deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const directSendOperation = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                return this.client.sendOperationRequest(args, spec);
+            });
+            const sendOperationFn = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                var _a;
+                let currentRawResponse = undefined;
+                const providedCallback = (_a = args.options) === null || _a === void 0 ? void 0 : _a.onResponse;
+                const callback = (rawResponse, flatResponse) => {
+                    currentRawResponse = rawResponse;
+                    providedCallback === null || providedCallback === void 0 ? void 0 : providedCallback(rawResponse, flatResponse);
+                };
+                const updatedArgs = Object.assign(Object.assign({}, args), { options: Object.assign(Object.assign({}, args.options), { onResponse: callback }) });
+                const flatResponse = yield directSendOperation(updatedArgs, spec);
+                return {
+                    flatResponse,
+                    rawResponse: {
+                        statusCode: currentRawResponse.status,
+                        body: currentRawResponse.parsedBody,
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
+                };
+            });
+            const lro = createLroSpec({
+                sendOperationFn,
+                args: {
+                    resourceGroupName,
+                    deploymentStackName,
+                    deploymentStack,
+                    options,
+                },
+                spec: validateStackAtResourceGroupOperationSpec,
+            });
+            const poller = yield coreLro.createHttpPoller(lro, {
+                restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
+                intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
+                resourceLocationConfig: "location",
+            });
+            yield poller.poll();
+            return poller;
+        });
+    }
+    /**
+     * Runs preflight validation on the Resource Group scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param resourceGroupName The name of the resource group. The name is case insensitive.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtResourceGroupAndWait(resourceGroupName, deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const poller = yield this.beginValidateStackAtResourceGroup(resourceGroupName, deploymentStackName, deploymentStack, options);
+            return poller.pollUntilDone();
+        });
+    }
+    /**
+     * Runs preflight validation on the Subscription scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtSubscription(deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const directSendOperation = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                return this.client.sendOperationRequest(args, spec);
+            });
+            const sendOperationFn = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                var _a;
+                let currentRawResponse = undefined;
+                const providedCallback = (_a = args.options) === null || _a === void 0 ? void 0 : _a.onResponse;
+                const callback = (rawResponse, flatResponse) => {
+                    currentRawResponse = rawResponse;
+                    providedCallback === null || providedCallback === void 0 ? void 0 : providedCallback(rawResponse, flatResponse);
+                };
+                const updatedArgs = Object.assign(Object.assign({}, args), { options: Object.assign(Object.assign({}, args.options), { onResponse: callback }) });
+                const flatResponse = yield directSendOperation(updatedArgs, spec);
+                return {
+                    flatResponse,
+                    rawResponse: {
+                        statusCode: currentRawResponse.status,
+                        body: currentRawResponse.parsedBody,
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
+                };
+            });
+            const lro = createLroSpec({
+                sendOperationFn,
+                args: { deploymentStackName, deploymentStack, options },
+                spec: validateStackAtSubscriptionOperationSpec,
+            });
+            const poller = yield coreLro.createHttpPoller(lro, {
+                restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
+                intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
+                resourceLocationConfig: "location",
+            });
+            yield poller.poll();
+            return poller;
+        });
+    }
+    /**
+     * Runs preflight validation on the Subscription scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtSubscriptionAndWait(deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const poller = yield this.beginValidateStackAtSubscription(deploymentStackName, deploymentStack, options);
+            return poller.pollUntilDone();
+        });
+    }
+    /**
+     * Runs preflight validation on the Management Group scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param managementGroupId Management Group id.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtManagementGroup(managementGroupId, deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const directSendOperation = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                return this.client.sendOperationRequest(args, spec);
+            });
+            const sendOperationFn = (args, spec) => tslib.__awaiter(this, void 0, void 0, function* () {
+                var _a;
+                let currentRawResponse = undefined;
+                const providedCallback = (_a = args.options) === null || _a === void 0 ? void 0 : _a.onResponse;
+                const callback = (rawResponse, flatResponse) => {
+                    currentRawResponse = rawResponse;
+                    providedCallback === null || providedCallback === void 0 ? void 0 : providedCallback(rawResponse, flatResponse);
+                };
+                const updatedArgs = Object.assign(Object.assign({}, args), { options: Object.assign(Object.assign({}, args.options), { onResponse: callback }) });
+                const flatResponse = yield directSendOperation(updatedArgs, spec);
+                return {
+                    flatResponse,
+                    rawResponse: {
+                        statusCode: currentRawResponse.status,
+                        body: currentRawResponse.parsedBody,
+                        headers: currentRawResponse.headers.toJSON(),
+                    },
+                };
+            });
+            const lro = createLroSpec({
+                sendOperationFn,
+                args: {
+                    managementGroupId,
+                    deploymentStackName,
+                    deploymentStack,
+                    options,
+                },
+                spec: validateStackAtManagementGroupOperationSpec,
+            });
+            const poller = yield coreLro.createHttpPoller(lro, {
+                restoreFrom: options === null || options === void 0 ? void 0 : options.resumeFrom,
+                intervalInMs: options === null || options === void 0 ? void 0 : options.updateIntervalInMs,
+                resourceLocationConfig: "location",
+            });
+            yield poller.poll();
+            return poller;
+        });
+    }
+    /**
+     * Runs preflight validation on the Management Group scoped Deployment stack template to verify its
+     * acceptance to Azure Resource Manager.
+     * @param managementGroupId Management Group id.
+     * @param deploymentStackName Name of the deployment stack.
+     * @param deploymentStack Deployment stack to validate.
+     * @param options The options parameters.
+     */
+    beginValidateStackAtManagementGroupAndWait(managementGroupId, deploymentStackName, deploymentStack, options) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const poller = yield this.beginValidateStackAtManagementGroup(managementGroupId, deploymentStackName, deploymentStack, options);
+            return poller.pollUntilDone();
+        });
     }
     /**
      * ListAtResourceGroupNext
@@ -7744,7 +8007,7 @@ class DeploymentStacksImpl {
     }
     /**
      * ListAtManagementGroupNext
-     * @param managementGroupId Management Group.
+     * @param managementGroupId Management Group id.
      * @param nextLink The nextLink from the previous successful call to the ListAtManagementGroup method.
      * @param options The options parameters.
      */
@@ -7759,72 +8022,72 @@ const listAtResourceGroupOperationSpec = {
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
-        resourceGroupName
+        resourceGroupName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const listAtSubscriptionOperationSpec = {
     path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [$host, subscriptionId],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const listAtManagementGroupOperationSpec = {
     path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [$host, managementGroupId],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const createOrUpdateAtResourceGroupOperationSpec = {
     path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "PUT",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         201: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         202: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         204: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     requestBody: deploymentStack,
     queryParameters: [apiVersion],
@@ -7832,32 +8095,32 @@ const createOrUpdateAtResourceGroupOperationSpec = {
         $host,
         subscriptionId,
         resourceGroupName,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept, contentType],
     mediaType: "json",
-    serializer
+    serializer,
 };
 const getAtResourceGroupOperationSpec = {
     path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
         resourceGroupName,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const deleteAtResourceGroupOperationSpec = {
     path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
@@ -7868,73 +8131,75 @@ const deleteAtResourceGroupOperationSpec = {
         202: {},
         204: {},
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [
         apiVersion,
         unmanageActionResources,
-        unmanageActionResourceGroups
+        unmanageActionResourceGroups,
+        unmanageActionManagementGroups,
+        bypassStackOutOfSyncError,
     ],
     urlParameters: [
         $host,
         subscriptionId,
         resourceGroupName,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const createOrUpdateAtSubscriptionOperationSpec = {
     path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "PUT",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         201: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         202: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         204: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     requestBody: deploymentStack,
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept, contentType],
     mediaType: "json",
-    serializer
+    serializer,
 };
 const getAtSubscriptionOperationSpec = {
     path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const deleteAtSubscriptionOperationSpec = {
     path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
@@ -7945,72 +8210,74 @@ const deleteAtSubscriptionOperationSpec = {
         202: {},
         204: {},
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [
         apiVersion,
         unmanageActionResources,
-        unmanageActionResourceGroups
+        unmanageActionResourceGroups,
+        unmanageActionManagementGroups,
+        bypassStackOutOfSyncError,
     ],
     urlParameters: [
         $host,
         subscriptionId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const createOrUpdateAtManagementGroupOperationSpec = {
     path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "PUT",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         201: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         202: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         204: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     requestBody: deploymentStack,
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         managementGroupId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept, contentType],
     mediaType: "json",
-    serializer
+    serializer,
 };
 const getAtManagementGroupOperationSpec = {
     path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStack
+            bodyMapper: DeploymentStack,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         managementGroupId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const deleteAtManagementGroupOperationSpec = {
     path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}",
@@ -8021,141 +8288,236 @@ const deleteAtManagementGroupOperationSpec = {
         202: {},
         204: {},
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [
         apiVersion,
         unmanageActionResources,
         unmanageActionResourceGroups,
-        unmanageActionManagementGroups
+        unmanageActionManagementGroups,
+        bypassStackOutOfSyncError,
     ],
     urlParameters: [
         $host,
         managementGroupId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const exportTemplateAtResourceGroupOperationSpec = {
     path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/exportTemplate",
     httpMethod: "POST",
     responses: {
         200: {
-            bodyMapper: DeploymentStackTemplateDefinition
+            bodyMapper: DeploymentStackTemplateDefinition,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
         resourceGroupName,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const exportTemplateAtSubscriptionOperationSpec = {
     path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/exportTemplate",
     httpMethod: "POST",
     responses: {
         200: {
-            bodyMapper: DeploymentStackTemplateDefinition
+            bodyMapper: DeploymentStackTemplateDefinition,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         subscriptionId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const exportTemplateAtManagementGroupOperationSpec = {
     path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/exportTemplate",
     httpMethod: "POST",
     responses: {
         200: {
-            bodyMapper: DeploymentStackTemplateDefinition
+            bodyMapper: DeploymentStackTemplateDefinition,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     queryParameters: [apiVersion],
     urlParameters: [
         $host,
         managementGroupId,
-        deploymentStackName
+        deploymentStackName,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
+};
+const validateStackAtResourceGroupOperationSpec = {
+    path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/validate",
+    httpMethod: "POST",
+    responses: {
+        200: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        201: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        202: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        204: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        default: {
+            bodyMapper: DeploymentStacksError,
+        },
+    },
+    requestBody: deploymentStack,
+    queryParameters: [apiVersion],
+    urlParameters: [
+        $host,
+        subscriptionId,
+        resourceGroupName,
+        deploymentStackName,
+    ],
+    headerParameters: [accept, contentType],
+    mediaType: "json",
+    serializer,
+};
+const validateStackAtSubscriptionOperationSpec = {
+    path: "/subscriptions/{subscriptionId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/validate",
+    httpMethod: "POST",
+    responses: {
+        200: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        201: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        202: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        204: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        default: {
+            bodyMapper: DeploymentStacksError,
+        },
+    },
+    requestBody: deploymentStack,
+    queryParameters: [apiVersion],
+    urlParameters: [
+        $host,
+        subscriptionId,
+        deploymentStackName,
+    ],
+    headerParameters: [accept, contentType],
+    mediaType: "json",
+    serializer,
+};
+const validateStackAtManagementGroupOperationSpec = {
+    path: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Resources/deploymentStacks/{deploymentStackName}/validate",
+    httpMethod: "POST",
+    responses: {
+        200: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        201: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        202: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        204: {
+            bodyMapper: DeploymentStackValidateResult,
+        },
+        default: {
+            bodyMapper: DeploymentStacksError,
+        },
+    },
+    requestBody: deploymentStack,
+    queryParameters: [apiVersion],
+    urlParameters: [
+        $host,
+        managementGroupId,
+        deploymentStackName,
+    ],
+    headerParameters: [accept, contentType],
+    mediaType: "json",
+    serializer,
 };
 const listAtResourceGroupNextOperationSpec = {
     path: "{nextLink}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     urlParameters: [
         $host,
         subscriptionId,
         resourceGroupName,
-        nextLink
+        nextLink,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const listAtSubscriptionNextOperationSpec = {
     path: "{nextLink}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     urlParameters: [
         $host,
         subscriptionId,
-        nextLink
+        nextLink,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 const listAtManagementGroupNextOperationSpec = {
     path: "{nextLink}",
     httpMethod: "GET",
     responses: {
         200: {
-            bodyMapper: DeploymentStackListResult
+            bodyMapper: DeploymentStackListResult,
         },
         default: {
-            bodyMapper: DeploymentStacksError
-        }
+            bodyMapper: DeploymentStacksError,
+        },
     },
     urlParameters: [
         $host,
         managementGroupId,
-        nextLink
+        nextLink,
     ],
     headerParameters: [accept],
-    serializer
+    serializer,
 };
 
 /*
@@ -8184,14 +8546,14 @@ class DeploymentStacksClient extends coreClient__namespace.ServiceClient {
         }
         const defaults = {
             requestContentType: "application/json; charset=utf-8",
-            credential: credentials
+            credential: credentials,
         };
-        const packageDetails = `azsdk-js-arm-resourcesdeploymentstacks/1.0.0-beta.1`;
+        const packageDetails = `azsdk-js-arm-resourcesdeploymentstacks/1.0.0`;
         const userAgentPrefix = options.userAgentOptions && options.userAgentOptions.userAgentPrefix
             ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
             : `${packageDetails}`;
         const optionsWithDefaults = Object.assign(Object.assign(Object.assign({}, defaults), options), { userAgentOptions: {
-                userAgentPrefix
+                userAgentPrefix,
             }, endpoint: (_b = (_a = options.endpoint) !== null && _a !== void 0 ? _a : options.baseUri) !== null && _b !== void 0 ? _b : "https://management.azure.com" });
         super(optionsWithDefaults);
         let bearerTokenAuthenticationPolicyFound = false;
@@ -8205,21 +8567,21 @@ class DeploymentStacksClient extends coreClient__namespace.ServiceClient {
             options.pipeline.getOrderedPolicies().length == 0 ||
             !bearerTokenAuthenticationPolicyFound) {
             this.pipeline.removePolicy({
-                name: coreRestPipeline__namespace.bearerTokenAuthenticationPolicyName
+                name: coreRestPipeline__namespace.bearerTokenAuthenticationPolicyName,
             });
             this.pipeline.addPolicy(coreRestPipeline__namespace.bearerTokenAuthenticationPolicy({
                 credential: credentials,
                 scopes: (_c = optionsWithDefaults.credentialScopes) !== null && _c !== void 0 ? _c : `${optionsWithDefaults.endpoint}/.default`,
                 challengeCallbacks: {
-                    authorizeRequestOnChallenge: coreClient__namespace.authorizeRequestOnClaimChallenge
-                }
+                    authorizeRequestOnChallenge: coreClient__namespace.authorizeRequestOnClaimChallenge,
+                },
             }));
         }
         // Parameter assignments
         this.subscriptionId = subscriptionId;
         // Assigning values to Constant parameters
         this.$host = options.$host || "https://management.azure.com";
-        this.apiVersion = options.apiVersion || "2022-08-01-preview";
+        this.apiVersion = options.apiVersion || "2024-03-01";
         this.deploymentStacks = new DeploymentStacksImpl(this);
         this.addCustomApiVersionPolicy(options.apiVersion);
     }
@@ -8246,7 +8608,7 @@ class DeploymentStacksClient extends coreClient__namespace.ServiceClient {
                     }
                     return next(request);
                 });
-            }
+            },
         };
         this.pipeline.addPolicy(apiVersionPolicy);
     }
@@ -45632,7 +45994,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseDenySettings = exports.parseUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.newDenySettings = exports.newUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -45913,10 +46275,9 @@ function getDeleteInputs(options) {
     return options;
 }
 /**
- * Parse actionOnUnmanage property.
+ * Generate actionOnUnmanage property.
  */
-function parseUnmanageProperties(value) {
-    core.debug(`Parsing actionOnUnmanage option: ${value}`);
+function newUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
             return {
@@ -45943,14 +46304,16 @@ function parseUnmanageProperties(value) {
             throw new Error(`Invalid actionOnUnmanage: ${value}`);
     }
 }
-exports.parseUnmanageProperties = parseUnmanageProperties;
+exports.newUnmanageProperties = newUnmanageProperties;
 /**
- * Parse denySettings property.
+ * Generate denySettings property.
  */
-function parseDenySettings() {
-    core.debug(`Parsing denySettings`);
+function newDenySettings(value) {
+    return {
+        mode: value
+    };
 }
-exports.parseDenySettings = parseDenySettings;
+exports.newDenySettings = newDenySettings;
 
 
 /***/ }),
@@ -46007,15 +46370,13 @@ async function run() {
         // Perform action
         switch (options.mode) {
             case 'create':
-                // Parse template and parameter files
-                const template = await helper.parseTemplateFile(options);
-                const parameters = options.parametersFile
-                    ? helper.parseParametersFile(options)
-                    : {};
-                await stack.createOrUpdateDeploymentStack(options, client, template, parameters);
+                await stack.createDeploymentStack(options, client);
                 break;
             case 'delete':
                 await stack.deleteDeploymentStack(options, client);
+                break;
+            case 'validate':
+                await stack.validateDeploymentStack(options, client);
                 break;
         }
         core.debug(`Finishing action`);
@@ -46060,21 +46421,56 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteDeploymentStack = exports.createOrUpdateDeploymentStack = void 0;
+exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const helper = __importStar(__nccwpck_require__(2707));
 /**
- * Create or update deployment stack.
+ * Get deployment stack.
  */
-async function createOrUpdateDeploymentStack(options, client, template, parameters) {
-    core.info(`Creating deployment stack`);
+async function getDeploymentStack(options, client) {
+    let operationPromise;
+    switch (options.scope) {
+        case 'managementGroup':
+            operationPromise = client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
+            break;
+        case 'subscription':
+            client.subscriptionId = options.subscriptionId;
+            operationPromise = client.deploymentStacks.getAtSubscription(options.name);
+            break;
+        case 'resourceGroup':
+            operationPromise = client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
+            break;
+    }
+    const deploymentStack = await operationPromise;
+    if (!deploymentStack) {
+        throw new Error(`Deployment stack not found`);
+    }
+    return deploymentStack;
+}
+/**
+ * Create deployment stack.
+ */
+async function createDeploymentStack(options, client) {
+    // Display operation message
+    ;
+    (await getDeploymentStack(options, client))
+        ? core.info(`Creating deployment stack`)
+        : core.info(`Updating deployment stack`);
+    // Parse template and parameter files
+    const template = await helper.parseTemplateFile(options);
+    const parameters = options.parametersFile
+        ? helper.parseParametersFile(options)
+        : {};
+    // Initialize deployment stack
     const deploymentStack = {
-        description: options.description,
         location: options.location,
-        actionOnUnmanage: helper.parseUnmanageProperties(options.actionOnUnmanage),
-        denySettings: { mode: options.denySettings },
-        template,
-        parameters
+        properties: {
+            description: options.description,
+            actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
+            denySettings: helper.newDenySettings(options.denySettings),
+            template,
+            parameters
+        }
     };
     let operationPromise;
     switch (options.scope) {
@@ -46097,19 +46493,19 @@ async function createOrUpdateDeploymentStack(options, client, template, paramete
     }
     await operationPromise;
 }
-exports.createOrUpdateDeploymentStack = createOrUpdateDeploymentStack;
+exports.createDeploymentStack = createDeploymentStack;
 /**
  * Delete deployment stack.
  */
 async function deleteDeploymentStack(options, client) {
     core.info(`Deleting deployment stack`);
-    let operationPromise;
-    const properties = helper.parseUnmanageProperties(options.actionOnUnmanage);
+    const deploymentStack = await getDeploymentStack(options, client);
     const params = {
-        unmanageActionManagementGroups: properties.managementGroups,
-        unmanageActionResourceGroups: properties.resourceGroups,
-        unmanageActionResources: properties.resources
+        unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
+        unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
+        unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
     };
+    let operationPromise;
     switch (options.scope) {
         case 'managementGroup':
             operationPromise = options.wait
@@ -46131,6 +46527,13 @@ async function deleteDeploymentStack(options, client) {
     await operationPromise;
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
+/**
+ * Validate deployment stack.
+ */
+async function validateDeploymentStack(options, client) {
+    // TODO(ljtill): Implement
+}
+exports.validateDeploymentStack = validateDeploymentStack;
 
 
 /***/ }),

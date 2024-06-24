@@ -13,3 +13,13 @@ export type Options = {
   parametersFile: string
   wait: boolean
 }
+
+export type ActionOnUnmanage = {
+  managementGroups: string
+  resourceGroups: string
+  resources: string
+}
+
+export type DenySettings = {
+  mode: string
+}

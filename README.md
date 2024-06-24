@@ -1,5 +1,7 @@
 # Azure Deployment Stacks Action
 
+![Icon](./docs/static/stacks.jpeg)
+
 [![GitHub Super-Linter](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/ci.yml/badge.svg)
 [![Check dist/](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml)

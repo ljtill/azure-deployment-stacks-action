@@ -45703,17 +45703,35 @@ exports.checkBicep = checkBicep;
 async function displayBicepVersion() {
     core.debug(`Displaying Bicep version`);
     const bicepPath = await io.which('bicep', true);
-    await exec.exec(`"${bicepPath}" --version`);
+    const execOptions = {};
+    execOptions.listeners = {
+        stdout: (data) => {
+            core.debug(data.toString());
+        },
+        stderr: (data) => {
+            core.error(data.toString());
+        }
+    };
+    await exec.exec(bicepPath, ['--version'], execOptions);
 }
 /**
  * Build Bicep file.
  */
 async function buildBicepFile(filePath) {
     core.debug(`Building Bicep file`);
-    const bicepPath = await io.which('bicep', true);
     // TODO(ljtill): Implement cross platform support
+    const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/main.json';
-    await exec.exec(`"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`);
+    const execOptions = {};
+    execOptions.listeners = {
+        stdout: (data) => {
+            core.debug(data.toString());
+        },
+        stderr: (data) => {
+            core.error(data.toString());
+        }
+    };
+    await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
 /**
@@ -45721,17 +45739,26 @@ async function buildBicepFile(filePath) {
  */
 async function buildBicepParametersFile(filePath) {
     core.debug(`Building Bicep parameters file`);
-    const bicepPath = await io.which('bicep', true);
     // TODO(ljtill): Implement cross platform support
+    const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/params.json';
-    await exec.exec(`"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`);
+    const execOptions = {};
+    execOptions.listeners = {
+        stdout: (data) => {
+            core.debug(data.toString());
+        },
+        stderr: (data) => {
+            core.error(data.toString());
+        }
+    };
+    await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
 /**
  * Parse template file.
  */
 async function parseTemplateFile(options) {
-    core.debug(`Parsing template file`);
+    core.debug(`Parsing template file: ${options.templateFile}`);
     let filePath = options.templateFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
@@ -45755,7 +45782,7 @@ exports.parseTemplateFile = parseTemplateFile;
  * Parse parameters file.
  */
 async function parseParametersFile(options) {
-    core.debug(`Parsing parameters file`);
+    core.debug(`Parsing parameters file: ${options.parametersFile}`);
     let filePath = options.parametersFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
@@ -45878,7 +45905,7 @@ function getDeleteInputs(options) {
  * Parse actionOnUnmanage property.
  */
 function parseUnmanageProperties(value) {
-    core.debug(`Parsing actionOnUnmanage: ${value}`);
+    core.debug(`Parsing actionOnUnmanage option: ${value}`);
     switch (value) {
         case 'deleteResources':
             return {

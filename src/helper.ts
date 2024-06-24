@@ -84,7 +84,17 @@ async function displayBicepVersion(): Promise<void> {
 
   const bicepPath = await io.which('bicep', true)
 
-  await exec.exec(`"${bicepPath}" --version`)
+  const execOptions: exec.ExecOptions = {}
+  execOptions.listeners = {
+    stdout: (data: Buffer) => {
+      core.debug(data.toString())
+    },
+    stderr: (data: Buffer) => {
+      core.error(data.toString())
+    }
+  }
+
+  await exec.exec(bicepPath, ['--version'], execOptions)
 }
 
 /**
@@ -93,13 +103,24 @@ async function displayBicepVersion(): Promise<void> {
 async function buildBicepFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep file`)
 
-  const bicepPath = await io.which('bicep', true)
-
   // TODO(ljtill): Implement cross platform support
+  const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/main.json'
 
+  const execOptions: exec.ExecOptions = {}
+  execOptions.listeners = {
+    stdout: (data: Buffer) => {
+      core.debug(data.toString())
+    },
+    stderr: (data: Buffer) => {
+      core.error(data.toString())
+    }
+  }
+
   await exec.exec(
-    `"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`
+    bicepPath,
+    ['build', filePath, '--outfile', outputPath],
+    execOptions
   )
 
   return outputPath
@@ -111,13 +132,24 @@ async function buildBicepFile(filePath: string): Promise<string> {
 async function buildBicepParametersFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep parameters file`)
 
-  const bicepPath = await io.which('bicep', true)
-
   // TODO(ljtill): Implement cross platform support
+  const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/params.json'
 
+  const execOptions: exec.ExecOptions = {}
+  execOptions.listeners = {
+    stdout: (data: Buffer) => {
+      core.debug(data.toString())
+    },
+    stderr: (data: Buffer) => {
+      core.error(data.toString())
+    }
+  }
+
   await exec.exec(
-    `"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`
+    bicepPath,
+    ['build-params', filePath, '--outfile', outputPath],
+    execOptions
   )
 
   return outputPath
@@ -129,7 +161,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 export async function parseTemplateFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing template file`)
+  core.debug(`Parsing template file: ${options.templateFile}`)
 
   let filePath = options.templateFile
 
@@ -159,7 +191,7 @@ export async function parseTemplateFile(
 export async function parseParametersFile(
   options: Options
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing parameters file`)
+  core.debug(`Parsing parameters file: ${options.parametersFile}`)
 
   let filePath = options.parametersFile
 
@@ -311,7 +343,7 @@ function getDeleteInputs(options: Partial<Options>): Partial<Options> {
 export function parseUnmanageProperties(
   value: string
 ): DeploymentStackPropertiesActionOnUnmanage {
-  core.debug(`Parsing actionOnUnmanage: ${value}`)
+  core.debug(`Parsing actionOnUnmanage option: ${value}`)
 
   switch (value) {
     case 'deleteResources':

@@ -45702,7 +45702,7 @@ exports.checkBicep = checkBicep;
  */
 async function printBicepVersion() {
     core.debug(`Printing the Bicep version`);
-    const bicepPath = io.which('bicep', true);
+    const bicepPath = await io.which('bicep', true);
     await exec.exec(`"${bicepPath}" --version`);
 }
 /**

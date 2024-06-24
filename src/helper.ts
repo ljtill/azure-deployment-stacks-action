@@ -82,7 +82,7 @@ export async function checkBicep(): Promise<boolean> {
 async function printBicepVersion(): Promise<void> {
   core.debug(`Printing the Bicep version`)
 
-  const bicepPath = io.which('bicep', true)
+  const bicepPath = await io.which('bicep', true)
 
   await exec.exec(`"${bicepPath}" --version`)
 }

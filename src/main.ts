@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { setLogLevel } from '@azure/logger'
 import { DeploymentStacksClient } from '@azure/arm-resourcesdeploymentstacks'
 import * as helper from './helper'
 import * as stack from './stack'
@@ -10,6 +11,11 @@ import * as stack from './stack'
 export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
+
+    // Set SDK log level
+    if (process.env['RUNNER_DEBUG']) {
+      setLogLevel('verbose')
+    }
 
     // Check that the Bicep binary is installed
     await helper.checkBicep()

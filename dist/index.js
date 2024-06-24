@@ -46349,6 +46349,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const logger_1 = __nccwpck_require__(9497);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
 const stack = __importStar(__nccwpck_require__(7067));
@@ -46359,6 +46360,10 @@ const stack = __importStar(__nccwpck_require__(7067));
 async function run() {
     try {
         core.debug(`Starting action`);
+        // Set SDK log level
+        if (process.env['RUNNER_DEBUG']) {
+            (0, logger_1.setLogLevel)('verbose');
+        }
         // Check that the Bicep binary is installed
         await helper.checkBicep();
         // Authenticate the session

@@ -328,6 +328,12 @@ function getDeleteInputs(options: Partial<Options>): Partial<Options> {
     'resourceGroup'
   ])
 
+  options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+    'deleteAll',
+    'deleteResources',
+    'detachAll'
+  ])
+
   switch (options.scope) {
     case 'managementGroup':
       options.managementGroupId = getInput('managementGroupId', true)
@@ -354,18 +360,21 @@ export function parseUnmanageProperties(
   switch (value) {
     case 'deleteResources':
       return {
+        // Delete all resources, detach resource groups and management groups
         managementGroups: 'detach',
         resourceGroups: 'detach',
         resources: 'delete'
       }
     case 'deleteAll':
       return {
+        // Delete resources, resource groups and management groups
         managementGroups: 'delete',
         resourceGroups: 'delete',
         resources: 'delete'
       }
     case 'detachAll':
       return {
+        // Detach resources, resource groups and management groups
         managementGroups: 'detach',
         resourceGroups: 'detach',
         resources: 'detach'

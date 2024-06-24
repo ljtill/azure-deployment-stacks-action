@@ -85,35 +85,52 @@ export async function deleteDeploymentStack(
 
   let operationPromise
 
+  const properties = helper.parseUnmanageProperties(options.actionOnUnmanage)
+  const params = {
+    unmanageActionManagementGroups: properties.managementGroups,
+    unmanageActionResourceGroups: properties.resourceGroups,
+    unmanageActionResources: properties.resources
+  }
+
   switch (options.scope) {
     case 'managementGroup':
       operationPromise = options.wait
         ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
             options.managementGroupId,
-            options.name
+            options.name,
+            params
           )
         : client.deploymentStacks.beginDeleteAtManagementGroup(
             options.managementGroupId,
-            options.name
+            options.name,
+            params
           )
       break
 
     case 'subscription':
       client.subscriptionId = options.subscriptionId
       operationPromise = options.wait
-        ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name)
-        : client.deploymentStacks.beginDeleteAtSubscription(options.name)
+        ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(
+            options.name,
+            params
+          )
+        : client.deploymentStacks.beginDeleteAtSubscription(
+            options.name,
+            params
+          )
       break
 
     case 'resourceGroup':
       operationPromise = options.wait
         ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
             options.resourceGroupName,
-            options.name
+            options.name,
+            params
           )
         : client.deploymentStacks.beginDeleteAtResourceGroup(
             options.resourceGroupName,
-            options.name
+            options.name,
+            params
           )
       break
   }

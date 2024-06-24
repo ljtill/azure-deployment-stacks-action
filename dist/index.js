@@ -45894,6 +45894,11 @@ function getDeleteInputs(options) {
         'subscription',
         'resourceGroup'
     ]);
+    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+        'deleteAll',
+        'deleteResources',
+        'detachAll'
+    ]);
     switch (options.scope) {
         case 'managementGroup':
             options.managementGroupId = getInput('managementGroupId', true);
@@ -45915,18 +45920,21 @@ function parseUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
             return {
+                // Delete all resources, detach resource groups and management groups
                 managementGroups: 'detach',
                 resourceGroups: 'detach',
                 resources: 'delete'
             };
         case 'deleteAll':
             return {
+                // Delete resources, resource groups and management groups
                 managementGroups: 'delete',
                 resourceGroups: 'delete',
                 resources: 'delete'
             };
         case 'detachAll':
             return {
+                // Detach resources, resource groups and management groups
                 managementGroups: 'detach',
                 resourceGroups: 'detach',
                 resources: 'detach'
@@ -46096,22 +46104,28 @@ exports.createOrUpdateDeploymentStack = createOrUpdateDeploymentStack;
 async function deleteDeploymentStack(options, client) {
     core.info(`Deleting deployment stack`);
     let operationPromise;
+    const properties = helper.parseUnmanageProperties(options.actionOnUnmanage);
+    const params = {
+        unmanageActionManagementGroups: properties.managementGroups,
+        unmanageActionResourceGroups: properties.resourceGroups,
+        unmanageActionResources: properties.resources
+    };
     switch (options.scope) {
         case 'managementGroup':
             operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(options.managementGroupId, options.name)
-                : client.deploymentStacks.beginDeleteAtManagementGroup(options.managementGroupId, options.name);
+                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(options.managementGroupId, options.name, params)
+                : client.deploymentStacks.beginDeleteAtManagementGroup(options.managementGroupId, options.name, params);
             break;
         case 'subscription':
             client.subscriptionId = options.subscriptionId;
             operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name)
-                : client.deploymentStacks.beginDeleteAtSubscription(options.name);
+                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name, params)
+                : client.deploymentStacks.beginDeleteAtSubscription(options.name, params);
             break;
         case 'resourceGroup':
             operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(options.resourceGroupName, options.name)
-                : client.deploymentStacks.beginDeleteAtResourceGroup(options.resourceGroupName, options.name);
+                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(options.resourceGroupName, options.name, params)
+                : client.deploymentStacks.beginDeleteAtResourceGroup(options.resourceGroupName, options.name, params);
             break;
     }
     await operationPromise;

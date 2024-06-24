@@ -45632,7 +45632,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseUnmanageProperties = exports.parseInputs = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.parseDenySettings = exports.parseUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -45641,9 +45641,10 @@ const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
 const identity_1 = __nccwpck_require__(3084);
 /**
- * Install the Bicep binary.
+ * Install Bicep binary.
  */
 async function installBicep() {
+    core.debug(`Installing the Bicep binary`);
     const url = 'https://github.com/azure/bicep/releases/latest/download/';
     switch (process.platform) {
         case 'win32':
@@ -45685,41 +45686,53 @@ async function installBicep() {
 }
 exports.installBicep = installBicep;
 /**
- * Check if the Bicep binary is installed.
+ * Check Bicep binary is installed.
  */
 async function checkBicep() {
+    core.debug(`Checking for the Bicep binary`);
     if ((await io.which('bicep', false)) === '') {
         throw new Error('Bicep is not installed');
     }
+    await printBicepVersion();
     return true;
 }
 exports.checkBicep = checkBicep;
 /**
- * Build the Bicep file.
+ * Print Bicep version.
+ */
+async function printBicepVersion() {
+    core.debug(`Printing the Bicep version`);
+    const bicepPath = io.which('bicep', true);
+    await exec.exec(`"${bicepPath}" --version`);
+}
+/**
+ * Build Bicep file.
  */
 async function buildBicepFile(filePath) {
+    core.debug(`Building Bicep file: ${filePath}`);
     const bicepPath = await io.which('bicep', true);
-    // TODO: Implement cross platform support
+    // TODO(ljtill): Implement cross platform support
     const outputPath = '/tmp/main.json';
     await exec.exec(`"${bicepPath}" build "${filePath}" --outfile "${outputPath}"`);
     return outputPath;
 }
 /**
- * Build the Bicep parameters file.
+ * Build Bicep parameters file.
  */
 async function buildBicepParametersFile(filePath) {
+    core.debug(`Building Bicep parameters file: ${filePath}`);
     const bicepPath = await io.which('bicep', true);
-    // TODO: Implement cross platform support
+    // TODO(ljtill): Implement cross platform support
     const outputPath = '/tmp/params.json';
     await exec.exec(`"${bicepPath}" build-params "${filePath}" --outfile "${outputPath}"`);
     return outputPath;
 }
 /**
- * Parse the template file.
+ * Parse template file.
  */
 async function parseTemplateFile(options) {
+    core.debug(`Parsing template file: ${options.templateFile}`);
     let filePath = options.templateFile;
-    core.debug(`Parsing the template file: ${filePath}`);
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
@@ -45739,11 +45752,11 @@ async function parseTemplateFile(options) {
 }
 exports.parseTemplateFile = parseTemplateFile;
 /**
- * Parse the parameters file.
+ * Parse parameters file.
  */
 async function parseParametersFile(options) {
+    core.debug(`Parsing the parameters file: ${options.parametersFile}`);
     let filePath = options.parametersFile;
-    core.debug(`Parsing the parameters file: ${filePath}`);
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
@@ -45763,30 +45776,50 @@ async function parseParametersFile(options) {
 }
 exports.parseParametersFile = parseParametersFile;
 /**
- * Get the Azure token.
+ * Initialize Azure Credential.
  */
 function newCredential() {
+    core.debug(`Generate new credential`);
     return new identity_1.DefaultAzureCredential();
 }
 exports.newCredential = newCredential;
 /**
- * Parse the inputs.
+ * Initiliaze Options.
  */
-function parseInputs() {
-    const options = {};
-    // Get the input if it's required and validate it.
-    function getInput(key, required, validValues) {
-        const value = core.getInput(key, { required, trimWhitespace: true });
-        if (validValues && !validValues.includes(value)) {
-            throw new Error(`Invalid ${key}`);
-        }
-        return value;
+function newOptions() {
+    core.debug(`Initializing options`);
+    let options = {};
+    options.mode = getInput('mode', true, ['create', 'delete']);
+    options.wait = getInput('wait', false) === 'true';
+    switch (options.mode) {
+        case 'create':
+            options = getCreateInputs(options);
+            break;
+        case 'delete':
+            options = getDeleteInputs(options);
+            break;
     }
-    // Gather inputs
+    return options;
+}
+exports.newOptions = newOptions;
+/**
+ * Get input from the workflow.
+ */
+function getInput(key, required, validValues) {
+    const value = core.getInput(key, { required, trimWhitespace: true });
+    if (validValues && !validValues.includes(value)) {
+        throw new Error(`Invalid ${key}`);
+    }
+    return value;
+}
+/**
+ * Parse create inputs.
+ */
+function getCreateInputs(options) {
+    core.debug(`Retrieving create inputs`);
     options.name = getInput('name', true);
     options.description = getInput('description', false);
     options.location = getInput('location', false);
-    options.mode = getInput('mode', true, ['create', 'delete']);
     options.scope = getInput('scope', true, [
         'managementGroup',
         'subscription',
@@ -45802,10 +45835,32 @@ function parseInputs() {
         'denyWriteAndDelete',
         'none'
     ]);
+    switch (options.scope) {
+        case 'managementGroup':
+            options.managementGroupId = getInput('managementGroupId', true);
+            break;
+        case 'subscription':
+            options.subscriptionId = getInput('subscriptionId', true);
+            break;
+        case 'resourceGroup':
+            options.resourceGroupName = getInput('resourceGroupName', true);
+            break;
+    }
     options.templateFile = getInput('templateFile', true);
     options.parametersFile = getInput('parametersFile', false);
-    options.wait = getInput('wait', false) === 'true';
-    // Handle scope-specific inputs
+    return options;
+}
+/**
+ * Parse delete inputs.
+ */
+function getDeleteInputs(options) {
+    core.debug(`Retrieving delete inputs`);
+    options.name = getInput('name', true);
+    options.scope = getInput('scope', true, [
+        'managementGroup',
+        'subscription',
+        'resourceGroup'
+    ]);
     switch (options.scope) {
         case 'managementGroup':
             options.managementGroupId = getInput('managementGroupId', true);
@@ -45819,11 +45874,11 @@ function parseInputs() {
     }
     return options;
 }
-exports.parseInputs = parseInputs;
 /**
- * Parse the actionOnUnmanage property.
+ * Parse actionOnUnmanage property.
  */
 function parseUnmanageProperties(value) {
+    core.debug(`Parsing actionOnUnmanage: ${value}`);
     switch (value) {
         case 'deleteResources':
             return {
@@ -45848,6 +45903,13 @@ function parseUnmanageProperties(value) {
     }
 }
 exports.parseUnmanageProperties = parseUnmanageProperties;
+/**
+ * Parse denySettings property.
+ */
+function parseDenySettings() {
+    core.debug(`Parsing denySettings`);
+}
+exports.parseDenySettings = parseDenySettings;
 
 
 /***/ }),
@@ -45892,17 +45954,13 @@ const stack = __importStar(__nccwpck_require__(7067));
  */
 async function run() {
     try {
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        core.debug(`Starting the action...`);
+        core.debug(`Starting the action`);
         // Check that the Bicep binary is installed
-        core.debug(`Checking for the Bicep binary...`);
         await helper.checkBicep();
         // Authenticate the session
-        core.debug(`Generate new credential...`);
         const credential = helper.newCredential();
         // Hydrate options variable
-        core.debug(`Parsing the inputs...`);
-        const options = helper.parseInputs();
+        const options = helper.newOptions();
         // Initialize deployment stacks client
         const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credential);
         // Parse the template and parameters
@@ -45910,18 +45968,16 @@ async function run() {
         const parameters = options.parametersFile
             ? helper.parseParametersFile(options)
             : {};
-        // Handle the execution mode
+        // Perform the action
         switch (options.mode) {
             case 'create':
-                core.info(`Creating deployment stack...`);
                 await stack.createOrUpdateDeploymentStack(options, client, template, parameters);
                 break;
             case 'delete':
-                core.info(`Deleting deployment stack...`);
                 await stack.deleteDeploymentStack(options, client);
                 break;
         }
-        core.debug(`Completing the action...`);
+        core.debug(`Completing the action`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -45964,11 +46020,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteDeploymentStack = exports.createOrUpdateDeploymentStack = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const helper = __importStar(__nccwpck_require__(2707));
 /**
  * Create or update deployment stack.
  */
 async function createOrUpdateDeploymentStack(options, client, template, parameters) {
+    core.info(`Creating deployment stack`);
     const deploymentStack = {
         description: options.description,
         location: options.location,
@@ -46003,6 +46061,7 @@ exports.createOrUpdateDeploymentStack = createOrUpdateDeploymentStack;
  * Delete deployment stack.
  */
 async function deleteDeploymentStack(options, client) {
+    core.info(`Deleting deployment stack`);
     let operationPromise;
     switch (options.scope) {
         case 'managementGroup':

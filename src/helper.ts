@@ -12,7 +12,7 @@ import { Options } from './types'
  * Install Bicep binary.
  */
 export async function installBicep(): Promise<void> {
-  core.debug(`Installing the Bicep binary...`)
+  core.debug(`Installing the Bicep binary`)
 
   const url = 'https://github.com/azure/bicep/releases/latest/download/'
 
@@ -65,7 +65,7 @@ export async function installBicep(): Promise<void> {
  * Check Bicep binary is installed.
  */
 export async function checkBicep(): Promise<boolean> {
-  core.debug(`Checking for the Bicep binary...`)
+  core.debug(`Checking for the Bicep binary`)
 
   if ((await io.which('bicep', false)) === '') {
     throw new Error('Bicep is not installed')
@@ -80,7 +80,7 @@ export async function checkBicep(): Promise<boolean> {
  * Print Bicep version.
  */
 async function printBicepVersion(): Promise<void> {
-  core.debug(`Printing the Bicep version...`)
+  core.debug(`Printing the Bicep version`)
 
   const bicepPath = io.which('bicep', true)
 
@@ -187,7 +187,7 @@ export async function parseParametersFile(
  * Initialize Azure Credential.
  */
 export function newCredential(): DefaultAzureCredential {
-  core.debug(`Generate new credential...`)
+  core.debug(`Generate new credential`)
 
   return new DefaultAzureCredential()
 }
@@ -196,7 +196,7 @@ export function newCredential(): DefaultAzureCredential {
  * Initiliaze Options.
  */
 export function newOptions(): Options {
-  core.debug(`Initializing options...`)
+  core.debug(`Initializing options`)
 
   let options: Partial<Options> = {}
 
@@ -235,7 +235,7 @@ function getInput(
  * Parse create inputs.
  */
 function getCreateInputs(options: Partial<Options>): Partial<Options> {
-  core.debug(`Retrieving create inputs...`)
+  core.debug(`Retrieving create inputs`)
 
   options.name = getInput('name', true)
   options.description = getInput('description', false)
@@ -280,7 +280,7 @@ function getCreateInputs(options: Partial<Options>): Partial<Options> {
  * Parse delete inputs.
  */
 function getDeleteInputs(options: Partial<Options>): Partial<Options> {
-  core.debug(`Retrieving delete inputs...`)
+  core.debug(`Retrieving delete inputs`)
 
   options.name = getInput('name', true)
 
@@ -341,5 +341,5 @@ export function parseUnmanageProperties(
  * Parse denySettings property.
  */
 export function parseDenySettings(): void {
-  core.debug(`Parsing denySettings...`)
+  core.debug(`Parsing denySettings`)
 }

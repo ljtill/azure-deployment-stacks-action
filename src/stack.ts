@@ -15,7 +15,7 @@ export async function createOrUpdateDeploymentStack(
   template: Record<string, unknown>,
   parameters: Record<string, unknown>
 ): Promise<void> {
-  core.info(`Creating deployment stack...`)
+  core.info(`Creating deployment stack`)
 
   const deploymentStack: DeploymentStack = {
     description: options.description,
@@ -81,7 +81,7 @@ export async function deleteDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
 ): Promise<void> {
-  core.info(`Deleting deployment stack...`)
+  core.info(`Deleting deployment stack`)
 
   let operationPromise
 

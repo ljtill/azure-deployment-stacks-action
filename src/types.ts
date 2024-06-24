@@ -1,8 +1,8 @@
 export type Options = {
   name: string
   description: string
-  scope: string
   location: string
+  scope: string
   mode: string
   actionOnUnmanage: string
   denySettings: string

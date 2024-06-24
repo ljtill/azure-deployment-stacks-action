@@ -1,7 +1,7 @@
 # Azure Deployment Stacks Action
 
-This repository contains a GitHub Action that allows engineers to create,
-update, delete, validate and export
+This repository contains a [GitHub Action](https://docs.github.com/actions) that
+allows engineers to create, update, delete, validate and export
 [Azure Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)
 directly from their GitHub workflows. It supports a variety of inputs for scopes
 and options, making it flexible and easy to use for managing Azure resources.
@@ -57,19 +57,22 @@ The following example demonstrates how to set up the action in create mode,
 which is recommended to be used with `push` triggers:
 
 ```yaml
-name: Creation
+name: Stack (Create)
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
-    name: Deploy
+    name: Create
     runs-on: ubuntu-latest
 
     steps:
@@ -85,16 +88,17 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deployment
-        uses: ljtill/azure-deployment-stacks-action@v1
+        uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
-          name: development
+          name: 'Microsoft.Samples'
+          description: 'Sample description for my Deployment Stack'
+          location: uksouth
           scope: subscription
           mode: create
           actionOnUnmanage: deleteAll
           denySettings: denyWriteAndDelete
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          templateFile: ./main.bicep
-          parametersFile: ./main.bicepparam
+          templateFile: ./src/main.bicep
           wait: true
 ```
 
@@ -104,16 +108,18 @@ The following example demonstrates how to set up the action in delete mode,
 which is recommended to be used with `workflow_dispatch` triggers:
 
 ```yaml
-name: Deletion
+name: Stack (Delete)
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
-    name: Deploy
+    name: Delete
     runs-on: ubuntu-latest
 
     steps:
@@ -129,11 +135,13 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deployment
-        uses: ljtill/azure-deployment-stacks-action@v1
+        uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
-          name: development
+          name: 'Microsoft.Samples'
+          location: uksouth
           scope: subscription
           mode: delete
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           wait: true
 ```
 
@@ -142,7 +150,51 @@ jobs:
 The following example demonstrates how to set up the action in delete mode,
 which is recommended to be used with `pull_request` triggers:
 
-// TODO(ljtill): Documentation
+```yaml
+name: Stack (Validate)
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'src/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deployment
+        uses: ljtill/azure-deployment-stacks-action@releases/v1
+        with:
+          name: 'Microsoft.Samples'
+          description: 'Sample description for my Deployment Stack'
+          location: uksouth
+          scope: subscription
+          mode: validate
+          actionOnUnmanage: deleteAll
+          denySettings: denyWriteAndDelete
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          templateFile: ./src/main.bicep
+          wait: true
+```
 
 ## Parameters
 

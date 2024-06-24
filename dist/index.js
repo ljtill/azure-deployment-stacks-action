@@ -46138,7 +46138,7 @@ async function parseTemplateFile(options) {
         }
     }
     else {
-        throw new Error('Invalid template file path');
+        throw new Error('Invalid template file path: ${filePath}');
     }
     // Read the file content
     const fileContent = fs.readFileSync(filePath);
@@ -46162,7 +46162,7 @@ async function parseParametersFile(options) {
         }
     }
     else {
-        throw new Error('Invalid parameters file path');
+        throw new Error('Invalid parameters file path: ${filePath}');
     }
     // Read the file content
     const fileContent = fs.readFileSync(filePath);

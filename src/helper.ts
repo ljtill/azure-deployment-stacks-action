@@ -180,7 +180,7 @@ export async function parseTemplateFile(
       filePath = await buildBicepFile(filePath)
     }
   } else {
-    throw new Error('Invalid template file path')
+    throw new Error('Invalid template file path: ${filePath}')
   }
 
   // Read the file content
@@ -210,7 +210,7 @@ export async function parseParametersFile(
       filePath = await buildBicepParametersFile(filePath)
     }
   } else {
-    throw new Error('Invalid parameters file path')
+    throw new Error('Invalid parameters file path: ${filePath}')
   }
 
   // Read the file content

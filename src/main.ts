@@ -23,15 +23,15 @@ export async function run(): Promise<void> {
     // Initialize deployment stacks client
     const client = new DeploymentStacksClient(credential)
 
-    // Parse the template and parameters
-    const template = await helper.parseTemplateFile(options)
-    const parameters = options.parametersFile
-      ? helper.parseParametersFile(options)
-      : {}
-
-    // Perform the action
+    // Perform action
     switch (options.mode) {
       case 'create':
+        // Parse template and parameter files
+        const template = await helper.parseTemplateFile(options)
+        const parameters = options.parametersFile
+          ? helper.parseParametersFile(options)
+          : {}
+
         await stack.createOrUpdateDeploymentStack(
           options,
           client,

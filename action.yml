@@ -33,9 +33,21 @@ inputs:
       'Defines what happens to resources that are no longer managed after the
       stack is updated or deleted.'
     required: false
+
   denySettings:
     description:
       'Define which operations are denied on resources managed by the stack.'
+    required: false
+  applyToChildScopes:
+    description: 'DenySettings will be applied to child scopes.'
+    required: false
+  excludedActions:
+    description:
+      'List of role-based management operations that are excluded from the
+      denySettings.'
+    required: false
+  excludedPrincipals:
+    description: 'List of Entra principal IDs excluded from the lock.'
     required: false
 
   managementGroupId:

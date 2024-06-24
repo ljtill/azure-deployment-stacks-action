@@ -198,21 +198,24 @@ jobs:
 
 ## Parameters
 
-| Parameter         | Required | Type   | Description                                                                                         | Default | Values                                       |
-| ----------------- | -------- | ------ | --------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------- |
-| name              | true     | string | The name of the deployment stack.                                                                   |         |                                              |
-| description       | false    | string | The description of the deployment stack.                                                            |         |                                              |
-| location          | false    | string | The location to store deployment stack.                                                             | eastus  |                                              |
-| scope             | true     | string | The scope of the deployment stack.                                                                  |         | managementGroup, subscription, resourceGroup |
-| mode              | true     | string | The mode of the deployment stack action.                                                            |         | create, delete, validate                     |
-| actionOnUnmanage  | false    | string | Defines what happens to resources that are no longer managed after the stack is updated or deleted. |         | deleteAll, deleteResources, detachAll        |
-| denySettings      | false    | string | Define which operations are denied on resources managed by the stack.                               |         | denyDelete, denyWriteAndDelete, none         |
-| managementGroupId | false    | string | The management group id where the deployment stack will be created.                                 |         |                                              |
-| subscriptionId    | false    | string | The subscription id where the deployment stack will be created.                                     |         |                                              |
-| resourceGroupName | false    | string | The resource group name where the deployment stack will be created.                                 |         |                                              |
-| templateFile      | false    | string | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
-| parametersFile    | false    | string | A path to a ARM or Bicep paramter file in the file system.                                          |         |                                              |
-| wait              | false    | string | Wait for the deployment to complete.                                                                | false   | true, false                                  |
+| Parameter          | Required | Type    | Description                                                                                         | Default | Values                                       |
+| ------------------ | -------- | ------- | --------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------- |
+| name               | true     | string  | The name of the deployment stack.                                                                   |         |                                              |
+| description        | false    | string  | The description of the deployment stack.                                                            |         |                                              |
+| location           | false    | string  | The location to store deployment stack.                                                             | eastus  |                                              |
+| scope              | true     | string  | The scope of the deployment stack.                                                                  |         | managementGroup, subscription, resourceGroup |
+| mode               | true     | string  | The mode of the deployment stack action.                                                            |         | create, delete, validate                     |
+| actionOnUnmanage   | false    | string  | Defines what happens to resources that are no longer managed after the stack is updated or deleted. |         | deleteAll, deleteResources, detachAll        |
+| denySettings       | false    | string  | Define which operations are denied on resources managed by the stack.                               |         | denyDelete, denyWriteAndDelete, none         |
+| applyToChildScopes | false    | boolean | DenySettings will be applied to child scopes.                                                       |         |                                              |
+| excludedActions    | false    | string  | List of role-based management operations that are excluded from the denySettings (Comma seperated). |         |                                              |
+| excludedPrincipals | false    | string  | List of Entra principal IDs excluded from the lock (Comma seperated).                               |         |                                              |
+| managementGroupId  | false    | string  | The management group id where the deployment stack will be created.                                 |         |                                              |
+| subscriptionId     | false    | string  | The subscription id where the deployment stack will be created.                                     |         |                                              |
+| resourceGroupName  | false    | string  | The resource group name where the deployment stack will be created.                                 |         |                                              |
+| templateFile       | false    | string  | A path to a ARM or Bicep file in the file system.                                                   |         |                                              |
+| parametersFile     | false    | string  | A path to a ARM or Bicep paramter file in the file system.                                          |         |                                              |
+| wait               | false    | boolean | Wait for the deployment to complete.                                                                | false   | true, false                                  |
 
 ## Documentation
 

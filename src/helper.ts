@@ -296,11 +296,15 @@ function getCreateInputs(options: Partial<Options>): Partial<Options> {
     'deleteResources',
     'detachAll'
   ])
+
   options.denySettings = getInput('denySettings', true, [
     'denyDelete',
     'denyWriteAndDelete',
     'none'
   ])
+  options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true'
+  options.excludedActions = getInput('excludedActions', false).split(',')
+  options.excludedPrincipals = getInput('excludedPrincipals', false).split(',')
 
   switch (options.scope) {
     case 'managementGroup':
@@ -370,11 +374,15 @@ function getValidateInputs(options: Partial<Options>): Partial<Options> {
     'deleteResources',
     'detachAll'
   ])
+
   options.denySettings = getInput('denySettings', true, [
     'denyDelete',
     'denyWriteAndDelete',
     'none'
   ])
+  options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true'
+  options.excludedActions = getInput('excludedActions', false).split(',')
+  options.excludedPrincipals = getInput('excludedPrincipals', false).split(',')
 
   switch (options.scope) {
     case 'managementGroup':
@@ -428,8 +436,11 @@ export function newUnmanageProperties(value: string): ActionOnUnmanage {
 /**
  * Initialize denySettings property.
  */
-export function newDenySettings(value: string): DenySettings {
+export function newDenySettings(options: Options): DenySettings {
   return {
-    mode: value
+    mode: options.denySettings,
+    applyToChildScopes: options.applyToChildScopes,
+    excludedActions: options.excludedActions,
+    excludedPrincipals: options.excludedPrincipals
   }
 }

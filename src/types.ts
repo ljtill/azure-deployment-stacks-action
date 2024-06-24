@@ -6,6 +6,9 @@ export type Options = {
   mode: string
   actionOnUnmanage: string
   denySettings: string
+  applyToChildScopes: boolean
+  excludedActions: string[]
+  excludedPrincipals: string[]
   managementGroupId: string
   subscriptionId: string
   resourceGroupName: string
@@ -24,4 +27,7 @@ export type ActionOnUnmanage = {
 
 export type DenySettings = {
   mode: string
+  applyToChildScopes: boolean
+  excludedActions: string[]
+  excludedPrincipals: string[]
 }

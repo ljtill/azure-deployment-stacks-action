@@ -46628,7 +46628,9 @@ async function validateDeploymentStack(options, client) {
                 : client.deploymentStacks.beginValidateStackAtResourceGroup(options.resourceGroupName, options.name, deploymentStack);
             break;
     }
+    // TODO(ljtill): Parse error messages
     await operationPromise;
+    core.info(`Valid deployment stack`);
 }
 exports.validateDeploymentStack = validateDeploymentStack;
 

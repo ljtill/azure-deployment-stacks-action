@@ -305,5 +305,9 @@ export async function validateDeploymentStack(
       break
   }
 
+  // TODO(ljtill): Parse error messages
+
   await operationPromise
+
+  core.info(`Valid deployment stack`)
 }

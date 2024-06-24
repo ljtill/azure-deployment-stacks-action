@@ -444,8 +444,3 @@ export function newDenySettings(options: Options): DenySettings {
     excludedPrincipals: options.excludedPrincipals
   }
 }
-
-/**
- * X
- */
-export function instanceOfDeploymentStack(): object is DeploymentStack {}

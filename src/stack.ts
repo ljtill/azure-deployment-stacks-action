@@ -9,10 +9,14 @@ import { Options } from './types'
 /**
  * Check if object is instance of DeploymentStack.
  */
-export function instanceOfDeploymentStack(
-  object: any
-): object is DeploymentStack {
-  return 'location' in object
+function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    'location' in object &&
+    'tags' in object &&
+    'properties' in object
+  )
 }
 
 /**
@@ -178,18 +182,16 @@ export async function createDeploymentStack(
 
   const result = await operationPromise
 
-  // TODO(ljtill): Pass output
-
   if (result) {
     if (instanceOfDeploymentStack(result)) {
       core.info(`Deployment stack created`)
 
       core.info(`Resources:`)
-      result.properties?.resources?.forEach(resource => {
-        core.info(`Status: ${resource.status}`)
-        core.info(`DenyStatus: ${resource.denyStatus}`)
-        core.info(`Id: ${resource.id}`)
-      })
+      for (const item of result.properties?.resources || []) {
+        core.info(`Status: ${item.status}`)
+        core.info(`DenyStatus: ${item.denyStatus}`)
+        core.info(`Id: ${item.id}`)
+      }
     }
   }
 }

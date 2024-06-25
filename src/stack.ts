@@ -174,6 +174,8 @@ export async function createDeploymentStack(
     }
     core.endGroup()
   }
+
+  core.info(`Operation completed successfully`)
 }
 
 /** Delete deployment stack. */

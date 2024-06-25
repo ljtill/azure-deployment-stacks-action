@@ -50773,6 +50773,7 @@ async function createDeploymentStack(options, client) {
         }
         core.endGroup();
     }
+    core.info(`Operation completed successfully`);
 }
 exports.createDeploymentStack = createDeploymentStack;
 /** Delete deployment stack. */

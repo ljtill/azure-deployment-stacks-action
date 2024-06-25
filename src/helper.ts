@@ -253,7 +253,7 @@ function getInput(
 export function newOptions(): Options {
   core.debug(`Initializing options`)
 
-  let options: Partial<Options> = {}
+  const options: Partial<Options> = {}
 
   // Basic options
   options.name = getInput('name', true)

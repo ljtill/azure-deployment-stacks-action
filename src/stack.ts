@@ -112,14 +112,17 @@ export async function createDeploymentStack(
     properties: {
       description: options.description,
       actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      denySettings: helper.newDenySettings(options),
+      // denySettings: helper.newDenySettings(options),
+      denySettings: {
+        mode: options.denySettings
+      },
       template,
       parameters
     },
     tags: {
-      Repository: options.repository,
-      Commit: options.commit,
-      Branch: options.branch
+      repository: options.repository,
+      commit: options.commit,
+      branch: options.branch
     }
   }
 
@@ -272,14 +275,17 @@ export async function validateDeploymentStack(
     properties: {
       description: options.description,
       actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      denySettings: helper.newDenySettings(options),
+      // denySettings: helper.newDenySettings(options),
+      denySettings: {
+        mode: options.denySettings
+      },
       template,
       parameters
     },
     tags: {
-      Repository: options.repository,
-      Commit: options.commit,
-      Branch: options.branch
+      repository: options.repository,
+      commit: options.commit,
+      branch: options.branch
     }
   }
 

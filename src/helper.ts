@@ -284,11 +284,15 @@ export function newOptions(): Options {
     const excludedActions = getInput('excludedActions', false)
     if (excludedActions) {
       options.excludedActions = excludedActions.split(',')
+    } else {
+      options.excludedActions = []
     }
 
     const excludedPrincipals = getInput('excludedPrincipals', false)
     if (excludedPrincipals) {
       options.excludedPrincipals = excludedPrincipals.split(',')
+    } else {
+      options.excludedPrincipals = ['']
     }
 
     // Template and parameters files

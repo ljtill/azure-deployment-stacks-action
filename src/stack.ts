@@ -112,10 +112,7 @@ export async function createDeploymentStack(
     properties: {
       description: options.description,
       actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      // denySettings: helper.newDenySettings(options),
-      denySettings: {
-        mode: options.denySettings
-      },
+      denySettings: helper.newDenySettings(options),
       template,
       parameters
     },
@@ -275,10 +272,7 @@ export async function validateDeploymentStack(
     properties: {
       description: options.description,
       actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      // denySettings: helper.newDenySettings(options),
-      denySettings: {
-        mode: options.denySettings
-      },
+      denySettings: helper.newDenySettings(options),
       template,
       parameters
     },

@@ -50764,7 +50764,7 @@ async function createDeploymentStack(options, client) {
     }
     const result = await operationPromise;
     if (result && helper.instanceOfDeploymentStack(result)) {
-        core.startGroup('Deployed managed resources');
+        core.startGroup('Deployed resources');
         for (const item of result.properties?.resources || []) {
             core.info(`Id: ${item.id}`);
             core.info(`Status: ${item.status}`);

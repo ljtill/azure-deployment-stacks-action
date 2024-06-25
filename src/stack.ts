@@ -186,7 +186,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
 
   const result = await operationPromise
 
-  if (result && helper.instanceOfDeploymentStack(result)) {
+  if (result && instanceOfDeploymentStack(result)) {
     core.startGroup('Deployed resources')
     for (const item of result.properties?.resources || []) {
       core.info(`Id: ${item.id}`)

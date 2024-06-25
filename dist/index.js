@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.instanceOfDeploymentStack = exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50547,15 +50547,6 @@ function prepareDenySettings(config) {
     };
 }
 exports.prepareDenySettings = prepareDenySettings;
-/** Check if object is instance of DeploymentStack. */
-function instanceOfDeploymentStack(object) {
-    return (typeof object === 'object' &&
-        object !== null &&
-        'location' in object &&
-        'tags' in object &&
-        'properties' in object);
-}
-exports.instanceOfDeploymentStack = instanceOfDeploymentStack;
 
 
 /***/ }),
@@ -50658,17 +50649,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = exports.instanceOfDeploymentStack = exports.newCredential = void 0;
+exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const identity_1 = __nccwpck_require__(3084);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
-const identity_1 = __nccwpck_require__(3084);
 /** Initialize Azure credential. */
 function newCredential() {
     core.debug(`Generate new credential`);
     return new identity_1.DefaultAzureCredential();
 }
-exports.newCredential = newCredential;
 /** Check if object is instance of DeploymentStack. */
 function instanceOfDeploymentStack(object) {
     return (typeof object === 'object' &&
@@ -50677,7 +50667,6 @@ function instanceOfDeploymentStack(object) {
         'tags' in object &&
         'properties' in object);
 }
-exports.instanceOfDeploymentStack = instanceOfDeploymentStack;
 /** Get deployment stack. */
 async function getDeploymentStack(config, client) {
     core.debug(`Retrieving deployment stack`);
@@ -50772,7 +50761,7 @@ async function createDeploymentStack(config) {
             break;
     }
     const result = await operationPromise;
-    if (result && helper.instanceOfDeploymentStack(result)) {
+    if (result && instanceOfDeploymentStack(result)) {
         core.startGroup('Deployed resources');
         for (const item of result.properties?.resources || []) {
             core.info(`Id: ${item.id}`);
@@ -50905,11 +50894,13 @@ const defaultContext = {
     commit: '',
     branch: ''
 };
+const defaultOutputs = {};
 /** Create default options */
 function createDefaultConfig(overrides) {
     return {
         inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },
-        context: { ...defaultContext, ...(overrides?.context || {}) }
+        context: { ...defaultContext, ...(overrides?.context || {}) },
+        outputs: { ...defaultOutputs, ...(overrides?.outputs || {}) }
     };
 }
 exports.createDefaultConfig = createDefaultConfig;

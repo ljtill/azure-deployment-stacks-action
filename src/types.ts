@@ -2,6 +2,7 @@
 export interface Config {
   inputs: Inputs
   context: Context
+  outputs: Outputs
 }
 
 /** Inputs */
@@ -33,6 +34,9 @@ interface Context {
   branch: string
 }
 
+/** Outputs */
+interface Outputs {}
+
 /** Default Values */
 const defaultInputs: Inputs = {
   name: '',
@@ -61,10 +65,13 @@ const defaultContext: Context = {
   branch: ''
 }
 
+const defaultOutputs: Outputs = {}
+
 /** Create default options */
 export function createDefaultConfig(overrides?: Partial<Config>): Config {
   return {
     inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },
-    context: { ...defaultContext, ...(overrides?.context || {}) }
+    context: { ...defaultContext, ...(overrides?.context || {}) },
+    outputs: { ...defaultOutputs, ...(overrides?.outputs || {}) }
   }
 }

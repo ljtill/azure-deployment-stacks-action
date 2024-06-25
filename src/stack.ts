@@ -1,39 +1,58 @@
 import * as core from '@actions/core'
+import { DefaultAzureCredential } from '@azure/identity'
 import {
   DeploymentStacksClient,
   DeploymentStack
 } from '@azure/arm-resourcesdeploymentstacks'
 import * as helper from './helper'
-import { Options } from './types'
+import { Config } from './types'
+
+/** Initialize Azure credential. */
+function newCredential(): DefaultAzureCredential {
+  core.debug(`Generate new credential`)
+
+  return new DefaultAzureCredential()
+}
+
+/** Check if object is instance of DeploymentStack. */
+function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    'location' in object &&
+    'tags' in object &&
+    'properties' in object
+  )
+}
 
 /** Get deployment stack. */
 async function getDeploymentStack(
-  options: Options,
+  config: Config,
   client: DeploymentStacksClient
 ): Promise<DeploymentStack> {
   core.debug(`Retrieving deployment stack`)
 
   let deploymentStack: DeploymentStack | undefined
 
-  switch (options.scope) {
+  switch (config.inputs.scope) {
     case 'managementGroup':
       deploymentStack = await client.deploymentStacks.getAtManagementGroup(
-        options.managementGroupId,
-        options.name
+        config.inputs.managementGroupId,
+        config.inputs.name
       )
       break
 
     case 'subscription':
-      client.subscriptionId = options.subscriptionId
+      client.subscriptionId = config.inputs.subscriptionId
       deploymentStack = await client.deploymentStacks.getAtSubscription(
-        options.name
+        config.inputs.name
       )
       break
 
     case 'resourceGroup':
       deploymentStack = await client.deploymentStacks.getAtResourceGroup(
-        options.resourceGroupName,
-        options.name
+        config.inputs.resourceGroupName,
+        config.inputs.name
       )
       break
   }
@@ -47,24 +66,24 @@ async function getDeploymentStack(
 
 /** List deployment stacks. */
 async function listDeploymentStacks(
-  options: Options,
+  config: Config,
   client: DeploymentStacksClient
 ): Promise<DeploymentStack[]> {
   core.debug(`Listing deployment stacks`)
 
   const deploymentStacks = []
 
-  switch (options.scope) {
+  switch (config.inputs.scope) {
     case 'managementGroup':
       for await (const item of client.deploymentStacks.listAtManagementGroup(
-        options.managementGroupId
+        config.inputs.managementGroupId
       )) {
         deploymentStacks.push(item)
       }
       break
 
     case 'subscription':
-      client.subscriptionId = options.subscriptionId
+      client.subscriptionId = config.inputs.subscriptionId
       for await (const item of client.deploymentStacks.listAtSubscription()) {
         deploymentStacks.push(item)
       }
@@ -72,7 +91,7 @@ async function listDeploymentStacks(
 
     case 'resourceGroup':
       for await (const item of client.deploymentStacks.listAtResourceGroup(
-        options.resourceGroupName
+        config.inputs.resourceGroupName
       )) {
         deploymentStacks.push(item)
       }
@@ -83,80 +102,83 @@ async function listDeploymentStacks(
 }
 
 /** Create deployment stack. */
-export async function createDeploymentStack(
-  options: Options,
-  client: DeploymentStacksClient
-): Promise<void> {
+export async function createDeploymentStack(config: Config): Promise<void> {
+  // Initialize deployment stacks client
+  const client = new DeploymentStacksClient(newCredential())
+
   // Display operation message
-  !(await listDeploymentStacks(options, client)).some(
-    stack => stack.name === options.name
+  !(await listDeploymentStacks(config, client)).some(
+    stack => stack.name === config.inputs.name
   )
     ? core.info(`Creating deployment stack`)
     : core.info(`Updating deployment stack`)
 
   // Parse template and parameter files
-  const template = await helper.parseTemplateFile(options)
-  const parameters = options.parametersFile
-    ? helper.parseParametersFile(options)
+  const template = await helper.parseTemplateFile(config)
+
+  const parameters = config.inputs.parametersFile
+    ? helper.parseParametersFile(config)
     : {}
 
   // Initialize deployment stack
   const deploymentStack: DeploymentStack = {
-    location: options.location,
+    location: config.inputs.location,
     properties: {
-      description: options.description,
-      actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      denySettings: helper.newDenySettings(options),
+      description: config.inputs.description,
+      actionOnUnmanage: helper.prepareUnmanageProperties(
+        config.inputs.actionOnUnmanage
+      ),
+      denySettings: helper.prepareDenySettings(config),
       template,
       parameters
     },
     tags: {
-      repository: options.repository,
-      commit: options.commit,
-      branch: options.branch
+      repository: config.context.repository,
+      commit: config.context.commit,
+      branch: config.context.branch
     }
   }
 
   let operationPromise
 
-  switch (options.scope) {
+  switch (config.inputs.scope) {
     case 'managementGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             deploymentStack
           )
       break
 
     case 'subscription':
-      client.subscriptionId = options.subscriptionId
-      operationPromise = options.wait
+      client.subscriptionId = config.inputs.subscriptionId
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(
-            options.name,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginCreateOrUpdateAtSubscription(
-            options.name,
+            config.inputs.name,
             deploymentStack
           )
       break
 
     case 'resourceGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             deploymentStack
           )
       break
@@ -179,13 +201,13 @@ export async function createDeploymentStack(
 }
 
 /** Delete deployment stack. */
-export async function deleteDeploymentStack(
-  options: Options,
-  client: DeploymentStacksClient
-): Promise<void> {
+export async function deleteDeploymentStack(config: Config): Promise<void> {
+  // Initialize deployment stacks client
+  const client = new DeploymentStacksClient(newCredential())
+
   core.info(`Deleting deployment stack`)
 
-  const deploymentStack = await getDeploymentStack(options, client)
+  const deploymentStack = await getDeploymentStack(config, client)
   const params = {
     unmanageActionManagementGroups:
       deploymentStack.properties?.actionOnUnmanage.managementGroups,
@@ -197,44 +219,44 @@ export async function deleteDeploymentStack(
 
   let operationPromise
 
-  switch (options.scope) {
+  switch (config.inputs.scope) {
     case 'managementGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             params
           )
         : client.deploymentStacks.beginDeleteAtManagementGroup(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             params
           )
       break
 
     case 'subscription':
-      client.subscriptionId = options.subscriptionId
-      operationPromise = options.wait
+      client.subscriptionId = config.inputs.subscriptionId
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(
-            options.name,
+            config.inputs.name,
             params
           )
         : client.deploymentStacks.beginDeleteAtSubscription(
-            options.name,
+            config.inputs.name,
             params
           )
       break
 
     case 'resourceGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             params
           )
         : client.deploymentStacks.beginDeleteAtResourceGroup(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             params
           )
       break
@@ -244,75 +266,77 @@ export async function deleteDeploymentStack(
 }
 
 /** Validate deployment stack. */
-export async function validateDeploymentStack(
-  options: Options,
-  client: DeploymentStacksClient
-): Promise<void> {
+export async function validateDeploymentStack(config: Config): Promise<void> {
+  // Initialize deployment stacks client
+  const client = new DeploymentStacksClient(newCredential())
+
   core.info(`Validating deployment stack`)
 
   // Parse template and parameter files
-  const template = await helper.parseTemplateFile(options)
-  const parameters = options.parametersFile
-    ? helper.parseParametersFile(options)
+  const template = await helper.parseTemplateFile(config)
+  const parameters = config.inputs.parametersFile
+    ? helper.parseParametersFile(config)
     : {}
 
   // Initialize deployment stack
   const deploymentStack: DeploymentStack = {
-    location: options.location,
+    location: config.inputs.location,
     properties: {
-      description: options.description,
-      actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-      denySettings: helper.newDenySettings(options),
+      description: config.inputs.description,
+      actionOnUnmanage: helper.prepareUnmanageProperties(
+        config.inputs.actionOnUnmanage
+      ),
+      denySettings: helper.prepareDenySettings(config),
       template,
       parameters
     },
     tags: {
-      repository: options.repository,
-      commit: options.commit,
-      branch: options.branch
+      repository: config.context.repository,
+      commit: config.context.commit,
+      branch: config.context.branch
     }
   }
 
   let operationPromise
 
-  switch (options.scope) {
+  switch (config.inputs.scope) {
     case 'managementGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginValidateStackAtManagementGroup(
-            options.managementGroupId,
-            options.name,
+            config.inputs.managementGroupId,
+            config.inputs.name,
             deploymentStack
           )
       break
 
     case 'subscription':
-      client.subscriptionId = options.subscriptionId
-      operationPromise = options.wait
+      client.subscriptionId = config.inputs.subscriptionId
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(
-            options.name,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginValidateStackAtSubscription(
-            options.name,
+            config.inputs.name,
             deploymentStack
           )
       break
 
     case 'resourceGroup':
-      operationPromise = options.wait
+      operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             deploymentStack
           )
         : client.deploymentStacks.beginValidateStackAtResourceGroup(
-            options.resourceGroupName,
-            options.name,
+            config.inputs.resourceGroupName,
+            config.inputs.name,
             deploymentStack
           )
       break

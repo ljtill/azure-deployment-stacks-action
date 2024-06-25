@@ -1,5 +1,11 @@
-/* Scope */
-export interface Options {
+/** Options */
+export interface Config {
+  inputs: Inputs
+  context: Context
+}
+
+/** Inputs */
+interface Inputs {
   name: string
   description: string
   location: string
@@ -16,22 +22,49 @@ export interface Options {
   templateFile: string
   parametersFile: string
   wait: boolean
+}
+
+/** Context */
+interface Context {
+  template: Record<string, unknown>
+  parameters: Record<string, unknown>
   repository: string
   commit: string
   branch: string
 }
 
-/* ActionOnUnmanage */
-export interface ActionOnUnmanage {
-  managementGroups: string
-  resourceGroups: string
-  resources: string
+/** Default Values */
+const defaultInputs: Inputs = {
+  name: '',
+  description: '',
+  location: '',
+  scope: '',
+  mode: '',
+  actionOnUnmanage: '',
+  denySettings: '',
+  applyToChildScopes: false,
+  excludedActions: [],
+  excludedPrincipals: [],
+  managementGroupId: '',
+  subscriptionId: '',
+  resourceGroupName: '',
+  templateFile: '',
+  parametersFile: '',
+  wait: false
 }
 
-/* DenySettings */
-export interface DenySettings {
-  mode: string
-  applyToChildScopes: boolean
-  excludedActions: string[]
-  excludedPrincipals: string[]
+const defaultContext: Context = {
+  template: {},
+  parameters: {},
+  repository: '',
+  commit: '',
+  branch: ''
+}
+
+/** Create default options */
+export function createDefaultConfig(overrides?: Partial<Config>): Config {
+  return {
+    inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },
+    context: { ...defaultContext, ...(overrides?.context || {}) }
+  }
 }

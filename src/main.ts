@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import { DeploymentStacksClient } from '@azure/arm-resourcesdeploymentstacks'
 import * as helper from './helper'
 import * as stack from './stack'
 
@@ -11,28 +10,22 @@ export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
 
-    // Check that the Bicep binary is installed
+    // Check Bicep is installed
     await helper.checkBicep()
 
-    // Authenticate the session
-    const credential = helper.newCredential()
-
-    // Hydrate options variable
-    const options = helper.newOptions()
-
-    // Initialize deployment stacks client
-    const client = new DeploymentStacksClient(credential)
+    // Hydrate configuration
+    const config = helper.newConfig()
 
     // Perform action
-    switch (options.mode) {
+    switch (config.inputs.mode) {
       case 'create':
-        await stack.createDeploymentStack(options, client)
+        await stack.createDeploymentStack(config)
         break
       case 'delete':
-        await stack.deleteDeploymentStack(options, client)
+        await stack.deleteDeploymentStack(config)
         break
       case 'validate':
-        await stack.validateDeploymentStack(options, client)
+        await stack.validateDeploymentStack(config)
         break
     }
 

@@ -5,9 +5,7 @@ import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
-import { DefaultAzureCredential } from '@azure/identity'
-import { Options, ActionOnUnmanage, DenySettings } from './types'
-import { DeploymentStack } from '@azure/arm-resourcesdeploymentstacks'
+import { Config, createDefaultConfig } from './types'
 
 /** Install Bicep binary. */
 export async function installBicep(): Promise<void> {
@@ -154,11 +152,11 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 
 /** Parse template file. */
 export async function parseTemplateFile(
-  options: Options
+  config: Config
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing template file: ${options.templateFile}`)
+  core.debug(`Parsing template file: ${config.inputs.templateFile}`)
 
-  let filePath = options.templateFile
+  let filePath = config.inputs.templateFile
 
   // Parse the file extension
   const fileExtension = path.extname(filePath)
@@ -182,11 +180,11 @@ export async function parseTemplateFile(
 
 /** Parse parameters file. */
 export async function parseParametersFile(
-  options: Options
+  config: Config
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing parameters file: ${options.parametersFile}`)
+  core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`)
 
-  let filePath = options.parametersFile
+  let filePath = config.inputs.parametersFile
 
   // Parse the file extension
   const fileExtension = path.extname(filePath)
@@ -208,13 +206,6 @@ export async function parseParametersFile(
   return JSON.parse(fileContent.toString())
 }
 
-/** Initialize Azure credential. */
-export function newCredential(): DefaultAzureCredential {
-  core.debug(`Generate new credential`)
-
-  return new DefaultAzureCredential()
-}
-
 /** Get input */
 function getInput(
   key: string,
@@ -229,90 +220,99 @@ function getInput(
   return value
 }
 
-/** Initiliaze Options. */
-export function newOptions(): Options {
-  core.debug(`Initializing options`)
+/** Initiliaze config. */
+export function newConfig(): Config {
+  core.debug(`Initializing config`)
 
-  const options: Partial<Options> = {}
+  const config: Config = createDefaultConfig()
 
-  // Basic options
-  options.name = getInput('name', true)
-  options.mode = getInput('mode', true, ['create', 'delete', 'validate'])
+  // Basic config
+  config.inputs.name = getInput('name', true)
+  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
 
-  // Additional options for 'create' or 'validate' modes
-  if (options.mode === 'create' || options.mode === 'validate') {
-    options.description = getInput('description', false)
-    options.location = getInput('location', false)
+  // Additional config for 'create' or 'validate' modes
+  if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
+    config.inputs.description = getInput('description', false)
+    config.inputs.location = getInput('location', false)
 
     // Unmanage Action
-    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+    config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
       'deleteAll',
       'deleteResources',
       'detachAll'
     ])
 
     // Deny Settings
-    options.denySettings = getInput('denySettings', true, [
+    config.inputs.denySettings = getInput('denySettings', true, [
       'denyDelete',
       'denyWriteAndDelete',
       'none'
     ])
 
-    options.applyToChildScopes =
+    config.inputs.applyToChildScopes =
       getInput('applyToChildScopes', false) === 'true'
 
     const excludedActions = getInput('excludedActions', false)
     if (excludedActions) {
-      options.excludedActions = excludedActions.split(',')
+      config.inputs.excludedActions = excludedActions.split(',')
     } else {
-      options.excludedActions = undefined
+      config.inputs.excludedActions = []
     }
 
     const excludedPrincipals = getInput('excludedPrincipals', false)
     if (excludedPrincipals) {
-      options.excludedPrincipals = excludedPrincipals.split(',')
+      config.inputs.excludedPrincipals = excludedPrincipals.split(',')
     } else {
-      options.excludedPrincipals = undefined
+      config.inputs.excludedPrincipals = []
     }
 
-    // Template and parameters files
-    options.templateFile = getInput('templateFile', true)
-    options.parametersFile = getInput('parametersFile', false)
+    // Template
+    config.inputs.templateFile = getInput('templateFile', true)
+
+    // Parameters
+    config.inputs.parametersFile = getInput('parametersFile', false)
 
     // Repository metadata
-    options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
-    options.commit = github.context.sha
-    options.branch = github.context.ref
+    config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
+    config.context.commit = github.context.sha
+    config.context.branch = github.context.ref
   }
 
-  // Scope options
-  options.scope = getInput('scope', true, [
+  // Scope config
+  config.inputs.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
     'resourceGroup'
   ])
 
-  // Scope specific options
-  switch (options.scope) {
+  // Scope specific config
+  switch (config.inputs.scope) {
     case 'managementGroup':
-      options.managementGroupId = getInput('managementGroupId', true)
+      config.inputs.managementGroupId = getInput('managementGroupId', true)
       break
     case 'subscription':
-      options.subscriptionId = getInput('subscriptionId', true)
+      config.inputs.subscriptionId = getInput('subscriptionId', true)
       break
     case 'resourceGroup':
-      options.resourceGroupName = getInput('resourceGroupName', true)
+      config.inputs.resourceGroupName = getInput('resourceGroupName', true)
       break
   }
 
-  // Control options
-  options.wait = getInput('wait', false) === 'true'
+  // Control config
+  config.inputs.wait = getInput('wait', false) === 'true'
 
-  return options as Options
+  return config
+}
+
+/* ActionOnUnmanage */
+interface ActionOnUnmanage {
+  managementGroups: string
+  resourceGroups: string
+  resources: string
 }
 
 /** Initialize actionOnUnmanage property. */
-export function newUnmanageProperties(value: string): ActionOnUnmanage {
+export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
       return {
@@ -340,25 +340,20 @@ export function newUnmanageProperties(value: string): ActionOnUnmanage {
   }
 }
 
-/** Initialize denySettings property. */
-export function newDenySettings(options: Options): DenySettings {
-  return {
-    mode: options.denySettings,
-    applyToChildScopes: options.applyToChildScopes,
-    excludedActions: options.excludedActions,
-    excludedPrincipals: options.excludedPrincipals
-  }
+/* DenySettings */
+interface DenySettings {
+  mode: string
+  applyToChildScopes: boolean
+  excludedActions: string[]
+  excludedPrincipals: string[]
 }
 
-/** Check if object is instance of DeploymentStack. */
-export function instanceOfDeploymentStack(
-  object: unknown
-): object is DeploymentStack {
-  return (
-    typeof object === 'object' &&
-    object !== null &&
-    'location' in object &&
-    'tags' in object &&
-    'properties' in object
-  )
+/** Initialize denySettings property. */
+export function prepareDenySettings(config: Config): DenySettings {
+  return {
+    mode: config.inputs.denySettings,
+    applyToChildScopes: config.inputs.applyToChildScopes,
+    excludedActions: config.inputs.excludedActions,
+    excludedPrincipals: config.inputs.excludedPrincipals
+  }
 }

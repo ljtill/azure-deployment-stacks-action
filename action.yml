@@ -66,6 +66,7 @@ inputs:
   templateFile:
     description: 'A path to a ARM or Bicep file in the file system.'
     required: false
+
   parametersFile:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false

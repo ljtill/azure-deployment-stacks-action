@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.instanceOfDeploymentStack = exports.newDenySettings = exports.newUnmanageProperties = exports.newOptions = exports.newCredential = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.instanceOfDeploymentStack = exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50274,7 +50274,7 @@ const exec = __importStar(__nccwpck_require__(9990));
 const github = __importStar(__nccwpck_require__(5438));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
-const identity_1 = __nccwpck_require__(3084);
+const types_1 = __nccwpck_require__(77);
 /** Install Bicep binary. */
 async function installBicep() {
     core.debug(`Installing Bicep binary`);
@@ -50386,9 +50386,9 @@ async function buildBicepParametersFile(filePath) {
     return outputPath;
 }
 /** Parse template file. */
-async function parseTemplateFile(options) {
-    core.debug(`Parsing template file: ${options.templateFile}`);
-    let filePath = options.templateFile;
+async function parseTemplateFile(config) {
+    core.debug(`Parsing template file: ${config.inputs.templateFile}`);
+    let filePath = config.inputs.templateFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
@@ -50408,9 +50408,9 @@ async function parseTemplateFile(options) {
 }
 exports.parseTemplateFile = parseTemplateFile;
 /** Parse parameters file. */
-async function parseParametersFile(options) {
-    core.debug(`Parsing parameters file: ${options.parametersFile}`);
-    let filePath = options.parametersFile;
+async function parseParametersFile(config) {
+    core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`);
+    let filePath = config.inputs.parametersFile;
     // Parse the file extension
     const fileExtension = path.extname(filePath);
     // Check if the file path is valid
@@ -50429,12 +50429,6 @@ async function parseParametersFile(options) {
     return JSON.parse(fileContent.toString());
 }
 exports.parseParametersFile = parseParametersFile;
-/** Initialize Azure credential. */
-function newCredential() {
-    core.debug(`Generate new credential`);
-    return new identity_1.DefaultAzureCredential();
-}
-exports.newCredential = newCredential;
 /** Get input */
 function getInput(key, required, validValues) {
     const value = core.getInput(key, { required, trimWhitespace: true });
@@ -50443,78 +50437,79 @@ function getInput(key, required, validValues) {
     }
     return value;
 }
-/** Initiliaze Options. */
-function newOptions() {
-    core.debug(`Initializing options`);
-    const options = {};
-    // Basic options
-    options.name = getInput('name', true);
-    options.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    // Additional options for 'create' or 'validate' modes
-    if (options.mode === 'create' || options.mode === 'validate') {
-        options.description = getInput('description', false);
-        options.location = getInput('location', false);
+/** Initiliaze config. */
+function newConfig() {
+    core.debug(`Initializing config`);
+    const config = (0, types_1.createDefaultConfig)();
+    // Basic config
+    config.inputs.name = getInput('name', true);
+    config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
+    // Additional config for 'create' or 'validate' modes
+    if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
+        config.inputs.description = getInput('description', false);
+        config.inputs.location = getInput('location', false);
         // Unmanage Action
-        options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+        config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
             'deleteAll',
             'deleteResources',
             'detachAll'
         ]);
         // Deny Settings
-        options.denySettings = getInput('denySettings', true, [
+        config.inputs.denySettings = getInput('denySettings', true, [
             'denyDelete',
             'denyWriteAndDelete',
             'none'
         ]);
-        options.applyToChildScopes =
+        config.inputs.applyToChildScopes =
             getInput('applyToChildScopes', false) === 'true';
         const excludedActions = getInput('excludedActions', false);
         if (excludedActions) {
-            options.excludedActions = excludedActions.split(',');
+            config.inputs.excludedActions = excludedActions.split(',');
         }
         else {
-            options.excludedActions = undefined;
+            config.inputs.excludedActions = [];
         }
         const excludedPrincipals = getInput('excludedPrincipals', false);
         if (excludedPrincipals) {
-            options.excludedPrincipals = excludedPrincipals.split(',');
+            config.inputs.excludedPrincipals = excludedPrincipals.split(',');
         }
         else {
-            options.excludedPrincipals = undefined;
+            config.inputs.excludedPrincipals = [];
         }
-        // Template and parameters files
-        options.templateFile = getInput('templateFile', true);
-        options.parametersFile = getInput('parametersFile', false);
+        // Template
+        config.inputs.templateFile = getInput('templateFile', true);
+        // Parameters
+        config.inputs.parametersFile = getInput('parametersFile', false);
         // Repository metadata
-        options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
-        options.commit = github.context.sha;
-        options.branch = github.context.ref;
+        config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+        config.context.commit = github.context.sha;
+        config.context.branch = github.context.ref;
     }
-    // Scope options
-    options.scope = getInput('scope', true, [
+    // Scope config
+    config.inputs.scope = getInput('scope', true, [
         'managementGroup',
         'subscription',
         'resourceGroup'
     ]);
-    // Scope specific options
-    switch (options.scope) {
+    // Scope specific config
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            options.managementGroupId = getInput('managementGroupId', true);
+            config.inputs.managementGroupId = getInput('managementGroupId', true);
             break;
         case 'subscription':
-            options.subscriptionId = getInput('subscriptionId', true);
+            config.inputs.subscriptionId = getInput('subscriptionId', true);
             break;
         case 'resourceGroup':
-            options.resourceGroupName = getInput('resourceGroupName', true);
+            config.inputs.resourceGroupName = getInput('resourceGroupName', true);
             break;
     }
-    // Control options
-    options.wait = getInput('wait', false) === 'true';
-    return options;
+    // Control config
+    config.inputs.wait = getInput('wait', false) === 'true';
+    return config;
 }
-exports.newOptions = newOptions;
+exports.newConfig = newConfig;
 /** Initialize actionOnUnmanage property. */
-function newUnmanageProperties(value) {
+function prepareUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
             return {
@@ -50541,17 +50536,17 @@ function newUnmanageProperties(value) {
             throw new Error(`Invalid actionOnUnmanage: ${value}`);
     }
 }
-exports.newUnmanageProperties = newUnmanageProperties;
+exports.prepareUnmanageProperties = prepareUnmanageProperties;
 /** Initialize denySettings property. */
-function newDenySettings(options) {
+function prepareDenySettings(config) {
     return {
-        mode: options.denySettings,
-        applyToChildScopes: options.applyToChildScopes,
-        excludedActions: options.excludedActions,
-        excludedPrincipals: options.excludedPrincipals
+        mode: config.inputs.denySettings,
+        applyToChildScopes: config.inputs.applyToChildScopes,
+        excludedActions: config.inputs.excludedActions,
+        excludedPrincipals: config.inputs.excludedPrincipals
     };
 }
-exports.newDenySettings = newDenySettings;
+exports.prepareDenySettings = prepareDenySettings;
 /** Check if object is instance of DeploymentStack. */
 function instanceOfDeploymentStack(object) {
     return (typeof object === 'object' &&
@@ -50596,7 +50591,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
 const stack = __importStar(__nccwpck_require__(7067));
 /**
@@ -50606,24 +50600,20 @@ const stack = __importStar(__nccwpck_require__(7067));
 async function run() {
     try {
         core.debug(`Starting action`);
-        // Check that the Bicep binary is installed
+        // Check Bicep is installed
         await helper.checkBicep();
-        // Authenticate the session
-        const credential = helper.newCredential();
-        // Hydrate options variable
-        const options = helper.newOptions();
-        // Initialize deployment stacks client
-        const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credential);
+        // Hydrate configuration
+        const config = helper.newConfig();
         // Perform action
-        switch (options.mode) {
+        switch (config.inputs.mode) {
             case 'create':
-                await stack.createDeploymentStack(options, client);
+                await stack.createDeploymentStack(config);
                 break;
             case 'delete':
-                await stack.deleteDeploymentStack(options, client);
+                await stack.deleteDeploymentStack(config);
                 break;
             case 'validate':
-                await stack.validateDeploymentStack(options, client);
+                await stack.validateDeploymentStack(config);
                 break;
         }
         core.debug(`Finishing action`);
@@ -50668,23 +50658,40 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
+exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = exports.instanceOfDeploymentStack = exports.newCredential = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
+const identity_1 = __nccwpck_require__(3084);
+/** Initialize Azure credential. */
+function newCredential() {
+    core.debug(`Generate new credential`);
+    return new identity_1.DefaultAzureCredential();
+}
+exports.newCredential = newCredential;
+/** Check if object is instance of DeploymentStack. */
+function instanceOfDeploymentStack(object) {
+    return (typeof object === 'object' &&
+        object !== null &&
+        'location' in object &&
+        'tags' in object &&
+        'properties' in object);
+}
+exports.instanceOfDeploymentStack = instanceOfDeploymentStack;
 /** Get deployment stack. */
-async function getDeploymentStack(options, client) {
+async function getDeploymentStack(config, client) {
     core.debug(`Retrieving deployment stack`);
     let deploymentStack;
-    switch (options.scope) {
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            deploymentStack = await client.deploymentStacks.getAtManagementGroup(options.managementGroupId, options.name);
+            deploymentStack = await client.deploymentStacks.getAtManagementGroup(config.inputs.managementGroupId, config.inputs.name);
             break;
         case 'subscription':
-            client.subscriptionId = options.subscriptionId;
-            deploymentStack = await client.deploymentStacks.getAtSubscription(options.name);
+            client.subscriptionId = config.inputs.subscriptionId;
+            deploymentStack = await client.deploymentStacks.getAtSubscription(config.inputs.name);
             break;
         case 'resourceGroup':
-            deploymentStack = await client.deploymentStacks.getAtResourceGroup(options.resourceGroupName, options.name);
+            deploymentStack = await client.deploymentStacks.getAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name);
             break;
     }
     if (!deploymentStack) {
@@ -50693,23 +50700,23 @@ async function getDeploymentStack(options, client) {
     return deploymentStack;
 }
 /** List deployment stacks. */
-async function listDeploymentStacks(options, client) {
+async function listDeploymentStacks(config, client) {
     core.debug(`Listing deployment stacks`);
     const deploymentStacks = [];
-    switch (options.scope) {
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            for await (const item of client.deploymentStacks.listAtManagementGroup(options.managementGroupId)) {
+            for await (const item of client.deploymentStacks.listAtManagementGroup(config.inputs.managementGroupId)) {
                 deploymentStacks.push(item);
             }
             break;
         case 'subscription':
-            client.subscriptionId = options.subscriptionId;
+            client.subscriptionId = config.inputs.subscriptionId;
             for await (const item of client.deploymentStacks.listAtSubscription()) {
                 deploymentStacks.push(item);
             }
             break;
         case 'resourceGroup':
-            for await (const item of client.deploymentStacks.listAtResourceGroup(options.resourceGroupName)) {
+            for await (const item of client.deploymentStacks.listAtResourceGroup(config.inputs.resourceGroupName)) {
                 deploymentStacks.push(item);
             }
             break;
@@ -50717,49 +50724,51 @@ async function listDeploymentStacks(options, client) {
     return deploymentStacks;
 }
 /** Create deployment stack. */
-async function createDeploymentStack(options, client) {
+async function createDeploymentStack(config) {
+    // Initialize deployment stacks client
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     // Display operation message
-    !(await listDeploymentStacks(options, client)).some(stack => stack.name === options.name)
+    !(await listDeploymentStacks(config, client)).some(stack => stack.name === config.inputs.name)
         ? core.info(`Creating deployment stack`)
         : core.info(`Updating deployment stack`);
     // Parse template and parameter files
-    const template = await helper.parseTemplateFile(options);
-    const parameters = options.parametersFile
-        ? helper.parseParametersFile(options)
+    const template = await helper.parseTemplateFile(config);
+    const parameters = config.inputs.parametersFile
+        ? helper.parseParametersFile(config)
         : {};
     // Initialize deployment stack
     const deploymentStack = {
-        location: options.location,
+        location: config.inputs.location,
         properties: {
-            description: options.description,
-            actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-            denySettings: helper.newDenySettings(options),
+            description: config.inputs.description,
+            actionOnUnmanage: helper.prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+            denySettings: helper.prepareDenySettings(config),
             template,
             parameters
         },
         tags: {
-            repository: options.repository,
-            commit: options.commit,
-            branch: options.branch
+            repository: config.context.repository,
+            commit: config.context.commit,
+            branch: config.context.branch
         }
     };
     let operationPromise;
-    switch (options.scope) {
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(options.managementGroupId, options.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(options.managementGroupId, options.name, deploymentStack);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack);
             break;
         case 'subscription':
-            client.subscriptionId = options.subscriptionId;
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(options.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(options.name, deploymentStack);
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(config.inputs.name, deploymentStack);
             break;
         case 'resourceGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(options.resourceGroupName, options.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(options.resourceGroupName, options.name, deploymentStack);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack);
             break;
     }
     const result = await operationPromise;
@@ -50777,77 +50786,81 @@ async function createDeploymentStack(options, client) {
 }
 exports.createDeploymentStack = createDeploymentStack;
 /** Delete deployment stack. */
-async function deleteDeploymentStack(options, client) {
+async function deleteDeploymentStack(config) {
+    // Initialize deployment stacks client
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Deleting deployment stack`);
-    const deploymentStack = await getDeploymentStack(options, client);
+    const deploymentStack = await getDeploymentStack(config, client);
     const params = {
         unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
         unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
         unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
     };
     let operationPromise;
-    switch (options.scope) {
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(options.managementGroupId, options.name, params)
-                : client.deploymentStacks.beginDeleteAtManagementGroup(options.managementGroupId, options.name, params);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, params)
+                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, params);
             break;
         case 'subscription':
-            client.subscriptionId = options.subscriptionId;
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(options.name, params)
-                : client.deploymentStacks.beginDeleteAtSubscription(options.name, params);
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, params)
+                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, params);
             break;
         case 'resourceGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(options.resourceGroupName, options.name, params)
-                : client.deploymentStacks.beginDeleteAtResourceGroup(options.resourceGroupName, options.name, params);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, params)
+                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, params);
             break;
     }
     await operationPromise;
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
 /** Validate deployment stack. */
-async function validateDeploymentStack(options, client) {
+async function validateDeploymentStack(config) {
+    // Initialize deployment stacks client
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Validating deployment stack`);
     // Parse template and parameter files
-    const template = await helper.parseTemplateFile(options);
-    const parameters = options.parametersFile
-        ? helper.parseParametersFile(options)
+    const template = await helper.parseTemplateFile(config);
+    const parameters = config.inputs.parametersFile
+        ? helper.parseParametersFile(config)
         : {};
     // Initialize deployment stack
     const deploymentStack = {
-        location: options.location,
+        location: config.inputs.location,
         properties: {
-            description: options.description,
-            actionOnUnmanage: helper.newUnmanageProperties(options.actionOnUnmanage),
-            denySettings: helper.newDenySettings(options),
+            description: config.inputs.description,
+            actionOnUnmanage: helper.prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+            denySettings: helper.prepareDenySettings(config),
             template,
             parameters
         },
         tags: {
-            repository: options.repository,
-            commit: options.commit,
-            branch: options.branch
+            repository: config.context.repository,
+            commit: config.context.commit,
+            branch: config.context.branch
         }
     };
     let operationPromise;
-    switch (options.scope) {
+    switch (config.inputs.scope) {
         case 'managementGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(options.managementGroupId, options.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtManagementGroup(options.managementGroupId, options.name, deploymentStack);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginValidateStackAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack);
             break;
         case 'subscription':
-            client.subscriptionId = options.subscriptionId;
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(options.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtSubscription(options.name, deploymentStack);
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginValidateStackAtSubscription(config.inputs.name, deploymentStack);
             break;
         case 'resourceGroup':
-            operationPromise = options.wait
-                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(options.resourceGroupName, options.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtResourceGroup(options.resourceGroupName, options.name, deploymentStack);
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack)
+                : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack);
             break;
     }
     // TODO(ljtill): Parse error messages
@@ -50855,6 +50868,51 @@ async function validateDeploymentStack(options, client) {
     core.info(`No validation errors detected`);
 }
 exports.validateDeploymentStack = validateDeploymentStack;
+
+
+/***/ }),
+
+/***/ 77:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createDefaultConfig = void 0;
+/** Default Values */
+const defaultInputs = {
+    name: '',
+    description: '',
+    location: '',
+    scope: '',
+    mode: '',
+    actionOnUnmanage: '',
+    denySettings: '',
+    applyToChildScopes: false,
+    excludedActions: [],
+    excludedPrincipals: [],
+    managementGroupId: '',
+    subscriptionId: '',
+    resourceGroupName: '',
+    templateFile: '',
+    parametersFile: '',
+    wait: false
+};
+const defaultContext = {
+    template: {},
+    parameters: {},
+    repository: '',
+    commit: '',
+    branch: ''
+};
+/** Create default options */
+function createDefaultConfig(overrides) {
+    return {
+        inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },
+        context: { ...defaultContext, ...(overrides?.context || {}) }
+    };
+}
+exports.createDefaultConfig = createDefaultConfig;
 
 
 /***/ }),

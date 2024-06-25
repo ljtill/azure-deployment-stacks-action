@@ -50275,9 +50275,7 @@ const github = __importStar(__nccwpck_require__(5438));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
 const identity_1 = __nccwpck_require__(3084);
-/**
- * Install Bicep binary.
- */
+/** Install Bicep binary. */
 async function installBicep() {
     core.debug(`Installing Bicep binary`);
     const url = 'https://github.com/azure/bicep/releases/latest/download/';
@@ -50320,9 +50318,7 @@ async function installBicep() {
     }
 }
 exports.installBicep = installBicep;
-/**
- * Check Bicep is installed.
- */
+/** Check Bicep is installed. */
 async function checkBicep() {
     core.debug(`Checking Bicep installation`);
     if ((await io.which('bicep', false)) === '') {
@@ -50332,9 +50328,7 @@ async function checkBicep() {
     return true;
 }
 exports.checkBicep = checkBicep;
-/**
- * Print Bicep version.
- */
+/** Print Bicep version. */
 async function displayBicepVersion() {
     core.debug(`Displaying Bicep version`);
     const bicepPath = await io.which('bicep', true);
@@ -50351,9 +50345,7 @@ async function displayBicepVersion() {
     };
     await exec.exec(bicepPath, ['--version'], execOptions);
 }
-/**
- * Build Bicep file.
- */
+/** Build Bicep file. */
 async function buildBicepFile(filePath) {
     core.debug(`Building Bicep file`);
     // TODO(ljtill): Implement cross platform support
@@ -50373,9 +50365,7 @@ async function buildBicepFile(filePath) {
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
-/**
- * Build Bicep parameters file.
- */
+/** Build Bicep parameters file. */
 async function buildBicepParametersFile(filePath) {
     core.debug(`Building Bicep parameters file`);
     // TODO(ljtill): Implement cross platform support
@@ -50395,9 +50385,7 @@ async function buildBicepParametersFile(filePath) {
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
-/**
- * Parse template file.
- */
+/** Parse template file. */
 async function parseTemplateFile(options) {
     core.debug(`Parsing template file: ${options.templateFile}`);
     let filePath = options.templateFile;
@@ -50419,9 +50407,7 @@ async function parseTemplateFile(options) {
     return JSON.parse(fileContent.toString());
 }
 exports.parseTemplateFile = parseTemplateFile;
-/**
- * Parse parameters file.
- */
+/** Parse parameters file. */
 async function parseParametersFile(options) {
     core.debug(`Parsing parameters file: ${options.parametersFile}`);
     let filePath = options.parametersFile;
@@ -50443,41 +50429,13 @@ async function parseParametersFile(options) {
     return JSON.parse(fileContent.toString());
 }
 exports.parseParametersFile = parseParametersFile;
-/**
- * Initialize Azure credential.
- */
+/** Initialize Azure credential. */
 function newCredential() {
     core.debug(`Generate new credential`);
     return new identity_1.DefaultAzureCredential();
 }
 exports.newCredential = newCredential;
-/**
- * Initiliaze Options.
- */
-function newOptions() {
-    core.debug(`Initializing options`);
-    let options = {};
-    options.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    options.wait = getInput('wait', false) === 'true';
-    switch (options.mode) {
-        case 'create':
-            options = getCreateInputs(options);
-            break;
-        case 'delete':
-            options = getDeleteInputs(options);
-            break;
-        case 'validate':
-            options = getValidateInputs(options);
-            break;
-    }
-    options.commit = github.context.sha;
-    options.branch = github.context.ref;
-    return options;
-}
-exports.newOptions = newOptions;
-/**
- * Get input from the workflow.
- */
+/** Get input */
 function getInput(key, required, validValues) {
     const value = core.getInput(key, { required, trimWhitespace: true });
     if (validValues && !validValues.includes(value)) {
@@ -50485,39 +50443,60 @@ function getInput(key, required, validValues) {
     }
     return value;
 }
-/**
- * Parse create inputs.
- */
-function getCreateInputs(options) {
-    core.debug(`Retrieving create inputs`);
+/** Initiliaze Options. */
+function newOptions() {
+    core.debug(`Initializing options`);
+    const options = {};
+    // Basic options
     options.name = getInput('name', true);
-    options.description = getInput('description', false);
-    options.location = getInput('location', false);
+    options.mode = getInput('mode', true, ['create', 'delete', 'validate']);
+    // Additional options for 'create' or 'validate' modes
+    if (options.mode === 'create' || options.mode === 'validate') {
+        options.description = getInput('description', false);
+        options.location = getInput('location', false);
+        // Unmanage Action
+        options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+            'deleteAll',
+            'deleteResources',
+            'detachAll'
+        ]);
+        // Deny Settings
+        options.denySettings = getInput('denySettings', true, [
+            'denyDelete',
+            'denyWriteAndDelete',
+            'none'
+        ]);
+        options.applyToChildScopes =
+            getInput('applyToChildScopes', false) === 'true';
+        const excludedActions = getInput('excludedActions', false);
+        if (excludedActions) {
+            options.excludedActions = excludedActions.split(',');
+        }
+        else {
+            options.excludedActions = undefined;
+        }
+        const excludedPrincipals = getInput('excludedPrincipals', false);
+        if (excludedPrincipals) {
+            options.excludedPrincipals = excludedPrincipals.split(',');
+        }
+        else {
+            options.excludedPrincipals = undefined;
+        }
+        // Template and parameters files
+        options.templateFile = getInput('templateFile', true);
+        options.parametersFile = getInput('parametersFile', false);
+        // Repository metadata
+        options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+        options.commit = github.context.sha;
+        options.branch = github.context.ref;
+    }
+    // Scope options
     options.scope = getInput('scope', true, [
         'managementGroup',
         'subscription',
         'resourceGroup'
     ]);
-    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-        'deleteAll',
-        'deleteResources',
-        'detachAll'
-    ]);
-    options.denySettings = getInput('denySettings', true, [
-        'denyDelete',
-        'denyWriteAndDelete',
-        'none'
-    ]);
-    options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true';
-    const excludedActions = getInput('excludedActions', false);
-    excludedActions
-        ? (options.excludedActions = excludedActions.split(','))
-        : (options.excludedActions = []);
-    const excludedPrincipals = getInput('excludedPrincipals', false);
-    excludedPrincipals
-        ? (options.excludedPrincipals = excludedPrincipals.split(','))
-        : (options.excludedPrincipals = []);
-    options.excludedPrincipals = getInput('excludedPrincipals', false).split(',');
+    // Scope specific options
     switch (options.scope) {
         case 'managementGroup':
             options.managementGroupId = getInput('managementGroupId', true);
@@ -50529,84 +50508,12 @@ function getCreateInputs(options) {
             options.resourceGroupName = getInput('resourceGroupName', true);
             break;
     }
-    options.templateFile = getInput('templateFile', true);
-    options.parametersFile = getInput('parametersFile', false);
+    // Control options
+    options.wait = getInput('wait', false) === 'true';
     return options;
 }
-/**
- * Parse delete inputs.
- */
-function getDeleteInputs(options) {
-    core.debug(`Retrieving delete inputs`);
-    options.name = getInput('name', true);
-    options.scope = getInput('scope', true, [
-        'managementGroup',
-        'subscription',
-        'resourceGroup'
-    ]);
-    switch (options.scope) {
-        case 'managementGroup':
-            options.managementGroupId = getInput('managementGroupId', true);
-            break;
-        case 'subscription':
-            options.subscriptionId = getInput('subscriptionId', true);
-            break;
-        case 'resourceGroup':
-            options.resourceGroupName = getInput('resourceGroupName', true);
-            break;
-    }
-    return options;
-}
-/**
- * Parse validate inputs.
- */
-function getValidateInputs(options) {
-    core.debug(`Retrieving validate inputs`);
-    options.name = getInput('name', true);
-    options.description = getInput('description', false);
-    options.location = getInput('location', false);
-    options.scope = getInput('scope', true, [
-        'managementGroup',
-        'subscription',
-        'resourceGroup'
-    ]);
-    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-        'deleteAll',
-        'deleteResources',
-        'detachAll'
-    ]);
-    options.denySettings = getInput('denySettings', true, [
-        'denyDelete',
-        'denyWriteAndDelete',
-        'none'
-    ]);
-    options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true';
-    const excludedActions = getInput('excludedActions', false);
-    excludedActions
-        ? (options.excludedActions = excludedActions.split(','))
-        : (options.excludedActions = []);
-    const excludedPrincipals = getInput('excludedPrincipals', false);
-    excludedPrincipals
-        ? (options.excludedPrincipals = excludedPrincipals.split(','))
-        : (options.excludedPrincipals = []);
-    switch (options.scope) {
-        case 'managementGroup':
-            options.managementGroupId = getInput('managementGroupId', true);
-            break;
-        case 'subscription':
-            options.subscriptionId = getInput('subscriptionId', true);
-            break;
-        case 'resourceGroup':
-            options.resourceGroupName = getInput('resourceGroupName', true);
-            break;
-    }
-    options.templateFile = getInput('templateFile', true);
-    options.parametersFile = getInput('parametersFile', false);
-    return options;
-}
-/**
- * Initialize actionOnUnmanage property.
- */
+exports.newOptions = newOptions;
+/** Initialize actionOnUnmanage property. */
 function newUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
@@ -50635,9 +50542,7 @@ function newUnmanageProperties(value) {
     }
 }
 exports.newUnmanageProperties = newUnmanageProperties;
-/**
- * Initialize denySettings property.
- */
+/** Initialize denySettings property. */
 function newDenySettings(options) {
     return {
         mode: options.denySettings,
@@ -50647,9 +50552,7 @@ function newDenySettings(options) {
     };
 }
 exports.newDenySettings = newDenySettings;
-/**
- * Check if object is instance of DeploymentStack.
- */
+/** Check if object is instance of DeploymentStack. */
 function instanceOfDeploymentStack(object) {
     return (typeof object === 'object' &&
         object !== null &&
@@ -50768,9 +50671,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const helper = __importStar(__nccwpck_require__(2707));
-/**
- * Get deployment stack.
- */
+/** Get deployment stack. */
 async function getDeploymentStack(options, client) {
     core.debug(`Retrieving deployment stack`);
     let deploymentStack;
@@ -50791,9 +50692,7 @@ async function getDeploymentStack(options, client) {
     }
     return deploymentStack;
 }
-/**
- * List deployment stacks.
- */
+/** List deployment stacks. */
 async function listDeploymentStacks(options, client) {
     core.debug(`Listing deployment stacks`);
     const deploymentStacks = [];
@@ -50817,9 +50716,7 @@ async function listDeploymentStacks(options, client) {
     }
     return deploymentStacks;
 }
-/**
- * Create deployment stack.
- */
+/** Create deployment stack. */
 async function createDeploymentStack(options, client) {
     // Display operation message
     !(await listDeploymentStacks(options, client)).some(stack => stack.name === options.name)
@@ -50841,8 +50738,9 @@ async function createDeploymentStack(options, client) {
             parameters
         },
         tags: {
-            Commit: options.commit,
-            Branch: options.branch
+            repository: options.repository,
+            commit: options.commit,
+            branch: options.branch
         }
     };
     let operationPromise;
@@ -50878,9 +50776,7 @@ async function createDeploymentStack(options, client) {
     }
 }
 exports.createDeploymentStack = createDeploymentStack;
-/**
- * Delete deployment stack.
- */
+/** Delete deployment stack. */
 async function deleteDeploymentStack(options, client) {
     core.info(`Deleting deployment stack`);
     const deploymentStack = await getDeploymentStack(options, client);
@@ -50911,9 +50807,7 @@ async function deleteDeploymentStack(options, client) {
     await operationPromise;
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
-/**
- * Validate deployment stack.
- */
+/** Validate deployment stack. */
 async function validateDeploymentStack(options, client) {
     core.info(`Validating deployment stack`);
     // Parse template and parameter files
@@ -50932,8 +50826,9 @@ async function validateDeploymentStack(options, client) {
             parameters
         },
         tags: {
-            Commit: options.commit,
-            Branch: options.branch
+            repository: options.repository,
+            commit: options.commit,
+            branch: options.branch
         }
     };
     let operationPromise;

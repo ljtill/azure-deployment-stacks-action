@@ -6,9 +6,7 @@ import {
 import * as helper from './helper'
 import { Options } from './types'
 
-/**
- * Get deployment stack.
- */
+/** Get deployment stack. */
 async function getDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
@@ -47,9 +45,7 @@ async function getDeploymentStack(
   return deploymentStack
 }
 
-/**
- * List deployment stacks.
- */
+/** List deployment stacks. */
 async function listDeploymentStacks(
   options: Options,
   client: DeploymentStacksClient
@@ -86,9 +82,7 @@ async function listDeploymentStacks(
   return deploymentStacks
 }
 
-/**
- * Create deployment stack.
- */
+/** Create deployment stack. */
 export async function createDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
@@ -184,9 +178,7 @@ export async function createDeploymentStack(
   }
 }
 
-/**
- * Delete deployment stack.
- */
+/** Delete deployment stack. */
 export async function deleteDeploymentStack(
   options: Options,
   client: DeploymentStacksClient
@@ -251,9 +243,7 @@ export async function deleteDeploymentStack(
   await operationPromise
 }
 
-/**
- * Validate deployment stack.
- */
+/** Validate deployment stack. */
 export async function validateDeploymentStack(
   options: Options,
   client: DeploymentStacksClient

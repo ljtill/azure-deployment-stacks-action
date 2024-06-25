@@ -1,4 +1,5 @@
-export type Options = {
+/* Scope */
+export interface Options {
   name: string
   description: string
   location: string
@@ -20,13 +21,15 @@ export type Options = {
   branch: string
 }
 
-export type ActionOnUnmanage = {
+/* ActionOnUnmanage */
+export interface ActionOnUnmanage {
   managementGroups: string
   resourceGroups: string
   resources: string
 }
 
-export type DenySettings = {
+/* DenySettings */
+export interface DenySettings {
   mode: string
   applyToChildScopes: boolean
   excludedActions: string[]

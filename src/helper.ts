@@ -9,9 +9,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { Options, ActionOnUnmanage, DenySettings } from './types'
 import { DeploymentStack } from '@azure/arm-resourcesdeploymentstacks'
 
-/**
- * Install Bicep binary.
- */
+/** Install Bicep binary. */
 export async function installBicep(): Promise<void> {
   core.debug(`Installing Bicep binary`)
 
@@ -62,9 +60,7 @@ export async function installBicep(): Promise<void> {
   }
 }
 
-/**
- * Check Bicep is installed.
- */
+/** Check Bicep is installed. */
 export async function checkBicep(): Promise<boolean> {
   core.debug(`Checking Bicep installation`)
 
@@ -77,9 +73,7 @@ export async function checkBicep(): Promise<boolean> {
   return true
 }
 
-/**
- * Print Bicep version.
- */
+/** Print Bicep version. */
 async function displayBicepVersion(): Promise<void> {
   core.debug(`Displaying Bicep version`)
 
@@ -100,9 +94,7 @@ async function displayBicepVersion(): Promise<void> {
   await exec.exec(bicepPath, ['--version'], execOptions)
 }
 
-/**
- * Build Bicep file.
- */
+/** Build Bicep file. */
 async function buildBicepFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep file`)
 
@@ -131,9 +123,7 @@ async function buildBicepFile(filePath: string): Promise<string> {
   return outputPath
 }
 
-/**
- * Build Bicep parameters file.
- */
+/** Build Bicep parameters file. */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep parameters file`)
 
@@ -162,9 +152,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   return outputPath
 }
 
-/**
- * Parse template file.
- */
+/** Parse template file. */
 export async function parseTemplateFile(
   options: Options
 ): Promise<Record<string, unknown>> {
@@ -192,9 +180,7 @@ export async function parseTemplateFile(
   return JSON.parse(fileContent.toString())
 }
 
-/**
- * Parse parameters file.
- */
+/** Parse parameters file. */
 export async function parseParametersFile(
   options: Options
 ): Promise<Record<string, unknown>> {
@@ -222,18 +208,14 @@ export async function parseParametersFile(
   return JSON.parse(fileContent.toString())
 }
 
-/**
- * Initialize Azure credential.
- */
+/** Initialize Azure credential. */
 export function newCredential(): DefaultAzureCredential {
   core.debug(`Generate new credential`)
 
   return new DefaultAzureCredential()
 }
 
-/**
- * Get input from the workflow.
- */
+/** Get input */
 function getInput(
   key: string,
   required: boolean,
@@ -247,9 +229,7 @@ function getInput(
   return value
 }
 
-/**
- * Initiliaze Options.
- */
+/** Initiliaze Options. */
 export function newOptions(): Options {
   core.debug(`Initializing options`)
 
@@ -285,14 +265,14 @@ export function newOptions(): Options {
     if (excludedActions) {
       options.excludedActions = excludedActions.split(',')
     } else {
-      options.excludedActions = []
+      options.excludedActions = undefined
     }
 
     const excludedPrincipals = getInput('excludedPrincipals', false)
     if (excludedPrincipals) {
       options.excludedPrincipals = excludedPrincipals.split(',')
     } else {
-      options.excludedPrincipals = ['']
+      options.excludedPrincipals = undefined
     }
 
     // Template and parameters files
@@ -312,6 +292,7 @@ export function newOptions(): Options {
     'resourceGroup'
   ])
 
+  // Scope specific options
   switch (options.scope) {
     case 'managementGroup':
       options.managementGroupId = getInput('managementGroupId', true)
@@ -330,9 +311,7 @@ export function newOptions(): Options {
   return options as Options
 }
 
-/**
- * Initialize actionOnUnmanage property.
- */
+/** Initialize actionOnUnmanage property. */
 export function newUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
@@ -361,9 +340,7 @@ export function newUnmanageProperties(value: string): ActionOnUnmanage {
   }
 }
 
-/**
- * Initialize denySettings property.
- */
+/** Initialize denySettings property. */
 export function newDenySettings(options: Options): DenySettings {
   return {
     mode: options.denySettings,
@@ -373,9 +350,7 @@ export function newDenySettings(options: Options): DenySettings {
   }
 }
 
-/**
- * Check if object is instance of DeploymentStack.
- */
+/** Check if object is instance of DeploymentStack. */
 export function instanceOfDeploymentStack(
   object: unknown
 ): object is DeploymentStack {

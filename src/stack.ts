@@ -165,11 +165,12 @@ export async function createDeploymentStack(
   const result = await operationPromise
 
   if (result && helper.instanceOfDeploymentStack(result)) {
-    core.startGroup('Managed resources:')
+    core.startGroup('Deployed managed resources')
     for (const item of result.properties?.resources || []) {
-      core.info(`\nStatus: ${item.status}`)
-      core.info(`DenyStatus: ${item.denyStatus}`)
       core.info(`Id: ${item.id}`)
+      core.info(`Status: ${item.status}`)
+      core.info(`DenyStatus: ${item.denyStatus}`)
+      core.info(`---`)
     }
     core.endGroup()
   }

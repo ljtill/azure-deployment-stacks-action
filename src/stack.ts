@@ -117,6 +117,7 @@ export async function createDeploymentStack(
       parameters
     },
     tags: {
+      Repository: options.repository,
       Commit: options.commit,
       Branch: options.branch
     }
@@ -276,6 +277,7 @@ export async function validateDeploymentStack(
       parameters
     },
     tags: {
+      Repository: options.repository,
       Commit: options.commit,
       Branch: options.branch
     }

@@ -232,37 +232,6 @@ export function newCredential(): DefaultAzureCredential {
 }
 
 /**
- * Initiliaze Options.
- */
-export function newOptions(): Options {
-  core.debug(`Initializing options`)
-
-  let options: Partial<Options> = {}
-
-  options.mode = getInput('mode', true, ['create', 'delete', 'validate'])
-  options.wait = getInput('wait', false) === 'true'
-
-  switch (options.mode) {
-    case 'create':
-      options = getCreateInputs(options)
-      break
-    case 'delete':
-      options = getDeleteInputs(options)
-      break
-    case 'validate':
-      options = getValidateInputs(options)
-      break
-  }
-
-  // Repository metadata
-  options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
-  options.commit = github.context.sha
-  options.branch = github.context.ref
-
-  return options as Options
-}
-
-/**
  * Get input from the workflow.
  */
 function getInput(
@@ -279,71 +248,60 @@ function getInput(
 }
 
 /**
- * Parse create inputs.
+ * Initiliaze Options.
  */
-function getCreateInputs(options: Partial<Options>): Partial<Options> {
-  core.debug(`Retrieving create inputs`)
+export function newOptions(): Options {
+  core.debug(`Initializing options`)
 
+  let options: Partial<Options> = {}
+
+  // Basic options
   options.name = getInput('name', true)
-  options.description = getInput('description', false)
-  options.location = getInput('location', false)
+  options.mode = getInput('mode', true, ['create', 'delete', 'validate'])
 
-  options.scope = getInput('scope', true, [
-    'managementGroup',
-    'subscription',
-    'resourceGroup'
-  ])
+  // Additional options for 'create' or 'validate' modes
+  if (options.mode === 'create' || options.mode === 'validate') {
+    options.description = getInput('description', false)
+    options.location = getInput('location', false)
 
-  options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-    'deleteAll',
-    'deleteResources',
-    'detachAll'
-  ])
+    // Unmanage Action
+    options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+      'deleteAll',
+      'deleteResources',
+      'detachAll'
+    ])
 
-  options.denySettings = getInput('denySettings', true, [
-    'denyDelete',
-    'denyWriteAndDelete',
-    'none'
-  ])
-  options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true'
-  const excludedActions = getInput('excludedActions', false)
-  excludedActions
-    ? (options.excludedActions = excludedActions.split(','))
-    : null
+    // Deny Settings
+    options.denySettings = getInput('denySettings', true, [
+      'denyDelete',
+      'denyWriteAndDelete',
+      'none'
+    ])
 
-  const excludedPrincipals = getInput('excludedPrincipals', false)
-  excludedPrincipals
-    ? (options.excludedPrincipals = excludedPrincipals.split(','))
-    : null
+    options.applyToChildScopes =
+      getInput('applyToChildScopes', false) === 'true'
 
-  options.excludedPrincipals = getInput('excludedPrincipals', false).split(',')
+    const excludedActions = getInput('excludedActions', false)
+    if (excludedActions) {
+      options.excludedActions = excludedActions.split(',')
+    }
 
-  switch (options.scope) {
-    case 'managementGroup':
-      options.managementGroupId = getInput('managementGroupId', true)
-      break
-    case 'subscription':
-      options.subscriptionId = getInput('subscriptionId', true)
-      break
-    case 'resourceGroup':
-      options.resourceGroupName = getInput('resourceGroupName', true)
-      break
+    const excludedPrincipals = getInput('excludedPrincipals', false)
+    if (excludedPrincipals) {
+      options.excludedPrincipals = excludedPrincipals.split(',')
+    }
+
+    // Template and parameters files
+    options.templateFile = getInput('templateFile', true)
+    options.parametersFile = getInput('parametersFile', false)
+
+    // Repository metadata
+    options.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
+    options.commit = github.context.sha
+    options.branch = github.context.ref
   }
 
-  options.templateFile = getInput('templateFile', true)
-  options.parametersFile = getInput('parametersFile', false)
-
-  return options
-}
-
-/**
- * Parse delete inputs.
- */
-function getDeleteInputs(options: Partial<Options>): Partial<Options> {
-  core.debug(`Retrieving delete inputs`)
-
-  options.name = getInput('name', true)
-
+  // Scope options
   options.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
@@ -362,63 +320,10 @@ function getDeleteInputs(options: Partial<Options>): Partial<Options> {
       break
   }
 
-  return options
-}
+  // Control options
+  options.wait = getInput('wait', false) === 'true'
 
-/**
- * Parse validate inputs.
- */
-function getValidateInputs(options: Partial<Options>): Partial<Options> {
-  core.debug(`Retrieving validate inputs`)
-
-  options.name = getInput('name', true)
-  options.description = getInput('description', false)
-  options.location = getInput('location', false)
-
-  options.scope = getInput('scope', true, [
-    'managementGroup',
-    'subscription',
-    'resourceGroup'
-  ])
-
-  options.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-    'deleteAll',
-    'deleteResources',
-    'detachAll'
-  ])
-
-  options.denySettings = getInput('denySettings', true, [
-    'denyDelete',
-    'denyWriteAndDelete',
-    'none'
-  ])
-  options.applyToChildScopes = getInput('applyToChildScopes', false) === 'true'
-  const excludedActions = getInput('excludedActions', false)
-  excludedActions
-    ? (options.excludedActions = excludedActions.split(','))
-    : null
-
-  const excludedPrincipals = getInput('excludedPrincipals', false)
-  excludedPrincipals
-    ? (options.excludedPrincipals = excludedPrincipals.split(','))
-    : null
-
-  switch (options.scope) {
-    case 'managementGroup':
-      options.managementGroupId = getInput('managementGroupId', true)
-      break
-    case 'subscription':
-      options.subscriptionId = getInput('subscriptionId', true)
-      break
-    case 'resourceGroup':
-      options.resourceGroupName = getInput('resourceGroupName', true)
-      break
-  }
-
-  options.templateFile = getInput('templateFile', true)
-  options.parametersFile = getInput('parametersFile', false)
-
-  return options
+  return options as Options
 }
 
 /**

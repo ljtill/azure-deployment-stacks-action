@@ -50437,14 +50437,14 @@ function getInput(key, required, validValues) {
     }
     return value;
 }
-/** Initiliaze config. */
+/** Initialize config. */
 function newConfig() {
     core.debug(`Initializing config`);
     const config = (0, types_1.createDefaultConfig)();
     // Basic config
     config.inputs.name = getInput('name', true);
     config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    // Additional config for 'create' or 'validate' modes
+    // Additional config
     if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
         config.inputs.description = getInput('description', false);
         config.inputs.location = getInput('location', false);
@@ -50463,19 +50463,13 @@ function newConfig() {
         config.inputs.applyToChildScopes =
             getInput('applyToChildScopes', false) === 'true';
         const excludedActions = getInput('excludedActions', false);
-        if (excludedActions) {
-            config.inputs.excludedActions = excludedActions.split(',');
-        }
-        else {
-            config.inputs.excludedActions = [];
-        }
+        config.inputs.excludedActions = excludedActions
+            ? excludedActions.split(',')
+            : [];
         const excludedPrincipals = getInput('excludedPrincipals', false);
-        if (excludedPrincipals) {
-            config.inputs.excludedPrincipals = excludedPrincipals.split(',');
-        }
-        else {
-            config.inputs.excludedPrincipals = [];
-        }
+        config.inputs.excludedPrincipals = excludedPrincipals
+            ? excludedPrincipals.split(',')
+            : [];
         // Template
         config.inputs.templateFile = getInput('templateFile', true);
         // Parameters

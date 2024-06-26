@@ -219,8 +219,7 @@ function getInput(
 
   return value
 }
-
-/** Initiliaze config. */
+/** Initialize config. */
 export function newConfig(): Config {
   core.debug(`Initializing config`)
 
@@ -230,7 +229,7 @@ export function newConfig(): Config {
   config.inputs.name = getInput('name', true)
   config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
 
-  // Additional config for 'create' or 'validate' modes
+  // Additional config
   if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
     config.inputs.description = getInput('description', false)
     config.inputs.location = getInput('location', false)
@@ -253,18 +252,14 @@ export function newConfig(): Config {
       getInput('applyToChildScopes', false) === 'true'
 
     const excludedActions = getInput('excludedActions', false)
-    if (excludedActions) {
-      config.inputs.excludedActions = excludedActions.split(',')
-    } else {
-      config.inputs.excludedActions = []
-    }
+    config.inputs.excludedActions = excludedActions
+      ? excludedActions.split(',')
+      : []
 
     const excludedPrincipals = getInput('excludedPrincipals', false)
-    if (excludedPrincipals) {
-      config.inputs.excludedPrincipals = excludedPrincipals.split(',')
-    } else {
-      config.inputs.excludedPrincipals = []
-    }
+    config.inputs.excludedPrincipals = excludedPrincipals
+      ? excludedPrincipals.split(',')
+      : []
 
     // Template
     config.inputs.templateFile = getInput('templateFile', true)

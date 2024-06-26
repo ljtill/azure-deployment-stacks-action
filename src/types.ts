@@ -1,4 +1,4 @@
-/** Options */
+/** Config */
 export interface Config {
   inputs: Inputs
   context: Context

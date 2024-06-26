@@ -1,11 +1,15 @@
-/** Config */
+/**
+ * Represents the configuration object.
+ */
 export interface Config {
   inputs: Inputs
   context: Context
   outputs: Outputs
 }
 
-/** Inputs */
+/**
+ * Represents the inputs for the deployment stack action.
+ */
 interface Inputs {
   name: string
   description: string
@@ -25,7 +29,9 @@ interface Inputs {
   wait: boolean
 }
 
-/** Context */
+/**
+ * Represents the context for the deployment stacks action.
+ */
 interface Context {
   template: Record<string, unknown>
   parameters: Record<string, unknown>
@@ -34,10 +40,14 @@ interface Context {
   branch: string
 }
 
-/** Outputs */
+/**
+ * Represents the outputs of a deployment.
+ */
 interface Outputs {}
 
-/** Default Values */
+/**
+ * Default inputs for the deployment stack.
+ */
 const defaultInputs: Inputs = {
   name: '',
   description: '',
@@ -56,7 +66,6 @@ const defaultInputs: Inputs = {
   parametersFile: '',
   wait: false
 }
-
 const defaultContext: Context = {
   template: {},
   parameters: {},
@@ -64,10 +73,13 @@ const defaultContext: Context = {
   commit: '',
   branch: ''
 }
-
 const defaultOutputs: Outputs = {}
 
-/** Create default options */
+/**
+ * Creates a default configuration object with optional overrides.
+ * @param overrides - Optional overrides for the configuration.
+ * @returns The default configuration object.
+ */
 export function createDefaultConfig(overrides?: Partial<Config>): Config {
   return {
     inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },

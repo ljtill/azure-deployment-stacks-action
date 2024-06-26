@@ -10,13 +10,10 @@ export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
 
-    // Check Bicep is installed
-    await helper.checkBicep()
+    await helper.checkBicepInstallation()
 
-    // Hydrate configuration
     const config = helper.newConfig()
 
-    // Perform action
     switch (config.inputs.mode) {
       case 'create':
         await stack.createDeploymentStack(config)

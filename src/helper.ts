@@ -7,7 +7,11 @@ import * as io from '@actions/io'
 import * as cache from '@actions/tool-cache'
 import { Config, createDefaultConfig } from './types'
 
-/** Install Bicep binary. */
+/**
+ * Installs the Bicep binary based on the current platform and architecture.
+ * @returns A Promise that resolves when the installation is complete.
+ * @throws {Error} If the platform, architecture, or binary is not supported.
+ */
 export async function installBicep(): Promise<void> {
   core.debug(`Installing Bicep binary`)
 
@@ -58,8 +62,12 @@ export async function installBicep(): Promise<void> {
   }
 }
 
-/** Check Bicep is installed. */
-export async function checkBicep(): Promise<boolean> {
+/**
+ * Checks if Bicep is installed and displays its version.
+ * @returns A promise that resolves to a boolean indicating if Bicep is installed.
+ * @throws An error if Bicep is not installed.
+ */
+export async function checkBicepInstallation(): Promise<boolean> {
   core.debug(`Checking Bicep installation`)
 
   if ((await io.which('bicep', false)) === '') {
@@ -71,7 +79,10 @@ export async function checkBicep(): Promise<boolean> {
   return true
 }
 
-/** Print Bicep version. */
+/**
+ * Displays the Bicep version.
+ * @returns A Promise that resolves when the Bicep version is displayed.
+ */
 async function displayBicepVersion(): Promise<void> {
   core.debug(`Displaying Bicep version`)
 
@@ -92,7 +103,11 @@ async function displayBicepVersion(): Promise<void> {
   await exec.exec(bicepPath, ['--version'], execOptions)
 }
 
-/** Build Bicep file. */
+/**
+ * Builds a Bicep file and returns the path of the output file.
+ * @param filePath The path of the Bicep file to build.
+ * @returns A promise that resolves to the path of the output file.
+ */
 async function buildBicepFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep file`)
 
@@ -121,7 +136,11 @@ async function buildBicepFile(filePath: string): Promise<string> {
   return outputPath
 }
 
-/** Build Bicep parameters file. */
+/**
+ * Builds a Bicep parameters file for the given Bicep file path.
+ * @param filePath The path to the Bicep file.
+ * @returns A Promise that resolves to the path of the generated parameters file.
+ */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
   core.debug(`Building Bicep parameters file`)
 
@@ -150,7 +169,12 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   return outputPath
 }
 
-/** Parse template file. */
+/**
+ * Parses the template file and returns the parsed content as a JSON object.
+ * @param config - The configuration object containing the input parameters.
+ * @returns A Promise that resolves to the parsed template content.
+ * @throws An error if the template file path is invalid.
+ */
 export async function parseTemplateFile(
   config: Config
 ): Promise<Record<string, unknown>> {
@@ -178,7 +202,12 @@ export async function parseTemplateFile(
   return JSON.parse(fileContent.toString())
 }
 
-/** Parse parameters file. */
+/**
+ * Parses the parameters file and returns the parsed content as a JSON object.
+ * @param config - The configuration object containing the inputs.
+ * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
+ * @throws An error if the parameters file path is invalid.
+ */
 export async function parseParametersFile(
   config: Config
 ): Promise<Record<string, unknown>> {
@@ -206,7 +235,14 @@ export async function parseParametersFile(
   return JSON.parse(fileContent.toString())
 }
 
-/** Get input */
+/**
+ * Retrieves the value of the specified input key from the workflow run context.
+ * @param key - The name of the input key.
+ * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
+ * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
+ * @returns The value of the input key.
+ * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
+ */
 function getInput(
   key: string,
   required: boolean,
@@ -219,7 +255,11 @@ function getInput(
 
   return value
 }
-/** Initialize config. */
+
+/**
+ * Creates a new configuration object based on user inputs.
+ * @returns The new configuration object.
+ */
 export function newConfig(): Config {
   core.debug(`Initializing config`)
 
@@ -299,14 +339,21 @@ export function newConfig(): Config {
   return config
 }
 
-/* ActionOnUnmanage */
+/**
+ * Represents the configuration for performing actions on unmanaged resources.
+ */
 interface ActionOnUnmanage {
   managementGroups: string
   resourceGroups: string
   resources: string
 }
 
-/** Initialize actionOnUnmanage property. */
+/**
+ * Prepares the properties for unmanaging resources based on the specified value.
+ * @param value - The value indicating the action to be performed on unmanaging resources.
+ * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
+ * @throws {Error} If the specified value is invalid.
+ */
 export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
@@ -335,7 +382,9 @@ export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   }
 }
 
-/* DenySettings */
+/**
+ * Represents the settings for denying access to a resource.
+ */
 interface DenySettings {
   mode: string
   applyToChildScopes: boolean
@@ -343,7 +392,11 @@ interface DenySettings {
   excludedPrincipals: string[]
 }
 
-/** Initialize denySettings property. */
+/**
+ * Prepares the deny settings based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns The deny settings object.
+ */
 export function prepareDenySettings(config: Config): DenySettings {
   return {
     mode: config.inputs.denySettings,

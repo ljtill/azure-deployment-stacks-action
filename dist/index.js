@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicep = exports.installBicep = void 0;
+exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstallation = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50275,7 +50275,11 @@ const github = __importStar(__nccwpck_require__(5438));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
 const types_1 = __nccwpck_require__(5077);
-/** Install Bicep binary. */
+/**
+ * Installs the Bicep binary based on the current platform and architecture.
+ * @returns A Promise that resolves when the installation is complete.
+ * @throws {Error} If the platform, architecture, or binary is not supported.
+ */
 async function installBicep() {
     core.debug(`Installing Bicep binary`);
     const url = 'https://github.com/azure/bicep/releases/latest/download/';
@@ -50318,8 +50322,12 @@ async function installBicep() {
     }
 }
 exports.installBicep = installBicep;
-/** Check Bicep is installed. */
-async function checkBicep() {
+/**
+ * Checks if Bicep is installed and displays its version.
+ * @returns A promise that resolves to a boolean indicating if Bicep is installed.
+ * @throws An error if Bicep is not installed.
+ */
+async function checkBicepInstallation() {
     core.debug(`Checking Bicep installation`);
     if ((await io.which('bicep', false)) === '') {
         throw new Error('Bicep is not installed');
@@ -50327,8 +50335,11 @@ async function checkBicep() {
     await displayBicepVersion();
     return true;
 }
-exports.checkBicep = checkBicep;
-/** Print Bicep version. */
+exports.checkBicepInstallation = checkBicepInstallation;
+/**
+ * Displays the Bicep version.
+ * @returns A Promise that resolves when the Bicep version is displayed.
+ */
 async function displayBicepVersion() {
     core.debug(`Displaying Bicep version`);
     const bicepPath = await io.which('bicep', true);
@@ -50345,7 +50356,11 @@ async function displayBicepVersion() {
     };
     await exec.exec(bicepPath, ['--version'], execOptions);
 }
-/** Build Bicep file. */
+/**
+ * Builds a Bicep file and returns the path of the output file.
+ * @param filePath The path of the Bicep file to build.
+ * @returns A promise that resolves to the path of the output file.
+ */
 async function buildBicepFile(filePath) {
     core.debug(`Building Bicep file`);
     // TODO(ljtill): Implement cross platform support
@@ -50365,7 +50380,11 @@ async function buildBicepFile(filePath) {
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
-/** Build Bicep parameters file. */
+/**
+ * Builds a Bicep parameters file for the given Bicep file path.
+ * @param filePath The path to the Bicep file.
+ * @returns A Promise that resolves to the path of the generated parameters file.
+ */
 async function buildBicepParametersFile(filePath) {
     core.debug(`Building Bicep parameters file`);
     // TODO(ljtill): Implement cross platform support
@@ -50385,7 +50404,12 @@ async function buildBicepParametersFile(filePath) {
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
-/** Parse template file. */
+/**
+ * Parses the template file and returns the parsed content as a JSON object.
+ * @param config - The configuration object containing the input parameters.
+ * @returns A Promise that resolves to the parsed template content.
+ * @throws An error if the template file path is invalid.
+ */
 async function parseTemplateFile(config) {
     core.debug(`Parsing template file: ${config.inputs.templateFile}`);
     let filePath = config.inputs.templateFile;
@@ -50407,7 +50431,12 @@ async function parseTemplateFile(config) {
     return JSON.parse(fileContent.toString());
 }
 exports.parseTemplateFile = parseTemplateFile;
-/** Parse parameters file. */
+/**
+ * Parses the parameters file and returns the parsed content as a JSON object.
+ * @param config - The configuration object containing the inputs.
+ * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
+ * @throws An error if the parameters file path is invalid.
+ */
 async function parseParametersFile(config) {
     core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`);
     let filePath = config.inputs.parametersFile;
@@ -50429,7 +50458,14 @@ async function parseParametersFile(config) {
     return JSON.parse(fileContent.toString());
 }
 exports.parseParametersFile = parseParametersFile;
-/** Get input */
+/**
+ * Retrieves the value of the specified input key from the workflow run context.
+ * @param key - The name of the input key.
+ * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
+ * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
+ * @returns The value of the input key.
+ * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
+ */
 function getInput(key, required, validValues) {
     const value = core.getInput(key, { required, trimWhitespace: true });
     if (validValues && !validValues.includes(value)) {
@@ -50437,7 +50473,10 @@ function getInput(key, required, validValues) {
     }
     return value;
 }
-/** Initialize config. */
+/**
+ * Creates a new configuration object based on user inputs.
+ * @returns The new configuration object.
+ */
 function newConfig() {
     core.debug(`Initializing config`);
     const config = (0, types_1.createDefaultConfig)();
@@ -50502,7 +50541,12 @@ function newConfig() {
     return config;
 }
 exports.newConfig = newConfig;
-/** Initialize actionOnUnmanage property. */
+/**
+ * Prepares the properties for unmanaging resources based on the specified value.
+ * @param value - The value indicating the action to be performed on unmanaging resources.
+ * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
+ * @throws {Error} If the specified value is invalid.
+ */
 function prepareUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
@@ -50531,7 +50575,11 @@ function prepareUnmanageProperties(value) {
     }
 }
 exports.prepareUnmanageProperties = prepareUnmanageProperties;
-/** Initialize denySettings property. */
+/**
+ * Prepares the deny settings based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns The deny settings object.
+ */
 function prepareDenySettings(config) {
     return {
         mode: config.inputs.denySettings,
@@ -50585,11 +50633,8 @@ const stack = __importStar(__nccwpck_require__(7067));
 async function run() {
     try {
         core.debug(`Starting action`);
-        // Check Bicep is installed
-        await helper.checkBicep();
-        // Hydrate configuration
+        await helper.checkBicepInstallation();
         const config = helper.newConfig();
-        // Perform action
         switch (config.inputs.mode) {
             case 'create':
                 await stack.createDeploymentStack(config);
@@ -50649,11 +50694,19 @@ const identity_1 = __nccwpck_require__(3084);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
 /** Initialize Azure credential. */
+/**
+ * Creates a new instance of DefaultAzureCredential.
+ * @returns A new instance of DefaultAzureCredential.
+ */
 function newCredential() {
     core.debug(`Generate new credential`);
     return new identity_1.DefaultAzureCredential();
 }
-/** Check if object is instance of DeploymentStack. */
+/**
+ * Checks if an object is an instance of DeploymentStack.
+ * @param object - The object to check.
+ * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
+ */
 function instanceOfDeploymentStack(object) {
     return (typeof object === 'object' &&
         object !== null &&
@@ -50661,7 +50714,13 @@ function instanceOfDeploymentStack(object) {
         'tags' in object &&
         'properties' in object);
 }
-/** Get deployment stack. */
+/**
+ * Retrieves the deployment stack based on the provided configuration and client.
+ * @param {Config} config - The configuration object.
+ * @param {DeploymentStacksClient} client - The deployment stacks client.
+ * @returns {Promise<DeploymentStack>} - A promise that resolves to the deployment stack.
+ * @throws {Error} - If the deployment stack is not found.
+ */
 async function getDeploymentStack(config, client) {
     core.debug(`Retrieving deployment stack`);
     let deploymentStack;
@@ -50682,7 +50741,13 @@ async function getDeploymentStack(config, client) {
     }
     return deploymentStack;
 }
-/** List deployment stacks. */
+/**
+ * Lists deployment stacks based on the provided configuration and client.
+ *
+ * @param config - The configuration object containing inputs for listing deployment stacks.
+ * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
+ * @returns A promise that resolves to an array of DeploymentStack objects.
+ */
 async function listDeploymentStacks(config, client) {
     core.debug(`Listing deployment stacks`);
     const deploymentStacks = [];
@@ -50706,7 +50771,11 @@ async function listDeploymentStacks(config, client) {
     }
     return deploymentStacks;
 }
-/** Create deployment stack. */
+/**
+ * Creates or updates a deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A Promise that resolves when the operation is completed successfully.
+ */
 async function createDeploymentStack(config) {
     // Initialize deployment stacks client
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
@@ -50771,7 +50840,11 @@ async function createDeploymentStack(config) {
     core.info(`Operation completed successfully`);
 }
 exports.createDeploymentStack = createDeploymentStack;
-/** Delete deployment stack. */
+/**
+ * Deletes a deployment stack based on the provided configuration.
+ * @param config - The configuration object containing the necessary parameters.
+ * @returns A Promise that resolves when the deletion operation is complete.
+ */
 async function deleteDeploymentStack(config) {
     // Initialize deployment stacks client
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
@@ -50805,7 +50878,11 @@ async function deleteDeploymentStack(config) {
     await operationPromise;
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
-/** Validate deployment stack. */
+/**
+ * Validates the deployment stack based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the validation is complete.
+ */
 async function validateDeploymentStack(config) {
     // Initialize deployment stacks client
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
@@ -50869,7 +50946,9 @@ exports.validateDeploymentStack = validateDeploymentStack;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createDefaultConfig = void 0;
-/** Default Values */
+/**
+ * Default inputs for the deployment stack.
+ */
 const defaultInputs = {
     name: '',
     description: '',
@@ -50896,7 +50975,11 @@ const defaultContext = {
     branch: ''
 };
 const defaultOutputs = {};
-/** Create default options */
+/**
+ * Creates a default configuration object with optional overrides.
+ * @param overrides - Optional overrides for the configuration.
+ * @returns The default configuration object.
+ */
 function createDefaultConfig(overrides) {
     return {
         inputs: { ...defaultInputs, ...(overrides?.inputs || {}) },

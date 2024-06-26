@@ -8,13 +8,21 @@ import * as helper from './helper'
 import { Config } from './types'
 
 /** Initialize Azure credential. */
+/**
+ * Creates a new instance of DefaultAzureCredential.
+ * @returns A new instance of DefaultAzureCredential.
+ */
 function newCredential(): DefaultAzureCredential {
   core.debug(`Generate new credential`)
 
   return new DefaultAzureCredential()
 }
 
-/** Check if object is instance of DeploymentStack. */
+/**
+ * Checks if an object is an instance of DeploymentStack.
+ * @param object - The object to check.
+ * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
+ */
 function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
   return (
     typeof object === 'object' &&
@@ -25,7 +33,13 @@ function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
   )
 }
 
-/** Get deployment stack. */
+/**
+ * Retrieves the deployment stack based on the provided configuration and client.
+ * @param {Config} config - The configuration object.
+ * @param {DeploymentStacksClient} client - The deployment stacks client.
+ * @returns {Promise<DeploymentStack>} - A promise that resolves to the deployment stack.
+ * @throws {Error} - If the deployment stack is not found.
+ */
 async function getDeploymentStack(
   config: Config,
   client: DeploymentStacksClient
@@ -64,7 +78,13 @@ async function getDeploymentStack(
   return deploymentStack
 }
 
-/** List deployment stacks. */
+/**
+ * Lists deployment stacks based on the provided configuration and client.
+ *
+ * @param config - The configuration object containing inputs for listing deployment stacks.
+ * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
+ * @returns A promise that resolves to an array of DeploymentStack objects.
+ */
 async function listDeploymentStacks(
   config: Config,
   client: DeploymentStacksClient
@@ -101,7 +121,11 @@ async function listDeploymentStacks(
   return deploymentStacks
 }
 
-/** Create deployment stack. */
+/**
+ * Creates or updates a deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A Promise that resolves when the operation is completed successfully.
+ */
 export async function createDeploymentStack(config: Config): Promise<void> {
   // Initialize deployment stacks client
   const client = new DeploymentStacksClient(newCredential())
@@ -210,7 +234,11 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Operation completed successfully`)
 }
 
-/** Delete deployment stack. */
+/**
+ * Deletes a deployment stack based on the provided configuration.
+ * @param config - The configuration object containing the necessary parameters.
+ * @returns A Promise that resolves when the deletion operation is complete.
+ */
 export async function deleteDeploymentStack(config: Config): Promise<void> {
   // Initialize deployment stacks client
   const client = new DeploymentStacksClient(newCredential())
@@ -276,7 +304,11 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
   await operationPromise
 }
 
-/** Validate deployment stack. */
+/**
+ * Validates the deployment stack based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the validation is complete.
+ */
 export async function validateDeploymentStack(config: Config): Promise<void> {
   // Initialize deployment stacks client
   const client = new DeploymentStacksClient(newCredential())

@@ -7,7 +7,6 @@ import {
 import * as helper from './helper'
 import { Config } from './types'
 
-/** Initialize Azure credential. */
 /**
  * Creates a new instance of DefaultAzureCredential.
  * @returns A new instance of DefaultAzureCredential.
@@ -127,7 +126,6 @@ async function listDeploymentStacks(
  * @returns A Promise that resolves when the operation is completed successfully.
  */
 export async function createDeploymentStack(config: Config): Promise<void> {
-  // Initialize deployment stacks client
   const client = new DeploymentStacksClient(newCredential())
 
   // Display operation message
@@ -139,7 +137,6 @@ export async function createDeploymentStack(config: Config): Promise<void> {
 
   // Parse template and parameter files
   const template = await helper.parseTemplateFile(config)
-
   const parameters = config.inputs.parametersFile
     ? helper.parseParametersFile(config)
     : {}
@@ -235,82 +232,11 @@ export async function createDeploymentStack(config: Config): Promise<void> {
 }
 
 /**
- * Deletes a deployment stack based on the provided configuration.
- * @param config - The configuration object containing the necessary parameters.
- * @returns A Promise that resolves when the deletion operation is complete.
- */
-export async function deleteDeploymentStack(config: Config): Promise<void> {
-  // Initialize deployment stacks client
-  const client = new DeploymentStacksClient(newCredential())
-
-  core.info(`Deleting deployment stack`)
-
-  const deploymentStack = await getDeploymentStack(config, client)
-  const optionalParams = {
-    abortSignal: new AbortController().signal,
-    unmanageActionManagementGroups:
-      deploymentStack.properties?.actionOnUnmanage.managementGroups,
-    unmanageActionResourceGroups:
-      deploymentStack.properties?.actionOnUnmanage.resourceGroups,
-    unmanageActionResources:
-      deploymentStack.properties?.actionOnUnmanage.resources
-  }
-
-  let operationPromise
-
-  switch (config.inputs.scope) {
-    case 'managementGroup':
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
-            config.inputs.managementGroupId,
-            config.inputs.name,
-            optionalParams
-          )
-        : client.deploymentStacks.beginDeleteAtManagementGroup(
-            config.inputs.managementGroupId,
-            config.inputs.name,
-            optionalParams
-          )
-      break
-
-    case 'subscription':
-      client.subscriptionId = config.inputs.subscriptionId
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(
-            config.inputs.name,
-            optionalParams
-          )
-        : client.deploymentStacks.beginDeleteAtSubscription(
-            config.inputs.name,
-            optionalParams
-          )
-      break
-
-    case 'resourceGroup':
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
-            config.inputs.resourceGroupName,
-            config.inputs.name,
-            optionalParams
-          )
-        : client.deploymentStacks.beginDeleteAtResourceGroup(
-            config.inputs.resourceGroupName,
-            config.inputs.name,
-            optionalParams
-          )
-      break
-  }
-
-  await operationPromise
-}
-
-/**
  * Validates the deployment stack based on the provided configuration.
  * @param config - The configuration object.
  * @returns A Promise that resolves when the validation is complete.
  */
 export async function validateDeploymentStack(config: Config): Promise<void> {
-  // Initialize deployment stacks client
   const client = new DeploymentStacksClient(newCredential())
 
   core.info(`Validating deployment stack`)
@@ -400,4 +326,73 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
   await operationPromise
 
   core.info(`No validation errors detected`)
+}
+
+/**
+ * Deletes a deployment stack based on the provided configuration.
+ * @param config - The configuration object containing the necessary parameters.
+ * @returns A Promise that resolves when the deletion operation is complete.
+ */
+export async function deleteDeploymentStack(config: Config): Promise<void> {
+  const client = new DeploymentStacksClient(newCredential())
+
+  core.info(`Deleting deployment stack`)
+
+  const deploymentStack = await getDeploymentStack(config, client)
+  const optionalParams = {
+    abortSignal: new AbortController().signal,
+    unmanageActionManagementGroups:
+      deploymentStack.properties?.actionOnUnmanage.managementGroups,
+    unmanageActionResourceGroups:
+      deploymentStack.properties?.actionOnUnmanage.resourceGroups,
+    unmanageActionResources:
+      deploymentStack.properties?.actionOnUnmanage.resources
+  }
+
+  let operationPromise
+
+  switch (config.inputs.scope) {
+    case 'managementGroup':
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
+            config.inputs.managementGroupId,
+            config.inputs.name,
+            optionalParams
+          )
+        : client.deploymentStacks.beginDeleteAtManagementGroup(
+            config.inputs.managementGroupId,
+            config.inputs.name,
+            optionalParams
+          )
+      break
+
+    case 'subscription':
+      client.subscriptionId = config.inputs.subscriptionId
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(
+            config.inputs.name,
+            optionalParams
+          )
+        : client.deploymentStacks.beginDeleteAtSubscription(
+            config.inputs.name,
+            optionalParams
+          )
+      break
+
+    case 'resourceGroup':
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
+            config.inputs.resourceGroupName,
+            config.inputs.name,
+            optionalParams
+          )
+        : client.deploymentStacks.beginDeleteAtResourceGroup(
+            config.inputs.resourceGroupName,
+            config.inputs.name,
+            optionalParams
+          )
+      break
+  }
+
+  await operationPromise
 }

@@ -166,6 +166,8 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
     execOptions
   )
 
+  core.debug(fs.readFileSync(outputPath).toString())
+
   return outputPath
 }
 

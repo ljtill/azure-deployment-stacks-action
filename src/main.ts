@@ -18,11 +18,11 @@ export async function run(): Promise<void> {
       case 'create':
         await stack.createDeploymentStack(config)
         break
-      case 'delete':
-        await stack.deleteDeploymentStack(config)
-        break
       case 'validate':
         await stack.validateDeploymentStack(config)
+        break
+      case 'delete':
+        await stack.deleteDeploymentStack(config)
         break
     }
 

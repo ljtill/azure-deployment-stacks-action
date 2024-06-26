@@ -50402,6 +50402,7 @@ async function buildBicepParametersFile(filePath) {
         silent: true
     };
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
+    core.debug(fs.readFileSync(outputPath).toString());
     return outputPath;
 }
 /**
@@ -50639,11 +50640,11 @@ async function run() {
             case 'create':
                 await stack.createDeploymentStack(config);
                 break;
-            case 'delete':
-                await stack.deleteDeploymentStack(config);
-                break;
             case 'validate':
                 await stack.validateDeploymentStack(config);
+                break;
+            case 'delete':
+                await stack.deleteDeploymentStack(config);
                 break;
         }
         core.debug(`Finishing action`);
@@ -50688,12 +50689,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
+exports.deleteDeploymentStack = exports.validateDeploymentStack = exports.createDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helper = __importStar(__nccwpck_require__(2707));
-/** Initialize Azure credential. */
 /**
  * Creates a new instance of DefaultAzureCredential.
  * @returns A new instance of DefaultAzureCredential.
@@ -50777,7 +50777,6 @@ async function listDeploymentStacks(config, client) {
  * @returns A Promise that resolves when the operation is completed successfully.
  */
 async function createDeploymentStack(config) {
-    // Initialize deployment stacks client
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     // Display operation message
     !(await listDeploymentStacks(config, client)).some(stack => stack.name === config.inputs.name)
@@ -50841,50 +50840,11 @@ async function createDeploymentStack(config) {
 }
 exports.createDeploymentStack = createDeploymentStack;
 /**
- * Deletes a deployment stack based on the provided configuration.
- * @param config - The configuration object containing the necessary parameters.
- * @returns A Promise that resolves when the deletion operation is complete.
- */
-async function deleteDeploymentStack(config) {
-    // Initialize deployment stacks client
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
-    core.info(`Deleting deployment stack`);
-    const deploymentStack = await getDeploymentStack(config, client);
-    const optionalParams = {
-        abortSignal: new AbortController().signal,
-        unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
-        unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
-        unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
-    };
-    let operationPromise;
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, optionalParams);
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, optionalParams);
-            break;
-        case 'resourceGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, optionalParams);
-            break;
-    }
-    await operationPromise;
-}
-exports.deleteDeploymentStack = deleteDeploymentStack;
-/**
  * Validates the deployment stack based on the provided configuration.
  * @param config - The configuration object.
  * @returns A Promise that resolves when the validation is complete.
  */
 async function validateDeploymentStack(config) {
-    // Initialize deployment stacks client
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Validating deployment stack`);
     // Parse template and parameter files
@@ -50935,6 +50895,43 @@ async function validateDeploymentStack(config) {
     core.info(`No validation errors detected`);
 }
 exports.validateDeploymentStack = validateDeploymentStack;
+/**
+ * Deletes a deployment stack based on the provided configuration.
+ * @param config - The configuration object containing the necessary parameters.
+ * @returns A Promise that resolves when the deletion operation is complete.
+ */
+async function deleteDeploymentStack(config) {
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
+    core.info(`Deleting deployment stack`);
+    const deploymentStack = await getDeploymentStack(config, client);
+    const optionalParams = {
+        abortSignal: new AbortController().signal,
+        unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
+        unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
+        unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
+    };
+    let operationPromise;
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, optionalParams);
+            break;
+        case 'subscription':
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, optionalParams);
+            break;
+        case 'resourceGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, optionalParams);
+            break;
+    }
+    await operationPromise;
+}
+exports.deleteDeploymentStack = deleteDeploymentStack;
 
 
 /***/ }),

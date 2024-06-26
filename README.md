@@ -19,7 +19,7 @@ deployments to your specific needs. Additionally, it includes options for
 setting the location, mode, and handling unmanaged resources, as well as
 configuring deny settings and specifying ARM or Bicep templates. This GitHub
 Action streamlines the process of managing Azure infrastructure, enabling
-efficient and automated deployments
+efficient and automated deployments.
 
 ## Authentication
 

@@ -994,7 +994,7 @@ exports.toCommandProperties = toCommandProperties;
 
 /***/ }),
 
-/***/ 9990:
+/***/ 1514:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -3593,7 +3593,7 @@ const stream = __importStar(__nccwpck_require__(2781));
 const util = __importStar(__nccwpck_require__(3837));
 const assert_1 = __nccwpck_require__(9491);
 const v4_1 = __importDefault(__nccwpck_require__(7468));
-const exec_1 = __nccwpck_require__(9990);
+const exec_1 = __nccwpck_require__(1514);
 const retry_helper_1 = __nccwpck_require__(8279);
 class HTTPError extends Error {
     constructor(httpStatusCode) {
@@ -5949,253 +5949,6 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 2557:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-/// <reference path="../shims-public.d.ts" />
-const listenersMap = new WeakMap();
-const abortedMap = new WeakMap();
-/**
- * An aborter instance implements AbortSignal interface, can abort HTTP requests.
- *
- * - Call AbortSignal.none to create a new AbortSignal instance that cannot be cancelled.
- * Use `AbortSignal.none` when you are required to pass a cancellation token but the operation
- * cannot or will not ever be cancelled.
- *
- * @example
- * Abort without timeout
- * ```ts
- * await doAsyncWork(AbortSignal.none);
- * ```
- */
-class AbortSignal {
-    constructor() {
-        /**
-         * onabort event listener.
-         */
-        this.onabort = null;
-        listenersMap.set(this, []);
-        abortedMap.set(this, false);
-    }
-    /**
-     * Status of whether aborted or not.
-     *
-     * @readonly
-     */
-    get aborted() {
-        if (!abortedMap.has(this)) {
-            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
-        }
-        return abortedMap.get(this);
-    }
-    /**
-     * Creates a new AbortSignal instance that will never be aborted.
-     *
-     * @readonly
-     */
-    static get none() {
-        return new AbortSignal();
-    }
-    /**
-     * Added new "abort" event listener, only support "abort" event.
-     *
-     * @param _type - Only support "abort" event
-     * @param listener - The listener to be added
-     */
-    addEventListener(
-    // tslint:disable-next-line:variable-name
-    _type, listener) {
-        if (!listenersMap.has(this)) {
-            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
-        }
-        const listeners = listenersMap.get(this);
-        listeners.push(listener);
-    }
-    /**
-     * Remove "abort" event listener, only support "abort" event.
-     *
-     * @param _type - Only support "abort" event
-     * @param listener - The listener to be removed
-     */
-    removeEventListener(
-    // tslint:disable-next-line:variable-name
-    _type, listener) {
-        if (!listenersMap.has(this)) {
-            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
-        }
-        const listeners = listenersMap.get(this);
-        const index = listeners.indexOf(listener);
-        if (index > -1) {
-            listeners.splice(index, 1);
-        }
-    }
-    /**
-     * Dispatches a synthetic event to the AbortSignal.
-     */
-    dispatchEvent(_event) {
-        throw new Error("This is a stub dispatchEvent implementation that should not be used.  It only exists for type-checking purposes.");
-    }
-}
-/**
- * Helper to trigger an abort event immediately, the onabort and all abort event listeners will be triggered.
- * Will try to trigger abort event for all linked AbortSignal nodes.
- *
- * - If there is a timeout, the timer will be cancelled.
- * - If aborted is true, nothing will happen.
- *
- * @internal
- */
-// eslint-disable-next-line @azure/azure-sdk/ts-use-interface-parameters
-function abortSignal(signal) {
-    if (signal.aborted) {
-        return;
-    }
-    if (signal.onabort) {
-        signal.onabort.call(signal);
-    }
-    const listeners = listenersMap.get(signal);
-    if (listeners) {
-        // Create a copy of listeners so mutations to the array
-        // (e.g. via removeListener calls) don't affect the listeners
-        // we invoke.
-        listeners.slice().forEach((listener) => {
-            listener.call(signal, { type: "abort" });
-        });
-    }
-    abortedMap.set(signal, true);
-}
-
-// Copyright (c) Microsoft Corporation.
-/**
- * This error is thrown when an asynchronous operation has been aborted.
- * Check for this error by testing the `name` that the name property of the
- * error matches `"AbortError"`.
- *
- * @example
- * ```ts
- * const controller = new AbortController();
- * controller.abort();
- * try {
- *   doAsyncWork(controller.signal)
- * } catch (e) {
- *   if (e.name === 'AbortError') {
- *     // handle abort error here.
- *   }
- * }
- * ```
- */
-class AbortError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "AbortError";
-    }
-}
-/**
- * An AbortController provides an AbortSignal and the associated controls to signal
- * that an asynchronous operation should be aborted.
- *
- * @example
- * Abort an operation when another event fires
- * ```ts
- * const controller = new AbortController();
- * const signal = controller.signal;
- * doAsyncWork(signal);
- * button.addEventListener('click', () => controller.abort());
- * ```
- *
- * @example
- * Share aborter cross multiple operations in 30s
- * ```ts
- * // Upload the same data to 2 different data centers at the same time,
- * // abort another when any of them is finished
- * const controller = AbortController.withTimeout(30 * 1000);
- * doAsyncWork(controller.signal).then(controller.abort);
- * doAsyncWork(controller.signal).then(controller.abort);
- *```
- *
- * @example
- * Cascaded aborting
- * ```ts
- * // All operations can't take more than 30 seconds
- * const aborter = Aborter.timeout(30 * 1000);
- *
- * // Following 2 operations can't take more than 25 seconds
- * await doAsyncWork(aborter.withTimeout(25 * 1000));
- * await doAsyncWork(aborter.withTimeout(25 * 1000));
- * ```
- */
-class AbortController {
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(parentSignals) {
-        this._signal = new AbortSignal();
-        if (!parentSignals) {
-            return;
-        }
-        // coerce parentSignals into an array
-        if (!Array.isArray(parentSignals)) {
-            // eslint-disable-next-line prefer-rest-params
-            parentSignals = arguments;
-        }
-        for (const parentSignal of parentSignals) {
-            // if the parent signal has already had abort() called,
-            // then call abort on this signal as well.
-            if (parentSignal.aborted) {
-                this.abort();
-            }
-            else {
-                // when the parent signal aborts, this signal should as well.
-                parentSignal.addEventListener("abort", () => {
-                    this.abort();
-                });
-            }
-        }
-    }
-    /**
-     * The AbortSignal associated with this controller that will signal aborted
-     * when the abort method is called on this controller.
-     *
-     * @readonly
-     */
-    get signal() {
-        return this._signal;
-    }
-    /**
-     * Signal that any operations passed this controller's associated abort signal
-     * to cancel any remaining work and throw an `AbortError`.
-     */
-    abort() {
-        abortSignal(this._signal);
-    }
-    /**
-     * Creates a new AbortSignal instance that will abort after the provided ms.
-     * @param ms - Elapsed time in milliseconds to trigger an abort.
-     */
-    static timeout(ms) {
-        const signal = new AbortSignal();
-        const timer = setTimeout(abortSignal, ms, signal);
-        // Prevent the active Timer from keeping the Node.js event loop active.
-        if (typeof timer.unref === "function") {
-            timer.unref();
-        }
-        return signal;
-    }
-}
-
-exports.AbortController = AbortController;
-exports.AbortError = AbortError;
-exports.AbortSignal = AbortSignal;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
 /***/ 3704:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -6207,7 +5960,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var tslib = __nccwpck_require__(4351);
 var coreClient = __nccwpck_require__(7611);
 var coreRestPipeline = __nccwpck_require__(9146);
-var coreLro = __nccwpck_require__(334);
+var coreLro = __nccwpck_require__(5069);
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
@@ -8886,7 +8639,7 @@ var logger$r = __nccwpck_require__(9497);
 var coreClient = __nccwpck_require__(7611);
 var coreUtil = __nccwpck_require__(637);
 var coreRestPipeline = __nccwpck_require__(9146);
-var abortController = __nccwpck_require__(2557);
+var abortController = __nccwpck_require__(1662);
 var coreTracing = __nccwpck_require__(9363);
 var fs = __nccwpck_require__(7147);
 var os = __nccwpck_require__(2037);
@@ -13679,7 +13432,254 @@ exports.useIdentityPlugin = useIdentityPlugin;
 
 /***/ }),
 
-/***/ 9379:
+/***/ 1662:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+/// <reference path="../shims-public.d.ts" />
+const listenersMap = new WeakMap();
+const abortedMap = new WeakMap();
+/**
+ * An aborter instance implements AbortSignal interface, can abort HTTP requests.
+ *
+ * - Call AbortSignal.none to create a new AbortSignal instance that cannot be cancelled.
+ * Use `AbortSignal.none` when you are required to pass a cancellation token but the operation
+ * cannot or will not ever be cancelled.
+ *
+ * @example
+ * Abort without timeout
+ * ```ts
+ * await doAsyncWork(AbortSignal.none);
+ * ```
+ */
+class AbortSignal {
+    constructor() {
+        /**
+         * onabort event listener.
+         */
+        this.onabort = null;
+        listenersMap.set(this, []);
+        abortedMap.set(this, false);
+    }
+    /**
+     * Status of whether aborted or not.
+     *
+     * @readonly
+     */
+    get aborted() {
+        if (!abortedMap.has(this)) {
+            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
+        }
+        return abortedMap.get(this);
+    }
+    /**
+     * Creates a new AbortSignal instance that will never be aborted.
+     *
+     * @readonly
+     */
+    static get none() {
+        return new AbortSignal();
+    }
+    /**
+     * Added new "abort" event listener, only support "abort" event.
+     *
+     * @param _type - Only support "abort" event
+     * @param listener - The listener to be added
+     */
+    addEventListener(
+    // tslint:disable-next-line:variable-name
+    _type, listener) {
+        if (!listenersMap.has(this)) {
+            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
+        }
+        const listeners = listenersMap.get(this);
+        listeners.push(listener);
+    }
+    /**
+     * Remove "abort" event listener, only support "abort" event.
+     *
+     * @param _type - Only support "abort" event
+     * @param listener - The listener to be removed
+     */
+    removeEventListener(
+    // tslint:disable-next-line:variable-name
+    _type, listener) {
+        if (!listenersMap.has(this)) {
+            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
+        }
+        const listeners = listenersMap.get(this);
+        const index = listeners.indexOf(listener);
+        if (index > -1) {
+            listeners.splice(index, 1);
+        }
+    }
+    /**
+     * Dispatches a synthetic event to the AbortSignal.
+     */
+    dispatchEvent(_event) {
+        throw new Error("This is a stub dispatchEvent implementation that should not be used.  It only exists for type-checking purposes.");
+    }
+}
+/**
+ * Helper to trigger an abort event immediately, the onabort and all abort event listeners will be triggered.
+ * Will try to trigger abort event for all linked AbortSignal nodes.
+ *
+ * - If there is a timeout, the timer will be cancelled.
+ * - If aborted is true, nothing will happen.
+ *
+ * @internal
+ */
+// eslint-disable-next-line @azure/azure-sdk/ts-use-interface-parameters
+function abortSignal(signal) {
+    if (signal.aborted) {
+        return;
+    }
+    if (signal.onabort) {
+        signal.onabort.call(signal);
+    }
+    const listeners = listenersMap.get(signal);
+    if (listeners) {
+        // Create a copy of listeners so mutations to the array
+        // (e.g. via removeListener calls) don't affect the listeners
+        // we invoke.
+        listeners.slice().forEach((listener) => {
+            listener.call(signal, { type: "abort" });
+        });
+    }
+    abortedMap.set(signal, true);
+}
+
+// Copyright (c) Microsoft Corporation.
+/**
+ * This error is thrown when an asynchronous operation has been aborted.
+ * Check for this error by testing the `name` that the name property of the
+ * error matches `"AbortError"`.
+ *
+ * @example
+ * ```ts
+ * const controller = new AbortController();
+ * controller.abort();
+ * try {
+ *   doAsyncWork(controller.signal)
+ * } catch (e) {
+ *   if (e.name === 'AbortError') {
+ *     // handle abort error here.
+ *   }
+ * }
+ * ```
+ */
+class AbortError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "AbortError";
+    }
+}
+/**
+ * An AbortController provides an AbortSignal and the associated controls to signal
+ * that an asynchronous operation should be aborted.
+ *
+ * @example
+ * Abort an operation when another event fires
+ * ```ts
+ * const controller = new AbortController();
+ * const signal = controller.signal;
+ * doAsyncWork(signal);
+ * button.addEventListener('click', () => controller.abort());
+ * ```
+ *
+ * @example
+ * Share aborter cross multiple operations in 30s
+ * ```ts
+ * // Upload the same data to 2 different data centers at the same time,
+ * // abort another when any of them is finished
+ * const controller = AbortController.withTimeout(30 * 1000);
+ * doAsyncWork(controller.signal).then(controller.abort);
+ * doAsyncWork(controller.signal).then(controller.abort);
+ *```
+ *
+ * @example
+ * Cascaded aborting
+ * ```ts
+ * // All operations can't take more than 30 seconds
+ * const aborter = Aborter.timeout(30 * 1000);
+ *
+ * // Following 2 operations can't take more than 25 seconds
+ * await doAsyncWork(aborter.withTimeout(25 * 1000));
+ * await doAsyncWork(aborter.withTimeout(25 * 1000));
+ * ```
+ */
+class AbortController {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    constructor(parentSignals) {
+        this._signal = new AbortSignal();
+        if (!parentSignals) {
+            return;
+        }
+        // coerce parentSignals into an array
+        if (!Array.isArray(parentSignals)) {
+            // eslint-disable-next-line prefer-rest-params
+            parentSignals = arguments;
+        }
+        for (const parentSignal of parentSignals) {
+            // if the parent signal has already had abort() called,
+            // then call abort on this signal as well.
+            if (parentSignal.aborted) {
+                this.abort();
+            }
+            else {
+                // when the parent signal aborts, this signal should as well.
+                parentSignal.addEventListener("abort", () => {
+                    this.abort();
+                });
+            }
+        }
+    }
+    /**
+     * The AbortSignal associated with this controller that will signal aborted
+     * when the abort method is called on this controller.
+     *
+     * @readonly
+     */
+    get signal() {
+        return this._signal;
+    }
+    /**
+     * Signal that any operations passed this controller's associated abort signal
+     * to cancel any remaining work and throw an `AbortError`.
+     */
+    abort() {
+        abortSignal(this._signal);
+    }
+    /**
+     * Creates a new AbortSignal instance that will abort after the provided ms.
+     * @param ms - Elapsed time in milliseconds to trigger an abort.
+     */
+    static timeout(ms) {
+        const signal = new AbortSignal();
+        const timer = setTimeout(abortSignal, ms, signal);
+        // Prevent the active Timer from keeping the Node.js event loop active.
+        if (typeof timer.unref === "function") {
+            timer.unref();
+        }
+        return signal;
+    }
+}
+
+exports.AbortController = AbortController;
+exports.AbortError = AbortError;
+exports.AbortSignal = AbortSignal;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 334:
 /***/ ((module) => {
 
 "use strict";
@@ -13797,7 +13797,7 @@ var import_universal_user_agent = __nccwpck_require__(5030);
 var import_before_after_hook = __nccwpck_require__(3682);
 var import_request = __nccwpck_require__(6234);
 var import_graphql = __nccwpck_require__(8467);
-var import_auth_token = __nccwpck_require__(9379);
+var import_auth_token = __nccwpck_require__(334);
 
 // pkg/dist-src/version.js
 var VERSION = "5.2.0";
@@ -50270,11 +50270,11 @@ exports.prepareDenySettings = exports.prepareUnmanageProperties = exports.newCon
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
-const exec = __importStar(__nccwpck_require__(9990));
+const exec = __importStar(__nccwpck_require__(1514));
 const github = __importStar(__nccwpck_require__(5438));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
-const types_1 = __nccwpck_require__(77);
+const types_1 = __nccwpck_require__(5077);
 /** Install Bicep binary. */
 async function installBicep() {
     core.debug(`Installing Bicep binary`);
@@ -50735,23 +50735,26 @@ async function createDeploymentStack(config) {
             branch: config.context.branch
         }
     };
+    const optionalParams = {
+        abortSignal: new AbortController().signal
+    };
     let operationPromise;
     switch (config.inputs.scope) {
         case 'managementGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
             break;
         case 'subscription':
             client.subscriptionId = config.inputs.subscriptionId;
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(config.inputs.name, deploymentStack, optionalParams);
             break;
         case 'resourceGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
             break;
     }
     const result = await operationPromise;
@@ -50774,7 +50777,8 @@ async function deleteDeploymentStack(config) {
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Deleting deployment stack`);
     const deploymentStack = await getDeploymentStack(config, client);
-    const params = {
+    const optionalParams = {
+        abortSignal: new AbortController().signal,
         unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
         unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
         unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
@@ -50783,19 +50787,19 @@ async function deleteDeploymentStack(config) {
     switch (config.inputs.scope) {
         case 'managementGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, params)
-                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, params);
+                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, optionalParams);
             break;
         case 'subscription':
             client.subscriptionId = config.inputs.subscriptionId;
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, params)
-                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, params);
+                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, optionalParams);
             break;
         case 'resourceGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, params)
-                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, params);
+                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, optionalParams);
             break;
     }
     await operationPromise;
@@ -50827,23 +50831,26 @@ async function validateDeploymentStack(config) {
             branch: config.context.branch
         }
     };
+    const optionalParams = {
+        abortSignal: new AbortController().signal
+    };
     let operationPromise;
     switch (config.inputs.scope) {
         case 'managementGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
             break;
         case 'subscription':
             client.subscriptionId = config.inputs.subscriptionId;
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtSubscription(config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtSubscription(config.inputs.name, deploymentStack, optionalParams);
             break;
         case 'resourceGroup':
             operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack)
-                : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack);
+                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
             break;
     }
     // TODO(ljtill): Parse error messages
@@ -50855,7 +50862,7 @@ exports.validateDeploymentStack = validateDeploymentStack;
 
 /***/ }),
 
-/***/ 77:
+/***/ 5077:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -51203,6 +51210,59 @@ module.exports = require("worker_threads");
 
 "use strict";
 module.exports = require("zlib");
+
+/***/ }),
+
+/***/ 2563:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AbortError = void 0;
+/**
+ * This error is thrown when an asynchronous operation has been aborted.
+ * Check for this error by testing the `name` that the name property of the
+ * error matches `"AbortError"`.
+ *
+ * @example
+ * ```ts
+ * const controller = new AbortController();
+ * controller.abort();
+ * try {
+ *   doAsyncWork(controller.signal)
+ * } catch (e) {
+ *   if (e.name === 'AbortError') {
+ *     // handle abort error here.
+ *   }
+ * }
+ * ```
+ */
+class AbortError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "AbortError";
+    }
+}
+exports.AbortError = AbortError;
+//# sourceMappingURL=AbortError.js.map
+
+/***/ }),
+
+/***/ 583:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AbortError = void 0;
+var AbortError_js_1 = __nccwpck_require__(2563);
+Object.defineProperty(exports, "AbortError", ({ enumerable: true, get: function () { return AbortError_js_1.AbortError; } }));
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -54000,7 +54060,7 @@ exports.createHttpPoller = createHttpPoller;
 
 /***/ }),
 
-/***/ 334:
+/***/ 5069:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -55308,7 +55368,7 @@ const http = tslib_1.__importStar(__nccwpck_require__(8849));
 const https = tslib_1.__importStar(__nccwpck_require__(5200));
 const zlib = tslib_1.__importStar(__nccwpck_require__(5628));
 const node_stream_1 = __nccwpck_require__(4492);
-const abort_controller_1 = __nccwpck_require__(1514);
+const abort_controller_1 = __nccwpck_require__(583);
 const httpHeaders_js_1 = __nccwpck_require__(118);
 const restError_js_1 = __nccwpck_require__(1036);
 const log_js_1 = __nccwpck_require__(648);
@@ -56844,7 +56904,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.retryPolicy = void 0;
 const helpers_js_1 = __nccwpck_require__(1333);
 const logger_1 = __nccwpck_require__(9497);
-const abort_controller_1 = __nccwpck_require__(1514);
+const abort_controller_1 = __nccwpck_require__(583);
 const constants_js_1 = __nccwpck_require__(3171);
 const retryPolicyLogger = (0, logger_1.createClientLogger)("core-rest-pipeline retryPolicy");
 /**
@@ -57710,7 +57770,7 @@ exports.createFile = createFile;
 // Licensed under the MIT license.
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseHeaderValueAsNumber = exports.delay = void 0;
-const abort_controller_1 = __nccwpck_require__(1514);
+const abort_controller_1 = __nccwpck_require__(583);
 const StandardAbortMessage = "The operation was aborted.";
 /**
  * A wrapper for setTimeout that resolves a promise after delayInMs milliseconds.
@@ -58209,59 +58269,6 @@ exports.setPlatformSpecificData = setPlatformSpecificData;
 
 /***/ }),
 
-/***/ 9390:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AbortError = void 0;
-/**
- * This error is thrown when an asynchronous operation has been aborted.
- * Check for this error by testing the `name` that the name property of the
- * error matches `"AbortError"`.
- *
- * @example
- * ```ts
- * const controller = new AbortController();
- * controller.abort();
- * try {
- *   doAsyncWork(controller.signal)
- * } catch (e) {
- *   if (e.name === 'AbortError') {
- *     // handle abort error here.
- *   }
- * }
- * ```
- */
-class AbortError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "AbortError";
-    }
-}
-exports.AbortError = AbortError;
-//# sourceMappingURL=AbortError.js.map
-
-/***/ }),
-
-/***/ 1514:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AbortError = void 0;
-var AbortError_js_1 = __nccwpck_require__(9390);
-Object.defineProperty(exports, "AbortError", ({ enumerable: true, get: function () { return AbortError_js_1.AbortError; } }));
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ 9363:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -58649,7 +58656,7 @@ exports.isReactNative = typeof navigator !== "undefined" && (navigator === null 
 // Licensed under the MIT license.
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createAbortablePromise = void 0;
-const abort_controller_1 = __nccwpck_require__(4812);
+const abort_controller_1 = __nccwpck_require__(583);
 /**
  * Creates an abortable promise.
  * @param buildPromise - A function that takes the resolve and reject functions as parameters.
@@ -58990,59 +58997,6 @@ function randomUUID() {
 }
 exports.randomUUID = randomUUID;
 //# sourceMappingURL=uuidUtils.js.map
-
-/***/ }),
-
-/***/ 2118:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AbortError = void 0;
-/**
- * This error is thrown when an asynchronous operation has been aborted.
- * Check for this error by testing the `name` that the name property of the
- * error matches `"AbortError"`.
- *
- * @example
- * ```ts
- * const controller = new AbortController();
- * controller.abort();
- * try {
- *   doAsyncWork(controller.signal)
- * } catch (e) {
- *   if (e.name === 'AbortError') {
- *     // handle abort error here.
- *   }
- * }
- * ```
- */
-class AbortError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "AbortError";
-    }
-}
-exports.AbortError = AbortError;
-//# sourceMappingURL=AbortError.js.map
-
-/***/ }),
-
-/***/ 4812:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AbortError = void 0;
-var AbortError_js_1 = __nccwpck_require__(2118);
-Object.defineProperty(exports, "AbortError", ({ enumerable: true, get: function () { return AbortError_js_1.AbortError; } }));
-//# sourceMappingURL=index.js.map
 
 /***/ }),
 

@@ -139,6 +139,10 @@ export async function createDeploymentStack(config: Config): Promise<void> {
     }
   }
 
+  const optionalParams = {
+    abortSignal: new AbortController().signal
+  }
+
   let operationPromise
 
   switch (config.inputs.scope) {
@@ -147,12 +151,14 @@ export async function createDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(
             config.inputs.managementGroupId,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(
             config.inputs.managementGroupId,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
 
@@ -161,11 +167,13 @@ export async function createDeploymentStack(config: Config): Promise<void> {
       operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginCreateOrUpdateAtSubscription(
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
 
@@ -174,12 +182,14 @@ export async function createDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
   }
@@ -208,7 +218,8 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
   core.info(`Deleting deployment stack`)
 
   const deploymentStack = await getDeploymentStack(config, client)
-  const params = {
+  const optionalParams = {
+    abortSignal: new AbortController().signal,
     unmanageActionManagementGroups:
       deploymentStack.properties?.actionOnUnmanage.managementGroups,
     unmanageActionResourceGroups:
@@ -225,12 +236,12 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(
             config.inputs.managementGroupId,
             config.inputs.name,
-            params
+            optionalParams
           )
         : client.deploymentStacks.beginDeleteAtManagementGroup(
             config.inputs.managementGroupId,
             config.inputs.name,
-            params
+            optionalParams
           )
       break
 
@@ -239,11 +250,11 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
       operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(
             config.inputs.name,
-            params
+            optionalParams
           )
         : client.deploymentStacks.beginDeleteAtSubscription(
             config.inputs.name,
-            params
+            optionalParams
           )
       break
 
@@ -252,12 +263,12 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            params
+            optionalParams
           )
         : client.deploymentStacks.beginDeleteAtResourceGroup(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            params
+            optionalParams
           )
       break
   }
@@ -297,6 +308,10 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
     }
   }
 
+  const optionalParams = {
+    abortSignal: new AbortController().signal
+  }
+
   let operationPromise
 
   switch (config.inputs.scope) {
@@ -305,12 +320,14 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(
             config.inputs.managementGroupId,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginValidateStackAtManagementGroup(
             config.inputs.managementGroupId,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
 
@@ -319,11 +336,13 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
       operationPromise = config.inputs.wait
         ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginValidateStackAtSubscription(
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
 
@@ -332,12 +351,14 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
         ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
         : client.deploymentStacks.beginValidateStackAtResourceGroup(
             config.inputs.resourceGroupName,
             config.inputs.name,
-            deploymentStack
+            deploymentStack,
+            optionalParams
           )
       break
   }

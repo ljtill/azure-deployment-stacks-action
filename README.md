@@ -9,7 +9,7 @@
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
 This repository contains a [GitHub Action](https://docs.github.com/actions) that
-allows engineers to create, update, delete, validate and export
+allows engineers to create, update, delete, and validate
 [Azure Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)
 directly from their GitHub workflows. It supports a variety of inputs for scopes
 and options, making it flexible and easy to use for managing Azure resources.

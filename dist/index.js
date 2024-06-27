@@ -50457,11 +50457,13 @@ async function parseParametersFile(config) {
     else {
         throw new Error('Invalid parameters file path: ${filePath}');
     }
-    const parsedData = JSON.parse(fs.readFileSync(filePath).toString());
-    if (!parsedData.parameters) {
-        throw new Error('Unable to parse parameters file.');
+    try {
+        const deploymentParameters = JSON.parse(fs.readFileSync(filePath).toString());
+        return deploymentParameters.parameters;
     }
-    return parsedData.parameters;
+    catch {
+        throw new Error('Invalid parameters file content');
+    }
 }
 exports.parseParametersFile = parseParametersFile;
 /**

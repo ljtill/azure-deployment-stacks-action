@@ -199,10 +199,23 @@ export async function parseTemplateFile(
   return JSON.parse(fs.readFileSync(filePath).toString())
 }
 
+interface ParametersContent {
+  $schema: string
+  contentVersion: string
+  parameters: Parameters
+}
+
 interface Parameters {
   [key: string]: {
-    value: string
+    value: string | Reference
   }
+}
+
+interface Reference {
+  keyVault: {
+    id: string
+  }
+  secretName: string
 }
 
 /**
@@ -230,13 +243,14 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
     throw new Error('Invalid parameters file path: ${filePath}')
   }
 
-  const parsedData = JSON.parse(fs.readFileSync(filePath).toString())
-
-  if (!parsedData.parameters) {
-    throw new Error('Unable to parse parameters file.')
+  try {
+    const deploymentParameters: ParametersContent = JSON.parse(
+      fs.readFileSync(filePath).toString()
+    )
+    return deploymentParameters.parameters
+  } catch {
+    throw new Error('Invalid parameters file content')
   }
-
-  return parsedData.parameters
 }
 
 /**

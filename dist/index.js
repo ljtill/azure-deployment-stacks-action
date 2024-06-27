@@ -50407,8 +50407,8 @@ const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
 const helpers = __importStar(__nccwpck_require__(202));
 /**
- * Checks if an object is an instance of DeploymentStack.
- * @param object - The object to check.
+ * Checks if the provided result is an instance of 'DeploymentStack'.
+ * @param result - The result to check.
  * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
  */
 function instanceOfDeploymentStack(result) {
@@ -50424,7 +50424,7 @@ function instanceOfDeploymentStack(result) {
 /**
  * Checks if the provided result is an instance of `DeploymentStackValidateResult`.
  * @param result - The result to be checked.
- * @returns `true` if the result is an instance of `DeploymentStackValidateResult`, `false` otherwise.
+ * @returns A boolean value indicating whether the object is an instance of DeploymentStackValidateResult.
  */
 function instanceOfDeploymentStackValidateResult(result) {
     return (!!result &&
@@ -50493,6 +50493,7 @@ function logValidateResult(validateResult) {
         core.warning('No result returned from operation');
         return;
     }
+    core.info(JSON.stringify(validateResult));
     if (instanceOfDeploymentStackValidateResult(validateResult)) {
         core.startGroup('Validation result');
         if (validateResult.error?.code) {

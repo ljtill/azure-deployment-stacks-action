@@ -32,8 +32,8 @@ type ValidateResult =
   | undefined
 
 /**
- * Checks if an object is an instance of DeploymentStack.
- * @param object - The object to check.
+ * Checks if the provided result is an instance of 'DeploymentStack'.
+ * @param result - The result to check.
  * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
  */
 function instanceOfDeploymentStack(result: Result): result is DeploymentStack {
@@ -52,7 +52,7 @@ function instanceOfDeploymentStack(result: Result): result is DeploymentStack {
 /**
  * Checks if the provided result is an instance of `DeploymentStackValidateResult`.
  * @param result - The result to be checked.
- * @returns `true` if the result is an instance of `DeploymentStackValidateResult`, `false` otherwise.
+ * @returns A boolean value indicating whether the object is an instance of DeploymentStackValidateResult.
  */
 function instanceOfDeploymentStackValidateResult(
   result: ValidateResult
@@ -134,6 +134,8 @@ export function logValidateResult(validateResult: ValidateResult): void {
     core.warning('No result returned from operation')
     return
   }
+
+  core.info(JSON.stringify(validateResult))
 
   if (instanceOfDeploymentStackValidateResult(validateResult)) {
     core.startGroup('Validation result')

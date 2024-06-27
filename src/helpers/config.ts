@@ -23,53 +23,52 @@ function getInput(
   return value
 }
 
-/**
- * Creates a new configuration object based on user inputs.
- * @returns The new configuration object.
- */
-export function newConfig(): Config {
-  const config: Config = createDefaultConfig()
-
-  config.inputs.name = getInput('name', true)
-  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
-
+function setModeInputs(config: Config) {
   if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
     config.inputs.description = getInput('description', false)
-    config.inputs.location = getInput('location', false)
 
+    // Action on unmanage
     config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
       'deleteAll',
       'deleteResources',
       'detachAll'
     ])
 
+    // Deny settings
     config.inputs.denySettings = getInput('denySettings', true, [
       'denyDelete',
       'denyWriteAndDelete',
       'none'
     ])
 
+    // Apply to child scopes
     config.inputs.applyToChildScopes =
       getInput('applyToChildScopes', false) === 'true'
 
+    // Excluded actions
     const excludedActions = getInput('excludedActions', false)
     config.inputs.excludedActions = excludedActions
       ? excludedActions.split(',')
       : []
 
+    // Excluded principals
     const excludedPrincipals = getInput('excludedPrincipals', false)
     config.inputs.excludedPrincipals = excludedPrincipals
       ? excludedPrincipals.split(',')
       : []
 
+    // Template and parameters files
     config.inputs.templateFile = getInput('templateFile', true)
     config.inputs.parametersFile = getInput('parametersFile', false)
 
+    // Runtime context
     config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
     config.context.commit = github.context.sha
     config.context.branch = github.context.ref
   }
+}
 
+function setScopeInputs(config: Config) {
   config.inputs.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
@@ -87,10 +86,27 @@ export function newConfig(): Config {
       config.inputs.resourceGroupName = getInput('resourceGroupName', true)
       break
   }
+}
+
+/**
+ * Creates a new configuration object based on user inputs.
+ * @returns The new configuration object.
+ */
+export function newConfig(): Config {
+  const config: Config = createDefaultConfig()
+
+  config.inputs.name = getInput('name', true)
+  config.inputs.location = getInput('location', false)
+  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
+
+  setModeInputs(config)
+  setScopeInputs(config)
 
   config.inputs.bypassStackOutOfSyncError =
     getInput('bypassStackOutOfSyncError', false) === 'true'
   config.inputs.wait = getInput('wait', false) === 'true'
+
+  core.debug(`Configuration: ${JSON.stringify(config)}`)
 
   return config
 }

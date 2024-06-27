@@ -84,7 +84,7 @@ Stamps Action:
 - [Delete](./docs/WORKFLOWS.md#delete)
 - [Validate](./docs/WORKFLOWS.md#validate)
 
-## Parameters
+## Customisation
 
 For a complete list of customization options, please refer to the
 [Parameters](./docs/PARAMETERS.md) document.

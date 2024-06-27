@@ -23,6 +23,13 @@ function getInput(
   return value
 }
 
+function setCommonInputs(config: Config) {
+  config.inputs.name = getInput('name', true)
+  config.inputs.location = getInput('location', false)
+  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
+  config.inputs.wait = getInput('wait', false) === 'true'
+}
+
 function setModeInputs(config: Config) {
   if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
     config.inputs.description = getInput('description', false)
@@ -65,6 +72,10 @@ function setModeInputs(config: Config) {
     config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
     config.context.commit = github.context.sha
     config.context.branch = github.context.ref
+
+    // Bypass stack out of sync error
+    config.inputs.bypassStackOutOfSyncError =
+      getInput('bypassStackOutOfSyncError', false) === 'true'
   }
 }
 
@@ -95,16 +106,9 @@ function setScopeInputs(config: Config) {
 export function newConfig(): Config {
   const config: Config = createDefaultConfig()
 
-  config.inputs.name = getInput('name', true)
-  config.inputs.location = getInput('location', false)
-  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
-
+  setCommonInputs(config)
   setModeInputs(config)
   setScopeInputs(config)
-
-  config.inputs.bypassStackOutOfSyncError =
-    getInput('bypassStackOutOfSyncError', false) === 'true'
-  config.inputs.wait = getInput('wait', false) === 'true'
 
   core.debug(`Configuration: ${JSON.stringify(config)}`)
 

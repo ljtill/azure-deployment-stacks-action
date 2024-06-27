@@ -199,19 +199,15 @@ export async function parseTemplateFile(
   return JSON.parse(fs.readFileSync(filePath).toString())
 }
 
-interface Parameters {
-  $schema: string
-  contentVersion: string
-  parameters: object
-}
-
 /**
  * Parses the parameters file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the inputs.
  * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
  * @throws An error if the parameters file path is invalid.
  */
-export async function parseParametersFile(config: Config): Promise<Parameters> {
+export async function parseParametersFile(
+  config: Config
+): Promise<Record<string, unknown>> {
   core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`)
 
   let filePath = config.inputs.parametersFile

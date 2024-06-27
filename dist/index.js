@@ -50461,7 +50461,7 @@ async function parseParametersFile(config) {
     if (!parsedData.parameters) {
         throw new Error('Unable to parse parameters file.');
     }
-    return parsedData;
+    return parsedData.parameters;
 }
 exports.parseParametersFile = parseParametersFile;
 /**

@@ -50237,7 +50237,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 165:
+/***/ 6165:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50269,7 +50269,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.newConfig = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const models_1 = __nccwpck_require__(859);
+const models_1 = __nccwpck_require__(2859);
 /**
  * Retrieves the value of the specified input key from the workflow run context.
  * @param key - The name of the input key.
@@ -50346,7 +50346,7 @@ exports.newConfig = newConfig;
 
 /***/ }),
 
-/***/ 202:
+/***/ 3202:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50366,14 +50366,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__nccwpck_require__(165), exports);
-__exportStar(__nccwpck_require__(167), exports);
-__exportStar(__nccwpck_require__(552), exports);
+__exportStar(__nccwpck_require__(6165), exports);
+__exportStar(__nccwpck_require__(9167), exports);
+__exportStar(__nccwpck_require__(2552), exports);
 
 
 /***/ }),
 
-/***/ 167:
+/***/ 9167:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50405,7 +50405,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.logValidateResult = exports.logResult = exports.newDeploymentStack = exports.newCredential = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
-const helpers = __importStar(__nccwpck_require__(202));
+const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * Checks if the provided result is an instance of 'DeploymentStack'.
  * @param result - The result to check.
@@ -50480,9 +50480,9 @@ function logResult(result) {
     if (instanceOfDeploymentStack(result)) {
         core.startGroup('Resources');
         for (const item of result.properties?.resources || []) {
-            core.info(`- Id:          ${item.id}\n`);
-            core.info(`- Status:      ${item.status}\n`);
-            core.info(`- Deny Status: ${item.denyStatus}\n`);
+            core.info(`- Id:          ${item.id}`);
+            core.info(`  Status:      ${item.status}`);
+            core.info(`  Deny Status: ${item.denyStatus}\n`);
         }
         core.endGroup();
         core.startGroup('Deleted Resources');
@@ -50574,7 +50574,7 @@ function prepareDenySettings(config) {
 
 /***/ }),
 
-/***/ 552:
+/***/ 2552:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50703,6 +50703,7 @@ async function buildBicepFile(filePath) {
         },
         silent: true
     };
+    core.debug(`bicep build --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
@@ -50726,6 +50727,7 @@ async function buildBicepParametersFile(filePath) {
         },
         silent: true
     };
+    core.debug(`bicep build-params --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
@@ -50823,7 +50825,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const helpers = __importStar(__nccwpck_require__(202));
+const helpers = __importStar(__nccwpck_require__(3202));
 const stack = __importStar(__nccwpck_require__(7067));
 /**
  * The main function for the action.
@@ -50858,7 +50860,7 @@ exports.run = run;
 
 /***/ }),
 
-/***/ 87:
+/***/ 6087:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -50911,7 +50913,7 @@ exports.createDefaultConfig = createDefaultConfig;
 
 /***/ }),
 
-/***/ 859:
+/***/ 2859:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50931,7 +50933,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__nccwpck_require__(87), exports);
+__exportStar(__nccwpck_require__(6087), exports);
 
 
 /***/ }),
@@ -50968,7 +50970,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteDeploymentStack = exports.validateDeploymentStack = exports.createDeploymentStack = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
-const helpers = __importStar(__nccwpck_require__(202));
+const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * Retrieves the deployment stack based on the provided configuration and client.
  * @param {Config} config - The configuration object.

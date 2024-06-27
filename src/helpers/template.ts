@@ -109,6 +109,7 @@ async function buildBicepFile(filePath: string): Promise<string> {
     silent: true
   }
 
+  core.debug(`bicep build --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build', filePath, '--outfile', outputPath],
@@ -140,6 +141,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
     silent: true
   }
 
+  core.debug(`bicep build-params --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build-params', filePath, '--outfile', outputPath],

@@ -119,9 +119,9 @@ export function logResult(result: Result): void {
   if (instanceOfDeploymentStack(result)) {
     core.startGroup('Resources')
     for (const item of result.properties?.resources || []) {
-      core.info(`- Id:          ${item.id}\n`)
-      core.info(`- Status:      ${item.status}\n`)
-      core.info(`- Deny Status: ${item.denyStatus}\n`)
+      core.info(`- Id:          ${item.id}`)
+      core.info(`  Status:      ${item.status}`)
+      core.info(`  Deny Status: ${item.denyStatus}\n`)
     }
     core.endGroup()
 

@@ -119,31 +119,27 @@ export function logResult(result: Result): void {
   if (instanceOfDeploymentStack(result)) {
     core.startGroup('Resources')
     for (const item of result.properties?.resources || []) {
-      core.info(
-        `Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`
-      )
-      core.info(`---`)
+      core.info(`- Id:          ${item.id}\n`)
+      core.info(`- Status:      ${item.status}\n`)
+      core.info(`- Deny Status: ${item.denyStatus}\n`)
     }
     core.endGroup()
 
     core.startGroup('Deleted Resources')
     for (const item of result.properties?.deletedResources || []) {
-      core.info(`Id: ${item.id}`)
-      core.info(`---`)
+      core.info(`- Id: ${item.id}\n`)
     }
     core.endGroup()
 
     core.startGroup('Detached Resources')
     for (const item of result.properties?.detachedResources || []) {
-      core.info(`Id: ${item.id}`)
-      core.info(`---`)
+      core.info(`- Id: ${item.id}\n`)
     }
     core.endGroup()
 
     core.startGroup('Failed Resources')
     for (const item of result.properties?.failedResources || []) {
-      core.info(`Id: ${item.id}\nError: ${item.error?.code}`)
-      core.info(`---`)
+      core.info(`- Id: ${item.id}\nError: ${item.error?.code}\n`)
     }
     core.endGroup()
   } else {
@@ -169,8 +165,7 @@ export function logValidateResult(validateResult: ValidateResult): void {
     core.startGroup('Resources')
 
     for (const item of validateResult.properties?.validatedResources || []) {
-      core.info(`Id: ${item.id}`)
-      core.info(`---`)
+      core.info(`- Id: ${item.id}\n`)
     }
 
     core.endGroup()

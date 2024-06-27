@@ -199,67 +199,10 @@ export async function parseTemplateFile(
   return JSON.parse(fs.readFileSync(filePath).toString())
 }
 
-type Parameter = { value: string } | { reference: object }
-
-type ParameterList = {
-  [key: string]: Parameter
-}
-
-// Type guards for Parameter using unknown
-function hasValue(obj: unknown): obj is { value: string } {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'value' in obj &&
-    typeof (obj as { value: unknown }).value === 'string' &&
-    !('reference' in obj)
-  )
-}
-
-function hasReference(obj: unknown): obj is { reference: object } {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'reference' in obj &&
-    typeof (obj as { reference: unknown }).reference === 'object' &&
-    (obj as { reference: unknown }).reference !== null &&
-    !('value' in obj)
-  )
-}
-
-function isParameter(obj: unknown): obj is Parameter {
-  return hasValue(obj) || hasReference(obj)
-}
-
-function isParameterList(obj: unknown): obj is ParameterList {
-  if (typeof obj !== 'object' || obj === null) return false
-
-  for (const key in obj) {
-    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue
-    const item = (obj as { [key: string]: unknown })[key]
-
-    if (!isParameter(item)) {
-      return false
-    }
-  }
-
-  return true
-}
-
-function extractParameterList(data: unknown): ParameterList | null {
-  if (typeof data !== 'object' || data === null) return null
-
-  const obj = data as { [key: string]: unknown }
-
-  if (
-    typeof obj.$schema === 'string' &&
-    typeof obj.contentVersion === 'string' &&
-    isParameterList(obj.parameters)
-  ) {
-    return obj.parameters
-  }
-
-  return null
+interface Parameters {
+  $schema: string
+  contentVersion: string
+  parameters: object
 }
 
 /**
@@ -268,9 +211,7 @@ function extractParameterList(data: unknown): ParameterList | null {
  * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
  * @throws An error if the parameters file path is invalid.
  */
-export async function parseParametersFile(
-  config: Config
-): Promise<ParameterList> {
+export async function parseParametersFile(config: Config): Promise<Parameters> {
   core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`)
 
   let filePath = config.inputs.parametersFile
@@ -289,13 +230,9 @@ export async function parseParametersFile(
     throw new Error('Invalid parameters file path: ${filePath}')
   }
 
-  const fileContent = fs.readFileSync(filePath)
+  const data: Parameters = JSON.parse(fs.readFileSync(filePath).toString())
 
-  const data = JSON.parse(fileContent.toString())
-
-  const parameters = extractParameterList(data)
-
-  if (parameters) {
+  if (data.parameters) {
     return data
   } else {
     throw new Error('Unable to parse parameters file.')

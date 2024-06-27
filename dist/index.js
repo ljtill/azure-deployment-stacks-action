@@ -50432,49 +50432,6 @@ async function parseTemplateFile(config) {
     return JSON.parse(fs.readFileSync(filePath).toString());
 }
 exports.parseTemplateFile = parseTemplateFile;
-// Type guards for Parameter using unknown
-function hasValue(obj) {
-    return (typeof obj === 'object' &&
-        obj !== null &&
-        'value' in obj &&
-        typeof obj.value === 'string' &&
-        !('reference' in obj));
-}
-function hasReference(obj) {
-    return (typeof obj === 'object' &&
-        obj !== null &&
-        'reference' in obj &&
-        typeof obj.reference === 'object' &&
-        obj.reference !== null &&
-        !('value' in obj));
-}
-function isParameter(obj) {
-    return hasValue(obj) || hasReference(obj);
-}
-function isParameterList(obj) {
-    if (typeof obj !== 'object' || obj === null)
-        return false;
-    for (const key in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, key))
-            continue;
-        const item = obj[key];
-        if (!isParameter(item)) {
-            return false;
-        }
-    }
-    return true;
-}
-function extractParameterList(data) {
-    if (typeof data !== 'object' || data === null)
-        return null;
-    const obj = data;
-    if (typeof obj.$schema === 'string' &&
-        typeof obj.contentVersion === 'string' &&
-        isParameterList(obj.parameters)) {
-        return obj.parameters;
-    }
-    return null;
-}
 /**
  * Parses the parameters file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the inputs.
@@ -50500,10 +50457,8 @@ async function parseParametersFile(config) {
     else {
         throw new Error('Invalid parameters file path: ${filePath}');
     }
-    const fileContent = fs.readFileSync(filePath);
-    const data = JSON.parse(fileContent.toString());
-    const parameters = extractParameterList(data);
-    if (parameters) {
+    const data = JSON.parse(fs.readFileSync(filePath).toString());
+    if (data.parameters) {
         return data;
     }
     else {

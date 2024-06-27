@@ -96,14 +96,6 @@ Stamps Action:
 - [Delete](./docs/WORKFLOWS.md#delete)
 - [Validate](./docs/WORKFLOWS.md#validate)
 
-## Execution
-
-As the action executes it's operations it will report the `Resources`,
-`Deleted Resources`, `Detached Resources`, `Failed Resources` within the
-workflow logs.
-
-![Logs](./docs/static/actions.png)
-
 ## Customisation
 
 For a complete list of customisation options, please refer to the

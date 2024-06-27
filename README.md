@@ -23,10 +23,13 @@ efficient and automated deployments.
 
 ## Authentication
 
-The action supports multiple authentication methods. The simplest approach is to
-use [`azure/login@v2`](https://github.com/azure/login). However, if the action
-runs on Self-Hosted Runners, it can also use Managed Identity for
-authentication.
+The default method for authentication involves using the
+[`azure/login@v2`](https://github.com/azure/login) action as an initial step.
+However, since our codebase relies on the Azure SDK, we utilize the
+[DefaultAzureCredential](https://learn.microsoft.com/azure/developer/javascript/sdk/authentication/overview)
+chain within the application. This approach enables us to integrate additional
+authentication methods like WorkloadIdentityCredential and ManagedIdentity,
+which are especially beneficial when executing jobs on Self-Hosted Agents.
 
 ## Modes
 
@@ -37,30 +40,38 @@ ensures that whenever changes are pushed to the repository, the action
 automatically creates or updates the Azure Deployment Stack accordingly. This is
 ideal for continuous integration and deployment workflows, where infrastructure
 changes should be applied seamlessly as part of the development process.
+Additionally, this will delete or detach resources that are no longer defined
+within the Deployment Stack.
 
 For `delete` mode, it is recommended to use it with `workflow_dispatch`
-triggers. This allows for manual initiation of the delete process through the
-GitHub Actions interface. Using `workflow_dispatch` triggers provides greater
-control and prevents accidental deletions, ensuring that stacks are only deleted
-when explicitly requested by an authorized user. This setup is particularly
-useful for maintenance tasks or cleanup operations where automated deletion
+triggers. This setup allows for manual initiation of the delete process through
+the GitHub Actions interface. Using `workflow_dispatch` triggers provides
+greater control and prevents accidental deletions, ensuring that stacks are only
+deleted when explicitly requested by an authorized user. This is particularly
+useful for maintenance tasks or cleanup operations, where automated deletion
 could pose risks.
 
 For `validate` mode, it is recommended to use it with `pull_request` triggers.
 This ensures that the Azure Deployment Stack is validated whenever a pull
 request is created or updated. By integrating validation into the pull request
-workflow, you can catch any potential issues or misconfigurations before they
-are merged into the main branch. This setup is ideal for ensuring the quality
-and integrity of infrastructure changes, as it allows for early detection of
-errors and provides an opportunity to review and address any issues in a
-collaborative manner. This approach helps maintain a stable and reliable
-infrastructure by preventing problematic changes from being integrated into the
-production environment.
+workflow, you can catch potential issues or misconfigurations before they are
+merged into the main branch. This setup is ideal for ensuring the quality and
+integrity of infrastructure changes, as it allows for early detection of errors
+and provides an opportunity to review and address issues collaboratively. This
+approach helps maintain a stable and reliable infrastructure by preventing
+problematic changes from being integrated into the production environment.
 
 ## Getting Started
 
 ```yaml
-- name: Stack
+- name: Login
+  uses: azure/login@v2
+  with:
+    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: Deployment
   uses: ljtill/azure-deployment-stacks-action@v1
   with:
     name: 'Microsoft.Samples'
@@ -72,6 +83,7 @@ production environment.
     denySettings: denyWriteAndDelete
     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     templateFile: ./src/main.bicep
+    parametersFile: ./src/main.bicepparam
     wait: true
 ```
 

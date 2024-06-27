@@ -50453,9 +50453,11 @@ function isParameterList(data) {
     if (typeof data !== 'object' || data === null)
         return false;
     for (const key in data) {
+        core.debug(`Key: ${key}`);
         if (!Object.prototype.hasOwnProperty.call(data, key))
             continue;
         const item = data[key];
+        core.debug(`Item: ${item}`);
         if (!(hasValue(item) || hasReference(item))) {
             return false;
         }

@@ -200,7 +200,10 @@ export async function parseTemplateFile(
 }
 
 type Parameter = { value: string } | { reference: object }
-type ParameterList = { [key: string]: Parameter }
+
+type ParameterList = {
+  [key: string]: Parameter
+}
 
 // Type guards for Parameter using unknown
 function hasValue(obj: unknown): obj is { value: string } {
@@ -224,24 +227,39 @@ function hasReference(obj: unknown): obj is { reference: object } {
   )
 }
 
-// Function to validate the parsed data
-function isParameterList(data: unknown): data is ParameterList {
-  if (typeof data !== 'object' || data === null) return false
+function isParameter(obj: unknown): obj is Parameter {
+  return hasValue(obj) || hasReference(obj)
+}
 
-  for (const key in data) {
-    core.debug(`Key: ${key}`)
+function isParameterList(obj: unknown): obj is ParameterList {
+  if (typeof obj !== 'object' || obj === null) return false
 
-    if (!Object.prototype.hasOwnProperty.call(data, key)) continue
-    const item = (data as { [key: string]: unknown })[key]
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue
+    const item = (obj as { [key: string]: unknown })[key]
 
-    core.debug(`Item: ${item}`)
-
-    if (!(hasValue(item) || hasReference(item))) {
+    if (!isParameter(item)) {
       return false
     }
   }
 
   return true
+}
+
+function extractParameterList(data: unknown): ParameterList | null {
+  if (typeof data !== 'object' || data === null) return null
+
+  const obj = data as { [key: string]: unknown }
+
+  if (
+    typeof obj.$schema === 'string' &&
+    typeof obj.contentVersion === 'string' &&
+    isParameterList(obj.parameters)
+  ) {
+    return obj.parameters
+  }
+
+  return null
 }
 
 /**
@@ -275,7 +293,9 @@ export async function parseParametersFile(
 
   const data = JSON.parse(fileContent.toString())
 
-  if (isParameterList(data)) {
+  const parameters = extractParameterList(data)
+
+  if (parameters) {
     return data
   } else {
     throw new Error('Unable to parse parameters file.')

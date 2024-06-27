@@ -50448,21 +50448,32 @@ function hasReference(obj) {
         obj.reference !== null &&
         !('value' in obj));
 }
-// Function to validate the parsed data
-function isParameterList(data) {
-    if (typeof data !== 'object' || data === null)
+function isParameter(obj) {
+    return hasValue(obj) || hasReference(obj);
+}
+function isParameterList(obj) {
+    if (typeof obj !== 'object' || obj === null)
         return false;
-    for (const key in data) {
-        core.debug(`Key: ${key}`);
-        if (!Object.prototype.hasOwnProperty.call(data, key))
+    for (const key in obj) {
+        if (!Object.prototype.hasOwnProperty.call(obj, key))
             continue;
-        const item = data[key];
-        core.debug(`Item: ${item}`);
-        if (!(hasValue(item) || hasReference(item))) {
+        const item = obj[key];
+        if (!isParameter(item)) {
             return false;
         }
     }
     return true;
+}
+function extractParameterList(data) {
+    if (typeof data !== 'object' || data === null)
+        return null;
+    const obj = data;
+    if (typeof obj.$schema === 'string' &&
+        typeof obj.contentVersion === 'string' &&
+        isParameterList(obj.parameters)) {
+        return obj.parameters;
+    }
+    return null;
 }
 /**
  * Parses the parameters file and returns the parsed content as a JSON object.
@@ -50491,7 +50502,8 @@ async function parseParametersFile(config) {
     }
     const fileContent = fs.readFileSync(filePath);
     const data = JSON.parse(fileContent.toString());
-    if (isParameterList(data)) {
+    const parameters = extractParameterList(data);
+    if (parameters) {
         return data;
     }
     else {

@@ -50432,8 +50432,7 @@ function instanceOfDeploymentStackValidateResult(result) {
         'name' in result &&
         'type' in result &&
         'systemData' in result &&
-        'properties' in result &&
-        'error' in result);
+        'properties' in result);
 }
 /**
  * Creates a new instance of DefaultAzureCredential.

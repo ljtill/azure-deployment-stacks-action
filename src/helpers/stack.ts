@@ -63,8 +63,7 @@ function instanceOfDeploymentStackValidateResult(
     'name' in result &&
     'type' in result &&
     'systemData' in result &&
-    'properties' in result &&
-    'error' in result
+    'properties' in result
   )
 }
 

@@ -50477,7 +50477,6 @@ function logResult(result) {
         core.warning('No result returned from operation');
         return;
     }
-    core.debug(`Result: ${JSON.stringify(result)}`);
     if (instanceOfDeploymentStack(result)) {
         core.startGroup('Resources');
         for (const item of result.properties?.resources || []) {
@@ -50504,6 +50503,9 @@ function logResult(result) {
         }
         core.endGroup();
     }
+    else {
+        core.debug(`Result: ${JSON.stringify(result)}`);
+    }
 }
 exports.logResult = logResult;
 function logValidateResult(validateResult) {
@@ -50511,18 +50513,20 @@ function logValidateResult(validateResult) {
         core.warning('No result returned from operation');
         return;
     }
-    core.debug(`Result: ${JSON.stringify(validateResult)}`);
     if (instanceOfDeploymentStackValidateResult(validateResult)) {
         if (validateResult.error?.code) {
             core.setFailed(`Validation failed with error: ${validateResult.error.code}`);
             return;
         }
-        core.startGroup('Validated Resources');
+        core.startGroup('Resources');
         for (const item of validateResult.properties?.validatedResources || []) {
             core.info(`Id: ${item.id}`);
             core.info(`---`);
         }
         core.endGroup();
+    }
+    else {
+        core.debug(`Result: ${JSON.stringify(validateResult)}`);
     }
 }
 exports.logValidateResult = logValidateResult;

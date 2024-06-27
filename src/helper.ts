@@ -13,8 +13,6 @@ import { Config, createDefaultConfig } from './types'
  * @throws {Error} If the platform, architecture, or binary is not supported.
  */
 export async function installBicep(): Promise<void> {
-  core.debug(`Installing Bicep binary`)
-
   const url = 'https://github.com/azure/bicep/releases/latest/download/'
 
   switch (process.platform) {
@@ -67,40 +65,27 @@ export async function installBicep(): Promise<void> {
  * @returns A promise that resolves to a boolean indicating if Bicep is installed.
  * @throws An error if Bicep is not installed.
  */
-export async function checkBicepInstallation(): Promise<boolean> {
-  core.debug(`Checking Bicep installation`)
+export async function checkBicepInstall(): Promise<boolean> {
+  try {
+    const bicepPath = await io.which('bicep', false)
+    const execOptions: exec.ExecOptions = {
+      listeners: {
+        stdout: (data: Buffer) => {
+          core.debug(data.toString().trim())
+        },
+        stderr: (data: Buffer) => {
+          core.error(data.toString().trim())
+        }
+      },
+      silent: true
+    }
 
-  if ((await io.which('bicep', false)) === '') {
+    await exec.exec(bicepPath, ['--version'], execOptions)
+
+    return true
+  } catch {
     throw new Error('Bicep is not installed')
   }
-
-  await displayBicepVersion()
-
-  return true
-}
-
-/**
- * Displays the Bicep version.
- * @returns A Promise that resolves when the Bicep version is displayed.
- */
-async function displayBicepVersion(): Promise<void> {
-  core.debug(`Displaying Bicep version`)
-
-  const bicepPath = await io.which('bicep', true)
-
-  const execOptions: exec.ExecOptions = {
-    listeners: {
-      stdout: (data: Buffer) => {
-        core.debug(data.toString().trim())
-      },
-      stderr: (data: Buffer) => {
-        core.error(data.toString().trim())
-      }
-    },
-    silent: true
-  }
-
-  await exec.exec(bicepPath, ['--version'], execOptions)
 }
 
 /**
@@ -109,8 +94,6 @@ async function displayBicepVersion(): Promise<void> {
  * @returns A promise that resolves to the path of the output file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  core.debug(`Building Bicep file`)
-
   // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/main.json'
@@ -142,8 +125,6 @@ async function buildBicepFile(filePath: string): Promise<string> {
  * @returns A Promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
-  core.debug(`Building Bicep parameters file`)
-
   // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
   const outputPath = '/tmp/params.json'
@@ -178,8 +159,6 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 export async function parseTemplateFile(
   config: Config
 ): Promise<Record<string, unknown>> {
-  core.debug(`Parsing template file: ${config.inputs.templateFile}`)
-
   let filePath = config.inputs.templateFile
   const fileExtension = path.extname(filePath)
 
@@ -199,18 +178,19 @@ export async function parseTemplateFile(
   return JSON.parse(fs.readFileSync(filePath).toString())
 }
 
+/**
+ * Represents the content of the parameters file.
+ */
 interface ParametersContent {
   $schema: string
   contentVersion: string
   parameters: Parameters
 }
-
 interface Parameters {
   [key: string]: {
     value: string | Reference
   }
 }
-
 interface Reference {
   keyVault: {
     id: string
@@ -225,12 +205,9 @@ interface Reference {
  * @throws An error if the parameters file path is invalid.
  */
 export async function parseParametersFile(config: Config): Promise<Parameters> {
-  core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`)
-
   let filePath = config.inputs.parametersFile
   const fileExtension = path.extname(filePath)
 
-  // Check file exists
   if (fs.existsSync(filePath)) {
     if (fileExtension === '.bicepparam') {
       filePath = await buildBicepParametersFile(filePath)
@@ -279,27 +256,21 @@ function getInput(
  * @returns The new configuration object.
  */
 export function newConfig(): Config {
-  core.debug(`Initializing config`)
-
   const config: Config = createDefaultConfig()
 
-  // Basic config
   config.inputs.name = getInput('name', true)
   config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
 
-  // Additional config
   if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
     config.inputs.description = getInput('description', false)
     config.inputs.location = getInput('location', false)
 
-    // Unmanage Action
     config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
       'deleteAll',
       'deleteResources',
       'detachAll'
     ])
 
-    // Deny Settings
     config.inputs.denySettings = getInput('denySettings', true, [
       'denyDelete',
       'denyWriteAndDelete',
@@ -319,26 +290,20 @@ export function newConfig(): Config {
       ? excludedPrincipals.split(',')
       : []
 
-    // Template
     config.inputs.templateFile = getInput('templateFile', true)
-
-    // Parameters
     config.inputs.parametersFile = getInput('parametersFile', false)
 
-    // Repository metadata
     config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
     config.context.commit = github.context.sha
     config.context.branch = github.context.ref
   }
 
-  // Scope config
   config.inputs.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
     'resourceGroup'
   ])
 
-  // Scope specific config
   switch (config.inputs.scope) {
     case 'managementGroup':
       config.inputs.managementGroupId = getInput('managementGroupId', true)
@@ -351,7 +316,6 @@ export function newConfig(): Config {
       break
   }
 
-  // Control config
   config.inputs.wait = getInput('wait', false) === 'true'
 
   return config

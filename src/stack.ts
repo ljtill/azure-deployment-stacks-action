@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { OperationState, SimplePollerLike } from '@azure/core-lro'
 import { DefaultAzureCredential } from '@azure/identity'
 import {
   DeploymentStacksClient,
@@ -12,9 +13,38 @@ import { Config } from './types'
  * @returns A new instance of DefaultAzureCredential.
  */
 function newCredential(): DefaultAzureCredential {
-  core.debug(`Generate new credential`)
-
+  core.info(`Authenticating with Azure`)
   return new DefaultAzureCredential()
+}
+
+/**
+ * Creates a new deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A promise that resolves to the created DeploymentStack.
+ */
+async function newDeploymentStack(config: Config): Promise<DeploymentStack> {
+  const template = await helper.parseTemplateFile(config)
+  const parameters = config.inputs.parametersFile
+    ? await helper.parseParametersFile(config)
+    : {}
+
+  return {
+    location: config.inputs.location,
+    properties: {
+      description: config.inputs.description,
+      actionOnUnmanage: prepareUnmanageProperties(
+        config.inputs.actionOnUnmanage
+      ),
+      denySettings: prepareDenySettings(config),
+      template,
+      parameters
+    },
+    tags: {
+      repository: config.context.repository,
+      commit: config.context.commit,
+      branch: config.context.branch
+    }
+  }
 }
 
 /**
@@ -30,6 +60,33 @@ function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
     'tags' in object &&
     'properties' in object
   )
+}
+
+/**
+ * Parses the result of a deployment stack operation and logs the deployed resources.
+ * @param result - The result of the deployment stack operation.
+ */
+function logResult(
+  result:
+    | DeploymentStack
+    | SimplePollerLike<OperationState<DeploymentStack>, DeploymentStack>
+    | undefined
+): void {
+  if (result === undefined) {
+    core.warning('No result returned from operation')
+    return
+  }
+
+  if (instanceOfDeploymentStack(result)) {
+    core.startGroup('Deployed resources')
+    for (const item of result.properties?.resources || []) {
+      core.info(
+        `Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`
+      )
+      core.info(`---`)
+    }
+    core.endGroup()
+  }
 }
 
 /**
@@ -51,21 +108,18 @@ function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
       return {
-        // Delete all resources, detach resource groups and management groups
         managementGroups: 'detach',
         resourceGroups: 'detach',
         resources: 'delete'
       }
     case 'deleteAll':
       return {
-        // Delete resources, resource groups and management groups
         managementGroups: 'delete',
         resourceGroups: 'delete',
         resources: 'delete'
       }
     case 'detachAll':
       return {
-        // Detach resources, resource groups and management groups
         managementGroups: 'detach',
         resourceGroups: 'detach',
         resources: 'detach'
@@ -110,8 +164,6 @@ async function getDeploymentStack(
   config: Config,
   client: DeploymentStacksClient
 ): Promise<DeploymentStack> {
-  core.debug(`Retrieving deployment stack`)
-
   let deploymentStack: DeploymentStack | undefined
 
   switch (config.inputs.scope) {
@@ -145,88 +197,15 @@ async function getDeploymentStack(
 }
 
 /**
- * Lists deployment stacks based on the provided configuration and client.
- *
- * @param config - The configuration object containing inputs for listing deployment stacks.
- * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
- * @returns A promise that resolves to an array of DeploymentStack objects.
- */
-async function listDeploymentStacks(
-  config: Config,
-  client: DeploymentStacksClient
-): Promise<DeploymentStack[]> {
-  core.debug(`Listing deployment stacks`)
-
-  const deploymentStacks = []
-
-  switch (config.inputs.scope) {
-    case 'managementGroup':
-      for await (const item of client.deploymentStacks.listAtManagementGroup(
-        config.inputs.managementGroupId
-      )) {
-        deploymentStacks.push(item)
-      }
-      break
-
-    case 'subscription':
-      client.subscriptionId = config.inputs.subscriptionId
-      for await (const item of client.deploymentStacks.listAtSubscription()) {
-        deploymentStacks.push(item)
-      }
-      break
-
-    case 'resourceGroup':
-      for await (const item of client.deploymentStacks.listAtResourceGroup(
-        config.inputs.resourceGroupName
-      )) {
-        deploymentStacks.push(item)
-      }
-      break
-  }
-
-  return deploymentStacks
-}
-
-/**
  * Creates or updates a deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
  * @returns A Promise that resolves when the operation is completed successfully.
  */
 export async function createDeploymentStack(config: Config): Promise<void> {
+  core.info(`Creating deployment stack`)
+
   const client = new DeploymentStacksClient(newCredential())
-
-  // Display operation message
-  !(await listDeploymentStacks(config, client)).some(
-    stack => stack.name === config.inputs.name
-  )
-    ? core.info(`Creating deployment stack`)
-    : core.info(`Updating deployment stack`)
-
-  // Parse template and parameter files
-  const template = await helper.parseTemplateFile(config)
-  const parameters = config.inputs.parametersFile
-    ? await helper.parseParametersFile(config)
-    : {}
-
-  // Initialize deployment stack
-  const deploymentStack: DeploymentStack = {
-    location: config.inputs.location,
-    properties: {
-      description: config.inputs.description,
-      actionOnUnmanage: prepareUnmanageProperties(
-        config.inputs.actionOnUnmanage
-      ),
-      denySettings: prepareDenySettings(config),
-      template,
-      parameters
-    },
-    tags: {
-      repository: config.context.repository,
-      commit: config.context.commit,
-      branch: config.context.branch
-    }
-  }
-
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -281,19 +260,9 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   }
 
   const result = await operationPromise
+  logResult(result)
 
-  if (result && instanceOfDeploymentStack(result)) {
-    core.startGroup('Deployed resources')
-    for (const item of result.properties?.resources || []) {
-      core.info(`Id: ${item.id}`)
-      core.info(`Status: ${item.status}`)
-      core.info(`DenyStatus: ${item.denyStatus}`)
-      core.info(`---`)
-    }
-    core.endGroup()
-  }
-
-  core.info(`Operation completed successfully`)
+  core.info(`Created deployment stack`)
 }
 
 /**
@@ -306,33 +275,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
 
   core.info(`Validating deployment stack`)
 
-  // Parse template and parameter files
-  const template = await helper.parseTemplateFile(config)
-  const parameters = config.inputs.parametersFile
-    ? await helper.parseParametersFile(config)
-    : {}
-
-  core.info(`Parameters: ${parameters}`)
-
-  // Initialize deployment stack
-  const deploymentStack: DeploymentStack = {
-    location: config.inputs.location,
-    properties: {
-      description: config.inputs.description,
-      actionOnUnmanage: prepareUnmanageProperties(
-        config.inputs.actionOnUnmanage
-      ),
-      denySettings: prepareDenySettings(config),
-      template,
-      parameters
-    },
-    tags: {
-      repository: config.context.repository,
-      commit: config.context.commit,
-      branch: config.context.branch
-    }
-  }
-
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -386,11 +329,11 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
       break
   }
 
-  // TODO(ljtill): Parse error messages
-
   await operationPromise
 
-  core.info(`No validation errors detected`)
+  logResult(deploymentStack)
+
+  core.info(`Validated deployment stack`)
 }
 
 /**
@@ -399,10 +342,9 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
  * @returns A Promise that resolves when the deletion operation is complete.
  */
 export async function deleteDeploymentStack(config: Config): Promise<void> {
-  const client = new DeploymentStacksClient(newCredential())
-
   core.info(`Deleting deployment stack`)
 
+  const client = new DeploymentStacksClient(newCredential())
   const deploymentStack = await getDeploymentStack(config, client)
   const optionalParams = {
     unmanageActionManagementGroups:
@@ -459,4 +401,6 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
   }
 
   await operationPromise
+
+  core.debug(`Deleted deployment stack`)
 }

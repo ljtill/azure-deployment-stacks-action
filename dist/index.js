@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstallation = exports.installBicep = void 0;
+exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstall = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50281,7 +50281,6 @@ const types_1 = __nccwpck_require__(5077);
  * @throws {Error} If the platform, architecture, or binary is not supported.
  */
 async function installBicep() {
-    core.debug(`Installing Bicep binary`);
     const url = 'https://github.com/azure/bicep/releases/latest/download/';
     switch (process.platform) {
         case 'win32':
@@ -50327,42 +50326,34 @@ exports.installBicep = installBicep;
  * @returns A promise that resolves to a boolean indicating if Bicep is installed.
  * @throws An error if Bicep is not installed.
  */
-async function checkBicepInstallation() {
-    core.debug(`Checking Bicep installation`);
-    if ((await io.which('bicep', false)) === '') {
+async function checkBicepInstall() {
+    try {
+        const bicepPath = await io.which('bicep', false);
+        const execOptions = {
+            listeners: {
+                stdout: (data) => {
+                    core.debug(data.toString().trim());
+                },
+                stderr: (data) => {
+                    core.error(data.toString().trim());
+                }
+            },
+            silent: true
+        };
+        await exec.exec(bicepPath, ['--version'], execOptions);
+        return true;
+    }
+    catch {
         throw new Error('Bicep is not installed');
     }
-    await displayBicepVersion();
-    return true;
 }
-exports.checkBicepInstallation = checkBicepInstallation;
-/**
- * Displays the Bicep version.
- * @returns A Promise that resolves when the Bicep version is displayed.
- */
-async function displayBicepVersion() {
-    core.debug(`Displaying Bicep version`);
-    const bicepPath = await io.which('bicep', true);
-    const execOptions = {
-        listeners: {
-            stdout: (data) => {
-                core.debug(data.toString().trim());
-            },
-            stderr: (data) => {
-                core.error(data.toString().trim());
-            }
-        },
-        silent: true
-    };
-    await exec.exec(bicepPath, ['--version'], execOptions);
-}
+exports.checkBicepInstall = checkBicepInstall;
 /**
  * Builds a Bicep file and returns the path of the output file.
  * @param filePath The path of the Bicep file to build.
  * @returns A promise that resolves to the path of the output file.
  */
 async function buildBicepFile(filePath) {
-    core.debug(`Building Bicep file`);
     // TODO(ljtill): Implement cross platform support
     const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/main.json';
@@ -50386,7 +50377,6 @@ async function buildBicepFile(filePath) {
  * @returns A Promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath) {
-    core.debug(`Building Bicep parameters file`);
     // TODO(ljtill): Implement cross platform support
     const bicepPath = await io.which('bicep', true);
     const outputPath = '/tmp/params.json';
@@ -50411,7 +50401,6 @@ async function buildBicepParametersFile(filePath) {
  * @throws An error if the template file path is invalid.
  */
 async function parseTemplateFile(config) {
-    core.debug(`Parsing template file: ${config.inputs.templateFile}`);
     let filePath = config.inputs.templateFile;
     const fileExtension = path.extname(filePath);
     // Check file exists
@@ -50439,10 +50428,8 @@ exports.parseTemplateFile = parseTemplateFile;
  * @throws An error if the parameters file path is invalid.
  */
 async function parseParametersFile(config) {
-    core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`);
     let filePath = config.inputs.parametersFile;
     const fileExtension = path.extname(filePath);
-    // Check file exists
     if (fs.existsSync(filePath)) {
         if (fileExtension === '.bicepparam') {
             filePath = await buildBicepParametersFile(filePath);
@@ -50486,22 +50473,17 @@ function getInput(key, required, validValues) {
  * @returns The new configuration object.
  */
 function newConfig() {
-    core.debug(`Initializing config`);
     const config = (0, types_1.createDefaultConfig)();
-    // Basic config
     config.inputs.name = getInput('name', true);
     config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    // Additional config
     if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
         config.inputs.description = getInput('description', false);
         config.inputs.location = getInput('location', false);
-        // Unmanage Action
         config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
             'deleteAll',
             'deleteResources',
             'detachAll'
         ]);
-        // Deny Settings
         config.inputs.denySettings = getInput('denySettings', true, [
             'denyDelete',
             'denyWriteAndDelete',
@@ -50517,22 +50499,17 @@ function newConfig() {
         config.inputs.excludedPrincipals = excludedPrincipals
             ? excludedPrincipals.split(',')
             : [];
-        // Template
         config.inputs.templateFile = getInput('templateFile', true);
-        // Parameters
         config.inputs.parametersFile = getInput('parametersFile', false);
-        // Repository metadata
         config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
         config.context.commit = github.context.sha;
         config.context.branch = github.context.ref;
     }
-    // Scope config
     config.inputs.scope = getInput('scope', true, [
         'managementGroup',
         'subscription',
         'resourceGroup'
     ]);
-    // Scope specific config
     switch (config.inputs.scope) {
         case 'managementGroup':
             config.inputs.managementGroupId = getInput('managementGroupId', true);
@@ -50544,7 +50521,6 @@ function newConfig() {
             config.inputs.resourceGroupName = getInput('resourceGroupName', true);
             break;
     }
-    // Control config
     config.inputs.wait = getInput('wait', false) === 'true';
     return config;
 }
@@ -50593,7 +50569,7 @@ const stack = __importStar(__nccwpck_require__(7067));
 async function run() {
     try {
         core.debug(`Starting action`);
-        await helper.checkBicepInstallation();
+        await helper.checkBicepInstall();
         const config = helper.newConfig();
         switch (config.inputs.mode) {
             case 'create':
@@ -50658,8 +50634,34 @@ const helper = __importStar(__nccwpck_require__(2707));
  * @returns A new instance of DefaultAzureCredential.
  */
 function newCredential() {
-    core.debug(`Generate new credential`);
+    core.info(`Authenticating with Azure`);
     return new identity_1.DefaultAzureCredential();
+}
+/**
+ * Creates a new deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A promise that resolves to the created DeploymentStack.
+ */
+async function newDeploymentStack(config) {
+    const template = await helper.parseTemplateFile(config);
+    const parameters = config.inputs.parametersFile
+        ? await helper.parseParametersFile(config)
+        : {};
+    return {
+        location: config.inputs.location,
+        properties: {
+            description: config.inputs.description,
+            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+            denySettings: prepareDenySettings(config),
+            template,
+            parameters
+        },
+        tags: {
+            repository: config.context.repository,
+            commit: config.context.commit,
+            branch: config.context.branch
+        }
+    };
 }
 /**
  * Checks if an object is an instance of DeploymentStack.
@@ -50674,6 +50676,24 @@ function instanceOfDeploymentStack(object) {
         'properties' in object);
 }
 /**
+ * Parses the result of a deployment stack operation and logs the deployed resources.
+ * @param result - The result of the deployment stack operation.
+ */
+function logResult(result) {
+    if (result === undefined) {
+        core.warning('No result returned from operation');
+        return;
+    }
+    if (instanceOfDeploymentStack(result)) {
+        core.startGroup('Deployed resources');
+        for (const item of result.properties?.resources || []) {
+            core.info(`Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+    }
+}
+/**
  * Prepares the properties for unmanaging resources based on the specified value.
  * @param value - The value indicating the action to be performed on unmanaging resources.
  * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
@@ -50683,21 +50703,18 @@ function prepareUnmanageProperties(value) {
     switch (value) {
         case 'deleteResources':
             return {
-                // Delete all resources, detach resource groups and management groups
                 managementGroups: 'detach',
                 resourceGroups: 'detach',
                 resources: 'delete'
             };
         case 'deleteAll':
             return {
-                // Delete resources, resource groups and management groups
                 managementGroups: 'delete',
                 resourceGroups: 'delete',
                 resources: 'delete'
             };
         case 'detachAll':
             return {
-                // Detach resources, resource groups and management groups
                 managementGroups: 'detach',
                 resourceGroups: 'detach',
                 resources: 'detach'
@@ -50727,7 +50744,6 @@ function prepareDenySettings(config) {
  * @throws {Error} - If the deployment stack is not found.
  */
 async function getDeploymentStack(config, client) {
-    core.debug(`Retrieving deployment stack`);
     let deploymentStack;
     switch (config.inputs.scope) {
         case 'managementGroup':
@@ -50747,67 +50763,14 @@ async function getDeploymentStack(config, client) {
     return deploymentStack;
 }
 /**
- * Lists deployment stacks based on the provided configuration and client.
- *
- * @param config - The configuration object containing inputs for listing deployment stacks.
- * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
- * @returns A promise that resolves to an array of DeploymentStack objects.
- */
-async function listDeploymentStacks(config, client) {
-    core.debug(`Listing deployment stacks`);
-    const deploymentStacks = [];
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            for await (const item of client.deploymentStacks.listAtManagementGroup(config.inputs.managementGroupId)) {
-                deploymentStacks.push(item);
-            }
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            for await (const item of client.deploymentStacks.listAtSubscription()) {
-                deploymentStacks.push(item);
-            }
-            break;
-        case 'resourceGroup':
-            for await (const item of client.deploymentStacks.listAtResourceGroup(config.inputs.resourceGroupName)) {
-                deploymentStacks.push(item);
-            }
-            break;
-    }
-    return deploymentStacks;
-}
-/**
  * Creates or updates a deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
  * @returns A Promise that resolves when the operation is completed successfully.
  */
 async function createDeploymentStack(config) {
+    core.info(`Creating deployment stack`);
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
-    // Display operation message
-    !(await listDeploymentStacks(config, client)).some(stack => stack.name === config.inputs.name)
-        ? core.info(`Creating deployment stack`)
-        : core.info(`Updating deployment stack`);
-    // Parse template and parameter files
-    const template = await helper.parseTemplateFile(config);
-    const parameters = config.inputs.parametersFile
-        ? await helper.parseParametersFile(config)
-        : {};
-    // Initialize deployment stack
-    const deploymentStack = {
-        location: config.inputs.location,
-        properties: {
-            description: config.inputs.description,
-            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
-            denySettings: prepareDenySettings(config),
-            template,
-            parameters
-        },
-        tags: {
-            repository: config.context.repository,
-            commit: config.context.commit,
-            branch: config.context.branch
-        }
-    };
+    const deploymentStack = await newDeploymentStack(config);
     const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
@@ -50829,17 +50792,8 @@ async function createDeploymentStack(config) {
             break;
     }
     const result = await operationPromise;
-    if (result && instanceOfDeploymentStack(result)) {
-        core.startGroup('Deployed resources');
-        for (const item of result.properties?.resources || []) {
-            core.info(`Id: ${item.id}`);
-            core.info(`Status: ${item.status}`);
-            core.info(`DenyStatus: ${item.denyStatus}`);
-            core.info(`---`);
-        }
-        core.endGroup();
-    }
-    core.info(`Operation completed successfully`);
+    logResult(result);
+    core.info(`Created deployment stack`);
 }
 exports.createDeploymentStack = createDeploymentStack;
 /**
@@ -50850,28 +50804,7 @@ exports.createDeploymentStack = createDeploymentStack;
 async function validateDeploymentStack(config) {
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Validating deployment stack`);
-    // Parse template and parameter files
-    const template = await helper.parseTemplateFile(config);
-    const parameters = config.inputs.parametersFile
-        ? await helper.parseParametersFile(config)
-        : {};
-    core.info(`Parameters: ${parameters}`);
-    // Initialize deployment stack
-    const deploymentStack = {
-        location: config.inputs.location,
-        properties: {
-            description: config.inputs.description,
-            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
-            denySettings: prepareDenySettings(config),
-            template,
-            parameters
-        },
-        tags: {
-            repository: config.context.repository,
-            commit: config.context.commit,
-            branch: config.context.branch
-        }
-    };
+    const deploymentStack = await newDeploymentStack(config);
     const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
@@ -50892,9 +50825,9 @@ async function validateDeploymentStack(config) {
                 : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
             break;
     }
-    // TODO(ljtill): Parse error messages
     await operationPromise;
-    core.info(`No validation errors detected`);
+    logResult(deploymentStack);
+    core.info(`Validated deployment stack`);
 }
 exports.validateDeploymentStack = validateDeploymentStack;
 /**
@@ -50903,8 +50836,8 @@ exports.validateDeploymentStack = validateDeploymentStack;
  * @returns A Promise that resolves when the deletion operation is complete.
  */
 async function deleteDeploymentStack(config) {
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     core.info(`Deleting deployment stack`);
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
     const deploymentStack = await getDeploymentStack(config, client);
     const optionalParams = {
         unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
@@ -50931,6 +50864,7 @@ async function deleteDeploymentStack(config) {
             break;
     }
     await operationPromise;
+    core.debug(`Deleted deployment stack`);
 }
 exports.deleteDeploymentStack = deleteDeploymentStack;
 

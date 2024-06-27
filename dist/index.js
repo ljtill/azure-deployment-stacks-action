@@ -50431,7 +50431,6 @@ function instanceOfDeploymentStackValidateResult(result) {
         'id' in result &&
         'name' in result &&
         'type' in result &&
-        'systemData' in result &&
         'properties' in result);
 }
 /**
@@ -50478,10 +50477,29 @@ function logResult(result) {
         core.warning('No result returned from operation');
         return;
     }
+    core.debug(`Result: ${JSON.stringify(result)}`);
     if (instanceOfDeploymentStack(result)) {
-        core.startGroup('Deployed resources');
+        core.startGroup('Resources');
         for (const item of result.properties?.resources || []) {
             core.info(`Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+        core.startGroup('Deleted Resources');
+        for (const item of result.properties?.deletedResources || []) {
+            core.info(`Id: ${item.id}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+        core.startGroup('Detached Resources');
+        for (const item of result.properties?.detachedResources || []) {
+            core.info(`Id: ${item.id}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+        core.startGroup('Failed Resources');
+        for (const item of result.properties?.failedResources || []) {
+            core.info(`Id: ${item.id}\nError: ${item.error?.code}`);
             core.info(`---`);
         }
         core.endGroup();
@@ -50493,13 +50511,13 @@ function logValidateResult(validateResult) {
         core.warning('No result returned from operation');
         return;
     }
-    core.info(JSON.stringify(validateResult));
+    core.debug(`Result: ${JSON.stringify(validateResult)}`);
     if (instanceOfDeploymentStackValidateResult(validateResult)) {
-        core.startGroup('Validation result');
         if (validateResult.error?.code) {
             core.setFailed(`Validation failed with error: ${validateResult.error.code}`);
+            return;
         }
-        core.info(`Resources: ${validateResult.properties?.validatedResources}`);
+        core.startGroup('Validated Resources');
         for (const item of validateResult.properties?.validatedResources || []) {
             core.info(`Id: ${item.id}`);
             core.info(`---`);

@@ -35,7 +35,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Stack
+      - name: Deployment
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'
@@ -79,7 +79,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Stack
+      - name: Deployment
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'
@@ -123,7 +123,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Stack
+      - name: Deployment
         uses: ljtill/azure-deployment-stacks-action@releases/v1
         with:
           name: 'Microsoft.Samples'

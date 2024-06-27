@@ -88,6 +88,8 @@ export function newConfig(): Config {
       break
   }
 
+  config.inputs.bypassStackOutOfSyncError =
+    getInput('bypassStackOutOfSyncError', false) === 'true'
   config.inputs.wait = getInput('wait', false) === 'true'
 
   return config

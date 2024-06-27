@@ -71,6 +71,13 @@ inputs:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false
 
+  bypassStackOutOfSyncError:
+    description:
+      'Flag to bypass service errors that indicate the stack resource list is
+      not correctly synchronized.'
+    required: false
+    default: 'false'
+
   wait:
     description: 'Wait for the deployment to complete.'
     required: false

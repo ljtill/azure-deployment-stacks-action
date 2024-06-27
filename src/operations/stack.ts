@@ -3,15 +3,15 @@ import {
   DeploymentStacksClient,
   DeploymentStack
 } from '@azure/arm-resourcesdeploymentstacks'
-import * as helpers from './helpers'
-import { Config } from './models'
+import * as helpers from '../helpers'
+import { Config } from '../models'
 
 /**
- * Retrieves the deployment stack based on the provided configuration and client.
- * @param {Config} config - The configuration object.
- * @param {DeploymentStacksClient} client - The deployment stacks client.
- * @returns {Promise<DeploymentStack>} - A promise that resolves to the deployment stack.
- * @throws {Error} - If the deployment stack is not found.
+ * Retrieves the deployment stack based on the provided configuration.
+ * @param config - The configuration object.
+ * @param client - The DeploymentStacksClient instance.
+ * @returns A Promise that resolves to the DeploymentStack object.
+ * @throws An error if the deployment stack is not found.
  */
 async function getDeploymentStack(
   config: Config,
@@ -50,9 +50,9 @@ async function getDeploymentStack(
 }
 
 /**
- * Creates or updates a deployment stack based on the provided configuration.
- * @param config - The configuration object for the deployment stack.
- * @returns A Promise that resolves when the operation is completed successfully.
+ * Creates a deployment stack based on the provided configuration.
+ * @param config - The configuration object for creating the deployment stack.
+ * @returns A Promise that resolves when the deployment stack is created.
  */
 export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Creating deployment stack`)
@@ -115,75 +115,6 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   helpers.logResult(await operationPromise)
 
   core.info(`Created deployment stack`)
-}
-
-/**
- * Validates the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @returns A Promise that resolves when the validation is complete.
- */
-export async function validateDeploymentStack(config: Config): Promise<void> {
-  const client = new DeploymentStacksClient(helpers.newCredential())
-
-  core.info(`Validating deployment stack`)
-
-  const deploymentStack = await helpers.newDeploymentStack(config)
-  const optionalParams = {}
-
-  let operationPromise
-
-  switch (config.inputs.scope) {
-    case 'managementGroup':
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(
-            config.inputs.managementGroupId,
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-        : client.deploymentStacks.beginValidateStackAtManagementGroup(
-            config.inputs.managementGroupId,
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-      break
-
-    case 'subscription':
-      client.subscriptionId = config.inputs.subscriptionId
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-        : client.deploymentStacks.beginValidateStackAtSubscription(
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-      break
-
-    case 'resourceGroup':
-      operationPromise = config.inputs.wait
-        ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(
-            config.inputs.resourceGroupName,
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-        : client.deploymentStacks.beginValidateStackAtResourceGroup(
-            config.inputs.resourceGroupName,
-            config.inputs.name,
-            deploymentStack,
-            optionalParams
-          )
-      break
-  }
-
-  helpers.logValidateResult(await operationPromise)
-
-  core.info(`Validated deployment stack`)
 }
 
 /**
@@ -253,4 +184,73 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
   await operationPromise
 
   core.debug(`Deleted deployment stack`)
+}
+
+/**
+ * Validates the deployment stack based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the validation is complete.
+ */
+export async function validateDeploymentStack(config: Config): Promise<void> {
+  const client = new DeploymentStacksClient(helpers.newCredential())
+
+  core.info(`Validating deployment stack`)
+
+  const deploymentStack = await helpers.newDeploymentStack(config)
+  const optionalParams = {}
+
+  let operationPromise
+
+  switch (config.inputs.scope) {
+    case 'managementGroup':
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(
+            config.inputs.managementGroupId,
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+        : client.deploymentStacks.beginValidateStackAtManagementGroup(
+            config.inputs.managementGroupId,
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+      break
+
+    case 'subscription':
+      client.subscriptionId = config.inputs.subscriptionId
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+        : client.deploymentStacks.beginValidateStackAtSubscription(
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+      break
+
+    case 'resourceGroup':
+      operationPromise = config.inputs.wait
+        ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(
+            config.inputs.resourceGroupName,
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+        : client.deploymentStacks.beginValidateStackAtResourceGroup(
+            config.inputs.resourceGroupName,
+            config.inputs.name,
+            deploymentStack,
+            optionalParams
+          )
+      break
+  }
+
+  helpers.logValidateResult(await operationPromise)
+
+  core.info(`Validated deployment stack`)
 }

@@ -26,6 +26,7 @@ interface Inputs {
   resourceGroupName: string
   templateFile: string
   parametersFile: string
+  bypassStackOutOfSyncError: boolean
   wait: boolean
 }
 
@@ -64,6 +65,7 @@ const defaultInputs: Inputs = {
   resourceGroupName: '',
   templateFile: '',
   parametersFile: '',
+  bypassStackOutOfSyncError: false,
   wait: false
 }
 const defaultContext: Context = {

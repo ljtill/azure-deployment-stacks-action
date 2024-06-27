@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
+import * as operations from './operations'
 import * as helpers from './helpers'
-import * as stack from './stack'
 
 /**
  * The main function for the action.
@@ -16,13 +16,13 @@ export async function run(): Promise<void> {
 
     switch (config.inputs.mode) {
       case 'create':
-        await stack.createDeploymentStack(config)
-        break
-      case 'validate':
-        await stack.validateDeploymentStack(config)
+        await operations.createDeploymentStack(config)
         break
       case 'delete':
-        await stack.deleteDeploymentStack(config)
+        await operations.deleteDeploymentStack(config)
+        break
+      case 'validate':
+        await operations.validateDeploymentStack(config)
         break
     }
 

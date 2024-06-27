@@ -96,7 +96,8 @@ export async function newDeploymentStack(
       ),
       denySettings: prepareDenySettings(config),
       template,
-      parameters
+      parameters,
+      bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
     },
     tags: {
       repository: config.context.repository,

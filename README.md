@@ -21,6 +21,32 @@ configuring deny settings and specifying ARM or Bicep templates. This GitHub
 Action streamlines the process of managing Azure infrastructure, enabling
 efficient and automated deployments.
 
+## Getting Started
+
+```yaml
+- name: Login
+  uses: azure/login@v2
+  with:
+    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: Deployment
+  uses: ljtill/azure-deployment-stacks-action@v1
+  with:
+    name: 'Microsoft.Samples'
+    description: 'Sample description for the Deployment Stack'
+    location: uksouth
+    scope: subscription
+    mode: create
+    actionOnUnmanage: deleteAll
+    denySettings: denyWriteAndDelete
+    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    templateFile: ./src/main.bicep
+    parametersFile: ./src/main.bicepparam
+    wait: true
+```
+
 ## Authentication
 
 The default method for authentication involves using the
@@ -60,32 +86,6 @@ integrity of infrastructure changes, as it allows for early detection of errors
 and provides an opportunity to review and address issues collaboratively. This
 approach helps maintain a stable and reliable infrastructure by preventing
 problematic changes from being integrated into the production environment.
-
-## Getting Started
-
-```yaml
-- name: Login
-  uses: azure/login@v2
-  with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-- name: Deployment
-  uses: ljtill/azure-deployment-stacks-action@v1
-  with:
-    name: 'Microsoft.Samples'
-    description: 'Sample description for the Deployment Stack'
-    location: uksouth
-    scope: subscription
-    mode: create
-    actionOnUnmanage: deleteAll
-    denySettings: denyWriteAndDelete
-    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    templateFile: ./src/main.bicep
-    parametersFile: ./src/main.bicepparam
-    wait: true
-```
 
 ## Workflows
 

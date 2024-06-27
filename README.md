@@ -86,7 +86,7 @@ Stamps Action:
 
 ## Customisation
 
-For a complete list of customization options, please refer to the
+For a complete list of customisation options, please refer to the
 [Parameters](./docs/PARAMETERS.md) document.
 
 ## Documentation

@@ -50461,6 +50461,7 @@ async function parseParametersFile(config) {
     if (!parsedData.parameters) {
         throw new Error('Unable to parse parameters file.');
     }
+    core.info(`Parsed parameters: ${JSON.stringify(parsedData.parameters)}`);
     return parsedData.parameters;
 }
 exports.parseParametersFile = parseParametersFile;

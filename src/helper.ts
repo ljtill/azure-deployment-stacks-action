@@ -232,6 +232,8 @@ export async function parseParametersFile(
     throw new Error('Unable to parse parameters file.')
   }
 
+  core.info(`Parsed parameters: ${JSON.stringify(parsedData.parameters)}`)
+
   return parsedData.parameters
 }
 

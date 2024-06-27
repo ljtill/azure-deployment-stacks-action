@@ -50788,7 +50788,7 @@ async function createDeploymentStack(config) {
     // Parse template and parameter files
     const template = await helper.parseTemplateFile(config);
     const parameters = config.inputs.parametersFile
-        ? helper.parseParametersFile(config)
+        ? await helper.parseParametersFile(config)
         : {};
     // Initialize deployment stack
     const deploymentStack = {
@@ -50853,7 +50853,7 @@ async function validateDeploymentStack(config) {
     // Parse template and parameter files
     const template = await helper.parseTemplateFile(config);
     const parameters = config.inputs.parametersFile
-        ? helper.parseParametersFile(config)
+        ? await helper.parseParametersFile(config)
         : {};
     core.info(`Parameters: ${parameters}`);
     // Initialize deployment stack

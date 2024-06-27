@@ -205,7 +205,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   // Parse template and parameter files
   const template = await helper.parseTemplateFile(config)
   const parameters = config.inputs.parametersFile
-    ? helper.parseParametersFile(config)
+    ? await helper.parseParametersFile(config)
     : {}
 
   // Initialize deployment stack
@@ -311,7 +311,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
   // Parse template and parameter files
   const template = await helper.parseTemplateFile(config)
   const parameters = config.inputs.parametersFile
-    ? helper.parseParametersFile(config)
+    ? await helper.parseParametersFile(config)
     : {}
 
   core.info(`Parameters: ${parameters}`)

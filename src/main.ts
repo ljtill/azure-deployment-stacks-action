@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import * as helper from './helper'
+import * as helpers from './helpers'
 import * as stack from './stack'
 
 /**
@@ -10,9 +10,9 @@ export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
 
-    await helper.checkBicepInstall()
+    await helpers.checkBicepInstall()
 
-    const config = helper.newConfig()
+    const config = helpers.newConfig()
 
     switch (config.inputs.mode) {
       case 'create':

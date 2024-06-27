@@ -50237,7 +50237,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 2707:
+/***/ 165:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50266,15 +50266,331 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newConfig = exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstall = exports.installBicep = void 0;
+exports.newConfig = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const models_1 = __nccwpck_require__(859);
+/**
+ * Retrieves the value of the specified input key from the workflow run context.
+ * @param key - The name of the input key.
+ * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
+ * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
+ * @returns The value of the input key.
+ * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
+ */
+function getInput(key, required, validValues) {
+    const value = core.getInput(key, { required, trimWhitespace: true });
+    if (validValues && !validValues.includes(value)) {
+        throw new Error(`Invalid ${key}`);
+    }
+    return value;
+}
+/**
+ * Creates a new configuration object based on user inputs.
+ * @returns The new configuration object.
+ */
+function newConfig() {
+    const config = (0, models_1.createDefaultConfig)();
+    config.inputs.name = getInput('name', true);
+    config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
+    if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
+        config.inputs.description = getInput('description', false);
+        config.inputs.location = getInput('location', false);
+        config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+            'deleteAll',
+            'deleteResources',
+            'detachAll'
+        ]);
+        config.inputs.denySettings = getInput('denySettings', true, [
+            'denyDelete',
+            'denyWriteAndDelete',
+            'none'
+        ]);
+        config.inputs.applyToChildScopes =
+            getInput('applyToChildScopes', false) === 'true';
+        const excludedActions = getInput('excludedActions', false);
+        config.inputs.excludedActions = excludedActions
+            ? excludedActions.split(',')
+            : [];
+        const excludedPrincipals = getInput('excludedPrincipals', false);
+        config.inputs.excludedPrincipals = excludedPrincipals
+            ? excludedPrincipals.split(',')
+            : [];
+        config.inputs.templateFile = getInput('templateFile', true);
+        config.inputs.parametersFile = getInput('parametersFile', false);
+        config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+        config.context.commit = github.context.sha;
+        config.context.branch = github.context.ref;
+    }
+    config.inputs.scope = getInput('scope', true, [
+        'managementGroup',
+        'subscription',
+        'resourceGroup'
+    ]);
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            config.inputs.managementGroupId = getInput('managementGroupId', true);
+            break;
+        case 'subscription':
+            config.inputs.subscriptionId = getInput('subscriptionId', true);
+            break;
+        case 'resourceGroup':
+            config.inputs.resourceGroupName = getInput('resourceGroupName', true);
+            break;
+    }
+    config.inputs.wait = getInput('wait', false) === 'true';
+    return config;
+}
+exports.newConfig = newConfig;
+
+
+/***/ }),
+
+/***/ 202:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(165), exports);
+__exportStar(__nccwpck_require__(167), exports);
+__exportStar(__nccwpck_require__(552), exports);
+
+
+/***/ }),
+
+/***/ 167:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.logValidateResult = exports.logResult = exports.newDeploymentStack = exports.newCredential = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const identity_1 = __nccwpck_require__(3084);
+const helpers = __importStar(__nccwpck_require__(202));
+/**
+ * Checks if an object is an instance of DeploymentStack.
+ * @param object - The object to check.
+ * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
+ */
+function instanceOfDeploymentStack(result) {
+    return (!!result &&
+        'id' in result &&
+        'name' in result &&
+        'type' in result &&
+        'systemData' in result &&
+        'location' in result &&
+        'tags' in result &&
+        'properties' in result);
+}
+/**
+ * Checks if the provided result is an instance of `DeploymentStackValidateResult`.
+ * @param result - The result to be checked.
+ * @returns `true` if the result is an instance of `DeploymentStackValidateResult`, `false` otherwise.
+ */
+function instanceOfDeploymentStackValidateResult(result) {
+    return (!!result &&
+        'id' in result &&
+        'name' in result &&
+        'type' in result &&
+        'systemData' in result &&
+        'properties' in result &&
+        'error' in result);
+}
+/**
+ * Creates a new instance of DefaultAzureCredential.
+ * @returns A new instance of DefaultAzureCredential.
+ */
+function newCredential() {
+    return new identity_1.DefaultAzureCredential();
+}
+exports.newCredential = newCredential;
+/**
+ * Creates a new deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A promise that resolves to the created DeploymentStack.
+ */
+async function newDeploymentStack(config) {
+    const template = await helpers.parseTemplateFile(config);
+    const parameters = config.inputs.parametersFile
+        ? await helpers.parseParametersFile(config)
+        : {};
+    return {
+        location: config.inputs.location,
+        properties: {
+            description: config.inputs.description,
+            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+            denySettings: prepareDenySettings(config),
+            template,
+            parameters
+        },
+        tags: {
+            repository: config.context.repository,
+            commit: config.context.commit,
+            branch: config.context.branch
+        }
+    };
+}
+exports.newDeploymentStack = newDeploymentStack;
+/**
+ * Parses the result of a deployment stack operation and logs the deployed resources.
+ * @param result - The result of the deployment stack operation.
+ */
+function logResult(result) {
+    if (result === undefined) {
+        core.warning('No result returned from operation');
+        return;
+    }
+    if (instanceOfDeploymentStack(result)) {
+        core.startGroup('Deployed resources');
+        for (const item of result.properties?.resources || []) {
+            core.info(`Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+    }
+}
+exports.logResult = logResult;
+function logValidateResult(validateResult) {
+    if (validateResult === undefined) {
+        core.warning('No result returned from operation');
+        return;
+    }
+    if (instanceOfDeploymentStackValidateResult(validateResult)) {
+        core.startGroup('Validation result');
+        if (validateResult.error?.code) {
+            core.setFailed(`Validation failed with error: ${validateResult.error.code}`);
+        }
+        core.info(`Resources: ${validateResult.properties?.validatedResources}`);
+        for (const item of validateResult.properties?.validatedResources || []) {
+            core.info(`Id: ${item.id}`);
+            core.info(`---`);
+        }
+        core.endGroup();
+    }
+}
+exports.logValidateResult = logValidateResult;
+/**
+ * Prepares the properties for unmanaging resources based on the specified value.
+ * @param value - The value indicating the action to be performed on unmanaging resources.
+ * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
+ * @throws {Error} If the specified value is invalid.
+ */
+function prepareUnmanageProperties(value) {
+    switch (value) {
+        case 'deleteResources':
+            return {
+                managementGroups: 'detach',
+                resourceGroups: 'detach',
+                resources: 'delete'
+            };
+        case 'deleteAll':
+            return {
+                managementGroups: 'delete',
+                resourceGroups: 'delete',
+                resources: 'delete'
+            };
+        case 'detachAll':
+            return {
+                managementGroups: 'detach',
+                resourceGroups: 'detach',
+                resources: 'detach'
+            };
+        default:
+            throw new Error(`Invalid actionOnUnmanage: ${value}`);
+    }
+}
+/**
+ * Prepares the deny settings based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns The deny settings object.
+ */
+function prepareDenySettings(config) {
+    return {
+        mode: config.inputs.denySettings,
+        applyToChildScopes: config.inputs.applyToChildScopes,
+        excludedActions: config.inputs.excludedActions,
+        excludedPrincipals: config.inputs.excludedPrincipals
+    };
+}
+
+
+/***/ }),
+
+/***/ 552:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstall = exports.installBicep = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const github = __importStar(__nccwpck_require__(5438));
 const io = __importStar(__nccwpck_require__(7436));
 const cache = __importStar(__nccwpck_require__(7784));
-const types_1 = __nccwpck_require__(5077);
 /**
  * Installs the Bicep binary based on the current platform and architecture.
  * @returns A Promise that resolves when the installation is complete.
@@ -50453,78 +50769,6 @@ async function parseParametersFile(config) {
     }
 }
 exports.parseParametersFile = parseParametersFile;
-/**
- * Retrieves the value of the specified input key from the workflow run context.
- * @param key - The name of the input key.
- * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
- * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
- * @returns The value of the input key.
- * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
- */
-function getInput(key, required, validValues) {
-    const value = core.getInput(key, { required, trimWhitespace: true });
-    if (validValues && !validValues.includes(value)) {
-        throw new Error(`Invalid ${key}`);
-    }
-    return value;
-}
-/**
- * Creates a new configuration object based on user inputs.
- * @returns The new configuration object.
- */
-function newConfig() {
-    const config = (0, types_1.createDefaultConfig)();
-    config.inputs.name = getInput('name', true);
-    config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
-        config.inputs.description = getInput('description', false);
-        config.inputs.location = getInput('location', false);
-        config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-            'deleteAll',
-            'deleteResources',
-            'detachAll'
-        ]);
-        config.inputs.denySettings = getInput('denySettings', true, [
-            'denyDelete',
-            'denyWriteAndDelete',
-            'none'
-        ]);
-        config.inputs.applyToChildScopes =
-            getInput('applyToChildScopes', false) === 'true';
-        const excludedActions = getInput('excludedActions', false);
-        config.inputs.excludedActions = excludedActions
-            ? excludedActions.split(',')
-            : [];
-        const excludedPrincipals = getInput('excludedPrincipals', false);
-        config.inputs.excludedPrincipals = excludedPrincipals
-            ? excludedPrincipals.split(',')
-            : [];
-        config.inputs.templateFile = getInput('templateFile', true);
-        config.inputs.parametersFile = getInput('parametersFile', false);
-        config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
-        config.context.commit = github.context.sha;
-        config.context.branch = github.context.ref;
-    }
-    config.inputs.scope = getInput('scope', true, [
-        'managementGroup',
-        'subscription',
-        'resourceGroup'
-    ]);
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            config.inputs.managementGroupId = getInput('managementGroupId', true);
-            break;
-        case 'subscription':
-            config.inputs.subscriptionId = getInput('subscriptionId', true);
-            break;
-        case 'resourceGroup':
-            config.inputs.resourceGroupName = getInput('resourceGroupName', true);
-            break;
-    }
-    config.inputs.wait = getInput('wait', false) === 'true';
-    return config;
-}
-exports.newConfig = newConfig;
 
 
 /***/ }),
@@ -50560,7 +50804,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const helper = __importStar(__nccwpck_require__(2707));
+const helpers = __importStar(__nccwpck_require__(202));
 const stack = __importStar(__nccwpck_require__(7067));
 /**
  * The main function for the action.
@@ -50569,8 +50813,8 @@ const stack = __importStar(__nccwpck_require__(7067));
 async function run() {
     try {
         core.debug(`Starting action`);
-        await helper.checkBicepInstall();
-        const config = helper.newConfig();
+        await helpers.checkBicepInstall();
+        const config = helpers.newConfig();
         switch (config.inputs.mode) {
             case 'create':
                 await stack.createDeploymentStack(config);
@@ -50595,283 +50839,7 @@ exports.run = run;
 
 /***/ }),
 
-/***/ 7067:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteDeploymentStack = exports.validateDeploymentStack = exports.createDeploymentStack = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const identity_1 = __nccwpck_require__(3084);
-const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
-const helper = __importStar(__nccwpck_require__(2707));
-/**
- * Creates a new instance of DefaultAzureCredential.
- * @returns A new instance of DefaultAzureCredential.
- */
-function newCredential() {
-    core.info(`Authenticating with Azure`);
-    return new identity_1.DefaultAzureCredential();
-}
-/**
- * Creates a new deployment stack based on the provided configuration.
- * @param config - The configuration object for the deployment stack.
- * @returns A promise that resolves to the created DeploymentStack.
- */
-async function newDeploymentStack(config) {
-    const template = await helper.parseTemplateFile(config);
-    const parameters = config.inputs.parametersFile
-        ? await helper.parseParametersFile(config)
-        : {};
-    return {
-        location: config.inputs.location,
-        properties: {
-            description: config.inputs.description,
-            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
-            denySettings: prepareDenySettings(config),
-            template,
-            parameters
-        },
-        tags: {
-            repository: config.context.repository,
-            commit: config.context.commit,
-            branch: config.context.branch
-        }
-    };
-}
-/**
- * Checks if an object is an instance of DeploymentStack.
- * @param object - The object to check.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
- */
-function instanceOfDeploymentStack(object) {
-    return (typeof object === 'object' &&
-        object !== null &&
-        'location' in object &&
-        'tags' in object &&
-        'properties' in object);
-}
-/**
- * Parses the result of a deployment stack operation and logs the deployed resources.
- * @param result - The result of the deployment stack operation.
- */
-function logResult(result) {
-    if (result === undefined) {
-        core.warning('No result returned from operation');
-        return;
-    }
-    if (instanceOfDeploymentStack(result)) {
-        core.startGroup('Deployed resources');
-        for (const item of result.properties?.resources || []) {
-            core.info(`Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`);
-            core.info(`---`);
-        }
-        core.endGroup();
-    }
-}
-/**
- * Prepares the properties for unmanaging resources based on the specified value.
- * @param value - The value indicating the action to be performed on unmanaging resources.
- * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
- * @throws {Error} If the specified value is invalid.
- */
-function prepareUnmanageProperties(value) {
-    switch (value) {
-        case 'deleteResources':
-            return {
-                managementGroups: 'detach',
-                resourceGroups: 'detach',
-                resources: 'delete'
-            };
-        case 'deleteAll':
-            return {
-                managementGroups: 'delete',
-                resourceGroups: 'delete',
-                resources: 'delete'
-            };
-        case 'detachAll':
-            return {
-                managementGroups: 'detach',
-                resourceGroups: 'detach',
-                resources: 'detach'
-            };
-        default:
-            throw new Error(`Invalid actionOnUnmanage: ${value}`);
-    }
-}
-/**
- * Prepares the deny settings based on the provided configuration.
- * @param config - The configuration object.
- * @returns The deny settings object.
- */
-function prepareDenySettings(config) {
-    return {
-        mode: config.inputs.denySettings,
-        applyToChildScopes: config.inputs.applyToChildScopes,
-        excludedActions: config.inputs.excludedActions,
-        excludedPrincipals: config.inputs.excludedPrincipals
-    };
-}
-/**
- * Retrieves the deployment stack based on the provided configuration and client.
- * @param {Config} config - The configuration object.
- * @param {DeploymentStacksClient} client - The deployment stacks client.
- * @returns {Promise<DeploymentStack>} - A promise that resolves to the deployment stack.
- * @throws {Error} - If the deployment stack is not found.
- */
-async function getDeploymentStack(config, client) {
-    let deploymentStack;
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            deploymentStack = await client.deploymentStacks.getAtManagementGroup(config.inputs.managementGroupId, config.inputs.name);
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            deploymentStack = await client.deploymentStacks.getAtSubscription(config.inputs.name);
-            break;
-        case 'resourceGroup':
-            deploymentStack = await client.deploymentStacks.getAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name);
-            break;
-    }
-    if (!deploymentStack) {
-        throw new Error(`Deployment stack not found`);
-    }
-    return deploymentStack;
-}
-/**
- * Creates or updates a deployment stack based on the provided configuration.
- * @param config - The configuration object for the deployment stack.
- * @returns A Promise that resolves when the operation is completed successfully.
- */
-async function createDeploymentStack(config) {
-    core.info(`Creating deployment stack`);
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
-    const deploymentStack = await newDeploymentStack(config);
-    const optionalParams = {};
-    let operationPromise;
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(config.inputs.name, deploymentStack, optionalParams);
-            break;
-        case 'resourceGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
-            break;
-    }
-    const result = await operationPromise;
-    logResult(result);
-    core.info(`Created deployment stack`);
-}
-exports.createDeploymentStack = createDeploymentStack;
-/**
- * Validates the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @returns A Promise that resolves when the validation is complete.
- */
-async function validateDeploymentStack(config) {
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
-    core.info(`Validating deployment stack`);
-    const deploymentStack = await newDeploymentStack(config);
-    const optionalParams = {};
-    let operationPromise;
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginValidateStackAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginValidateStackAtSubscription(config.inputs.name, deploymentStack, optionalParams);
-            break;
-        case 'resourceGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
-                : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
-            break;
-    }
-    await operationPromise;
-    logResult(deploymentStack);
-    core.info(`Validated deployment stack`);
-}
-exports.validateDeploymentStack = validateDeploymentStack;
-/**
- * Deletes a deployment stack based on the provided configuration.
- * @param config - The configuration object containing the necessary parameters.
- * @returns A Promise that resolves when the deletion operation is complete.
- */
-async function deleteDeploymentStack(config) {
-    core.info(`Deleting deployment stack`);
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(newCredential());
-    const deploymentStack = await getDeploymentStack(config, client);
-    const optionalParams = {
-        unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
-        unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
-        unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
-    };
-    let operationPromise;
-    switch (config.inputs.scope) {
-        case 'managementGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, optionalParams);
-            break;
-        case 'subscription':
-            client.subscriptionId = config.inputs.subscriptionId;
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, optionalParams);
-            break;
-        case 'resourceGroup':
-            operationPromise = config.inputs.wait
-                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, optionalParams)
-                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, optionalParams);
-            break;
-    }
-    await operationPromise;
-    core.debug(`Deleted deployment stack`);
-}
-exports.deleteDeploymentStack = deleteDeploymentStack;
-
-
-/***/ }),
-
-/***/ 5077:
+/***/ 87:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -50920,6 +50888,197 @@ function createDefaultConfig(overrides) {
     };
 }
 exports.createDefaultConfig = createDefaultConfig;
+
+
+/***/ }),
+
+/***/ 859:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(87), exports);
+
+
+/***/ }),
+
+/***/ 7067:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deleteDeploymentStack = exports.validateDeploymentStack = exports.createDeploymentStack = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
+const helpers = __importStar(__nccwpck_require__(202));
+/**
+ * Retrieves the deployment stack based on the provided configuration and client.
+ * @param {Config} config - The configuration object.
+ * @param {DeploymentStacksClient} client - The deployment stacks client.
+ * @returns {Promise<DeploymentStack>} - A promise that resolves to the deployment stack.
+ * @throws {Error} - If the deployment stack is not found.
+ */
+async function getDeploymentStack(config, client) {
+    let deploymentStack;
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            deploymentStack = await client.deploymentStacks.getAtManagementGroup(config.inputs.managementGroupId, config.inputs.name);
+            break;
+        case 'subscription':
+            client.subscriptionId = config.inputs.subscriptionId;
+            deploymentStack = await client.deploymentStacks.getAtSubscription(config.inputs.name);
+            break;
+        case 'resourceGroup':
+            deploymentStack = await client.deploymentStacks.getAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name);
+            break;
+    }
+    if (!deploymentStack) {
+        throw new Error(`Deployment stack not found`);
+    }
+    return deploymentStack;
+}
+/**
+ * Creates or updates a deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A Promise that resolves when the operation is completed successfully.
+ */
+async function createDeploymentStack(config) {
+    core.info(`Creating deployment stack`);
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
+    const deploymentStack = await helpers.newDeploymentStack(config);
+    const optionalParams = {};
+    let operationPromise;
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
+            break;
+        case 'subscription':
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtSubscription(config.inputs.name, deploymentStack, optionalParams);
+            break;
+        case 'resourceGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
+            break;
+    }
+    helpers.logResult(await operationPromise);
+    core.info(`Created deployment stack`);
+}
+exports.createDeploymentStack = createDeploymentStack;
+/**
+ * Validates the deployment stack based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the validation is complete.
+ */
+async function validateDeploymentStack(config) {
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
+    core.info(`Validating deployment stack`);
+    const deploymentStack = await helpers.newDeploymentStack(config);
+    const optionalParams = {};
+    let operationPromise;
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, deploymentStack, optionalParams);
+            break;
+        case 'subscription':
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtSubscription(config.inputs.name, deploymentStack, optionalParams);
+            break;
+        case 'resourceGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams)
+                : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
+            break;
+    }
+    helpers.logValidateResult(await operationPromise);
+    core.info(`Validated deployment stack`);
+}
+exports.validateDeploymentStack = validateDeploymentStack;
+/**
+ * Deletes a deployment stack based on the provided configuration.
+ * @param config - The configuration object containing the necessary parameters.
+ * @returns A Promise that resolves when the deletion operation is complete.
+ */
+async function deleteDeploymentStack(config) {
+    core.info(`Deleting deployment stack`);
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
+    const deploymentStack = await getDeploymentStack(config, client);
+    const optionalParams = {
+        unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
+        unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
+        unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources
+    };
+    let operationPromise;
+    switch (config.inputs.scope) {
+        case 'managementGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.inputs.managementGroupId, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtManagementGroup(config.inputs.managementGroupId, config.inputs.name, optionalParams);
+            break;
+        case 'subscription':
+            client.subscriptionId = config.inputs.subscriptionId;
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtSubscriptionAndWait(config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtSubscription(config.inputs.name, optionalParams);
+            break;
+        case 'resourceGroup':
+            operationPromise = config.inputs.wait
+                ? client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.inputs.resourceGroupName, config.inputs.name, optionalParams)
+                : client.deploymentStacks.beginDeleteAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, optionalParams);
+            break;
+    }
+    await operationPromise;
+    core.debug(`Deleted deployment stack`);
+}
+exports.deleteDeploymentStack = deleteDeploymentStack;
 
 
 /***/ }),

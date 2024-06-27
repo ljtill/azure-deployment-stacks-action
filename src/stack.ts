@@ -1,157 +1,10 @@
 import * as core from '@actions/core'
-import { OperationState, SimplePollerLike } from '@azure/core-lro'
-import { DefaultAzureCredential } from '@azure/identity'
 import {
   DeploymentStacksClient,
   DeploymentStack
 } from '@azure/arm-resourcesdeploymentstacks'
-import * as helper from './helper'
-import { Config } from './types'
-
-/**
- * Creates a new instance of DefaultAzureCredential.
- * @returns A new instance of DefaultAzureCredential.
- */
-function newCredential(): DefaultAzureCredential {
-  core.info(`Authenticating with Azure`)
-  return new DefaultAzureCredential()
-}
-
-/**
- * Creates a new deployment stack based on the provided configuration.
- * @param config - The configuration object for the deployment stack.
- * @returns A promise that resolves to the created DeploymentStack.
- */
-async function newDeploymentStack(config: Config): Promise<DeploymentStack> {
-  const template = await helper.parseTemplateFile(config)
-  const parameters = config.inputs.parametersFile
-    ? await helper.parseParametersFile(config)
-    : {}
-
-  return {
-    location: config.inputs.location,
-    properties: {
-      description: config.inputs.description,
-      actionOnUnmanage: prepareUnmanageProperties(
-        config.inputs.actionOnUnmanage
-      ),
-      denySettings: prepareDenySettings(config),
-      template,
-      parameters
-    },
-    tags: {
-      repository: config.context.repository,
-      commit: config.context.commit,
-      branch: config.context.branch
-    }
-  }
-}
-
-/**
- * Checks if an object is an instance of DeploymentStack.
- * @param object - The object to check.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
- */
-function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
-  return (
-    typeof object === 'object' &&
-    object !== null &&
-    'location' in object &&
-    'tags' in object &&
-    'properties' in object
-  )
-}
-
-/**
- * Parses the result of a deployment stack operation and logs the deployed resources.
- * @param result - The result of the deployment stack operation.
- */
-function logResult(
-  result:
-    | DeploymentStack
-    | SimplePollerLike<OperationState<DeploymentStack>, DeploymentStack>
-    | undefined
-): void {
-  if (result === undefined) {
-    core.warning('No result returned from operation')
-    return
-  }
-
-  if (instanceOfDeploymentStack(result)) {
-    core.startGroup('Deployed resources')
-    for (const item of result.properties?.resources || []) {
-      core.info(
-        `Id: ${item.id}\nStatus: ${item.status}\nDenyStatus: ${item.denyStatus}`
-      )
-      core.info(`---`)
-    }
-    core.endGroup()
-  }
-}
-
-/**
- * Represents the configuration for performing actions on unmanaged resources.
- */
-interface ActionOnUnmanage {
-  managementGroups: string
-  resourceGroups: string
-  resources: string
-}
-
-/**
- * Prepares the properties for unmanaging resources based on the specified value.
- * @param value - The value indicating the action to be performed on unmanaging resources.
- * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
- * @throws {Error} If the specified value is invalid.
- */
-function prepareUnmanageProperties(value: string): ActionOnUnmanage {
-  switch (value) {
-    case 'deleteResources':
-      return {
-        managementGroups: 'detach',
-        resourceGroups: 'detach',
-        resources: 'delete'
-      }
-    case 'deleteAll':
-      return {
-        managementGroups: 'delete',
-        resourceGroups: 'delete',
-        resources: 'delete'
-      }
-    case 'detachAll':
-      return {
-        managementGroups: 'detach',
-        resourceGroups: 'detach',
-        resources: 'detach'
-      }
-    default:
-      throw new Error(`Invalid actionOnUnmanage: ${value}`)
-  }
-}
-
-/**
- * Represents the settings for denying access to a resource.
- */
-interface DenySettings {
-  mode: string
-  applyToChildScopes: boolean
-  excludedActions: string[]
-  excludedPrincipals: string[]
-}
-
-/**
- * Prepares the deny settings based on the provided configuration.
- * @param config - The configuration object.
- * @returns The deny settings object.
- */
-function prepareDenySettings(config: Config): DenySettings {
-  return {
-    mode: config.inputs.denySettings,
-    applyToChildScopes: config.inputs.applyToChildScopes,
-    excludedActions: config.inputs.excludedActions,
-    excludedPrincipals: config.inputs.excludedPrincipals
-  }
-}
+import * as helpers from './helpers'
+import { Config } from './models'
 
 /**
  * Retrieves the deployment stack based on the provided configuration and client.
@@ -204,8 +57,8 @@ async function getDeploymentStack(
 export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Creating deployment stack`)
 
-  const client = new DeploymentStacksClient(newCredential())
-  const deploymentStack = await newDeploymentStack(config)
+  const client = new DeploymentStacksClient(helpers.newCredential())
+  const deploymentStack = await helpers.newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -259,8 +112,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
       break
   }
 
-  const result = await operationPromise
-  logResult(result)
+  helpers.logResult(await operationPromise)
 
   core.info(`Created deployment stack`)
 }
@@ -271,11 +123,11 @@ export async function createDeploymentStack(config: Config): Promise<void> {
  * @returns A Promise that resolves when the validation is complete.
  */
 export async function validateDeploymentStack(config: Config): Promise<void> {
-  const client = new DeploymentStacksClient(newCredential())
+  const client = new DeploymentStacksClient(helpers.newCredential())
 
   core.info(`Validating deployment stack`)
 
-  const deploymentStack = await newDeploymentStack(config)
+  const deploymentStack = await helpers.newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -329,9 +181,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
       break
   }
 
-  await operationPromise
-
-  logResult(deploymentStack)
+  helpers.logValidateResult(await operationPromise)
 
   core.info(`Validated deployment stack`)
 }
@@ -344,7 +194,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
 export async function deleteDeploymentStack(config: Config): Promise<void> {
   core.info(`Deleting deployment stack`)
 
-  const client = new DeploymentStacksClient(newCredential())
+  const client = new DeploymentStacksClient(helpers.newCredential())
   const deploymentStack = await getDeploymentStack(config, client)
   const optionalParams = {
     unmanageActionManagementGroups:

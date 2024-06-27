@@ -50482,27 +50482,28 @@ function logResult(result) {
         for (const item of result.properties?.resources || []) {
             core.info(`- Id:          ${item.id}`);
             core.info(`  Status:      ${item.status}`);
-            core.info(`  Deny Status: ${item.denyStatus}\n`);
+            core.info(`  Deny Status: ${item.denyStatus}`);
         }
         core.endGroup();
         core.startGroup('Deleted Resources');
         for (const item of result.properties?.deletedResources || []) {
-            core.info(`- Id: ${item.id}\n`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
         core.startGroup('Detached Resources');
         for (const item of result.properties?.detachedResources || []) {
-            core.info(`- Id: ${item.id}\n`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
         core.startGroup('Failed Resources');
         for (const item of result.properties?.failedResources || []) {
-            core.info(`- Id: ${item.id}\nError: ${item.error?.code}\n`);
+            core.info(`- Id:    ${item.id}`);
+            core.info(`  Error: ${item.error?.code}`);
         }
         core.endGroup();
     }
     else {
-        core.debug(`Result: ${JSON.stringify(result)}`);
+        core.debug(`Payload: ${JSON.stringify(result)}`);
     }
 }
 exports.logResult = logResult;
@@ -50518,12 +50519,12 @@ function logValidateResult(validateResult) {
         }
         core.startGroup('Resources');
         for (const item of validateResult.properties?.validatedResources || []) {
-            core.info(`- Id: ${item.id}\n`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
     }
     else {
-        core.debug(`Result: ${JSON.stringify(validateResult)}`);
+        core.debug(`Payload: ${JSON.stringify(validateResult)}`);
     }
 }
 exports.logValidateResult = logValidateResult;

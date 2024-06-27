@@ -230,13 +230,13 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
     throw new Error('Invalid parameters file path: ${filePath}')
   }
 
-  const data: Parameters = JSON.parse(fs.readFileSync(filePath).toString())
+  const parsedData = JSON.parse(fs.readFileSync(filePath).toString())
 
-  if (data.parameters) {
-    return data
-  } else {
+  if (!parsedData.parameters) {
     throw new Error('Unable to parse parameters file.')
   }
+
+  return parsedData
 }
 
 /**

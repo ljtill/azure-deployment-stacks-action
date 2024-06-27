@@ -227,9 +227,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
     }
   }
 
-  const optionalParams = {
-    abortSignal: new AbortController().signal
-  }
+  const optionalParams = {}
 
   let operationPromise
 
@@ -335,9 +333,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
     }
   }
 
-  const optionalParams = {
-    abortSignal: new AbortController().signal
-  }
+  const optionalParams = {}
 
   let operationPromise
 
@@ -409,7 +405,6 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
 
   const deploymentStack = await getDeploymentStack(config, client)
   const optionalParams = {
-    abortSignal: new AbortController().signal,
     unmanageActionManagementGroups:
       deploymentStack.properties?.actionOnUnmanage.managementGroups,
     unmanageActionResourceGroups:

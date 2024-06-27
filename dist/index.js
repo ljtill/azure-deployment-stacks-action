@@ -50808,9 +50808,7 @@ async function createDeploymentStack(config) {
             branch: config.context.branch
         }
     };
-    const optionalParams = {
-        abortSignal: new AbortController().signal
-    };
+    const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
         case 'managementGroup':
@@ -50874,9 +50872,7 @@ async function validateDeploymentStack(config) {
             branch: config.context.branch
         }
     };
-    const optionalParams = {
-        abortSignal: new AbortController().signal
-    };
+    const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
         case 'managementGroup':
@@ -50911,7 +50907,6 @@ async function deleteDeploymentStack(config) {
     core.info(`Deleting deployment stack`);
     const deploymentStack = await getDeploymentStack(config, client);
     const optionalParams = {
-        abortSignal: new AbortController().signal,
         unmanageActionManagementGroups: deploymentStack.properties?.actionOnUnmanage.managementGroups,
         unmanageActionResourceGroups: deploymentStack.properties?.actionOnUnmanage.resourceGroups,
         unmanageActionResources: deploymentStack.properties?.actionOnUnmanage.resources

@@ -50790,7 +50790,6 @@ async function createDeploymentStack(config) {
     const parameters = config.inputs.parametersFile
         ? helper.parseParametersFile(config)
         : {};
-    core.info(`Parameters: ${parameters}`);
     // Initialize deployment stack
     const deploymentStack = {
         location: config.inputs.location,
@@ -50856,6 +50855,7 @@ async function validateDeploymentStack(config) {
     const parameters = config.inputs.parametersFile
         ? helper.parseParametersFile(config)
         : {};
+    core.info(`Parameters: ${parameters}`);
     // Initialize deployment stack
     const deploymentStack = {
         location: config.inputs.location,

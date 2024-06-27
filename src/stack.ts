@@ -208,8 +208,6 @@ export async function createDeploymentStack(config: Config): Promise<void> {
     ? helper.parseParametersFile(config)
     : {}
 
-  core.info(`Parameters: ${parameters}`)
-
   // Initialize deployment stack
   const deploymentStack: DeploymentStack = {
     location: config.inputs.location,
@@ -315,6 +313,8 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
   const parameters = config.inputs.parametersFile
     ? helper.parseParametersFile(config)
     : {}
+
+  core.info(`Parameters: ${parameters}`)
 
   // Initialize deployment stack
   const deploymentStack: DeploymentStack = {

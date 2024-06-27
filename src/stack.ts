@@ -33,6 +33,73 @@ function instanceOfDeploymentStack(object: unknown): object is DeploymentStack {
 }
 
 /**
+ * Represents the configuration for performing actions on unmanaged resources.
+ */
+interface ActionOnUnmanage {
+  managementGroups: string
+  resourceGroups: string
+  resources: string
+}
+
+/**
+ * Prepares the properties for unmanaging resources based on the specified value.
+ * @param value - The value indicating the action to be performed on unmanaging resources.
+ * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
+ * @throws {Error} If the specified value is invalid.
+ */
+function prepareUnmanageProperties(value: string): ActionOnUnmanage {
+  switch (value) {
+    case 'deleteResources':
+      return {
+        // Delete all resources, detach resource groups and management groups
+        managementGroups: 'detach',
+        resourceGroups: 'detach',
+        resources: 'delete'
+      }
+    case 'deleteAll':
+      return {
+        // Delete resources, resource groups and management groups
+        managementGroups: 'delete',
+        resourceGroups: 'delete',
+        resources: 'delete'
+      }
+    case 'detachAll':
+      return {
+        // Detach resources, resource groups and management groups
+        managementGroups: 'detach',
+        resourceGroups: 'detach',
+        resources: 'detach'
+      }
+    default:
+      throw new Error(`Invalid actionOnUnmanage: ${value}`)
+  }
+}
+
+/**
+ * Represents the settings for denying access to a resource.
+ */
+interface DenySettings {
+  mode: string
+  applyToChildScopes: boolean
+  excludedActions: string[]
+  excludedPrincipals: string[]
+}
+
+/**
+ * Prepares the deny settings based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns The deny settings object.
+ */
+function prepareDenySettings(config: Config): DenySettings {
+  return {
+    mode: config.inputs.denySettings,
+    applyToChildScopes: config.inputs.applyToChildScopes,
+    excludedActions: config.inputs.excludedActions,
+    excludedPrincipals: config.inputs.excludedPrincipals
+  }
+}
+
+/**
  * Retrieves the deployment stack based on the provided configuration and client.
  * @param {Config} config - The configuration object.
  * @param {DeploymentStacksClient} client - The deployment stacks client.
@@ -146,10 +213,10 @@ export async function createDeploymentStack(config: Config): Promise<void> {
     location: config.inputs.location,
     properties: {
       description: config.inputs.description,
-      actionOnUnmanage: helper.prepareUnmanageProperties(
+      actionOnUnmanage: prepareUnmanageProperties(
         config.inputs.actionOnUnmanage
       ),
-      denySettings: helper.prepareDenySettings(config),
+      denySettings: prepareDenySettings(config),
       template,
       parameters
     },
@@ -252,10 +319,10 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
     location: config.inputs.location,
     properties: {
       description: config.inputs.description,
-      actionOnUnmanage: helper.prepareUnmanageProperties(
+      actionOnUnmanage: prepareUnmanageProperties(
         config.inputs.actionOnUnmanage
       ),
-      denySettings: helper.prepareDenySettings(config),
+      denySettings: prepareDenySettings(config),
       template,
       parameters
     },

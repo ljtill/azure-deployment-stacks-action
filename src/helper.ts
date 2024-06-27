@@ -166,8 +166,6 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
     execOptions
   )
 
-  core.debug(fs.readFileSync(outputPath).toString())
-
   return outputPath
 }
 
@@ -183,25 +181,63 @@ export async function parseTemplateFile(
   core.debug(`Parsing template file: ${config.inputs.templateFile}`)
 
   let filePath = config.inputs.templateFile
-
-  // Parse the file extension
   const fileExtension = path.extname(filePath)
 
-  // Check if the file path is valid
+  // Check file exists
   if (fs.existsSync(filePath)) {
     if (fileExtension === '.bicep') {
-      // Build the Bicep file
       filePath = await buildBicepFile(filePath)
+    } else if (fileExtension === '.json') {
+      core.debug(`Skipping as JSON file provided.`)
+    } else {
+      throw new Error('Unsupported file type.')
     }
   } else {
     throw new Error('Invalid template file path: ${filePath}')
   }
 
-  // Read the file content
-  const fileContent = fs.readFileSync(filePath)
+  return JSON.parse(fs.readFileSync(filePath).toString())
+}
 
-  // Parse the file content
-  return JSON.parse(fileContent.toString())
+type Parameter = { value: string } | { reference: object }
+type ParameterList = { [key: string]: Parameter }
+
+// Type guards for Parameter using unknown
+function hasValue(obj: unknown): obj is { value: string } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'value' in obj &&
+    typeof (obj as { value: unknown }).value === 'string' &&
+    !('reference' in obj)
+  )
+}
+
+function hasReference(obj: unknown): obj is { reference: object } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'reference' in obj &&
+    typeof (obj as { reference: unknown }).reference === 'object' &&
+    (obj as { reference: unknown }).reference !== null &&
+    !('value' in obj)
+  )
+}
+
+// Function to validate the parsed data
+function isParameterList(data: unknown): data is ParameterList {
+  if (typeof data !== 'object' || data === null) return false
+
+  for (const key in data) {
+    if (!Object.prototype.hasOwnProperty.call(data, key)) continue
+    const item = (data as { [key: string]: unknown })[key]
+
+    if (!(hasValue(item) || hasReference(item))) {
+      return false
+    }
+  }
+
+  return true
 }
 
 /**
@@ -212,29 +248,34 @@ export async function parseTemplateFile(
  */
 export async function parseParametersFile(
   config: Config
-): Promise<Record<string, unknown>> {
+): Promise<ParameterList> {
   core.debug(`Parsing parameters file: ${config.inputs.parametersFile}`)
 
   let filePath = config.inputs.parametersFile
-
-  // Parse the file extension
   const fileExtension = path.extname(filePath)
 
-  // Check if the file path is valid
+  // Check file exists
   if (fs.existsSync(filePath)) {
     if (fileExtension === '.bicepparam') {
-      // Build the Bicep parameters file
       filePath = await buildBicepParametersFile(filePath)
+    } else if (fileExtension === '.json') {
+      core.debug(`Skipping as JSON file provided.`)
+    } else {
+      throw new Error('Unsupported file type.')
     }
   } else {
     throw new Error('Invalid parameters file path: ${filePath}')
   }
 
-  // Read the file content
   const fileContent = fs.readFileSync(filePath)
 
-  // Parse the file content
-  return JSON.parse(fileContent.toString())
+  const data = JSON.parse(fileContent.toString())
+
+  if (isParameterList(data)) {
+    return data
+  } else {
+    throw new Error('Unable to parse parameters file.')
+  }
 }
 
 /**
@@ -339,71 +380,4 @@ export function newConfig(): Config {
   config.inputs.wait = getInput('wait', false) === 'true'
 
   return config
-}
-
-/**
- * Represents the configuration for performing actions on unmanaged resources.
- */
-interface ActionOnUnmanage {
-  managementGroups: string
-  resourceGroups: string
-  resources: string
-}
-
-/**
- * Prepares the properties for unmanaging resources based on the specified value.
- * @param value - The value indicating the action to be performed on unmanaging resources.
- * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
- * @throws {Error} If the specified value is invalid.
- */
-export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
-  switch (value) {
-    case 'deleteResources':
-      return {
-        // Delete all resources, detach resource groups and management groups
-        managementGroups: 'detach',
-        resourceGroups: 'detach',
-        resources: 'delete'
-      }
-    case 'deleteAll':
-      return {
-        // Delete resources, resource groups and management groups
-        managementGroups: 'delete',
-        resourceGroups: 'delete',
-        resources: 'delete'
-      }
-    case 'detachAll':
-      return {
-        // Detach resources, resource groups and management groups
-        managementGroups: 'detach',
-        resourceGroups: 'detach',
-        resources: 'detach'
-      }
-    default:
-      throw new Error(`Invalid actionOnUnmanage: ${value}`)
-  }
-}
-
-/**
- * Represents the settings for denying access to a resource.
- */
-interface DenySettings {
-  mode: string
-  applyToChildScopes: boolean
-  excludedActions: string[]
-  excludedPrincipals: string[]
-}
-
-/**
- * Prepares the deny settings based on the provided configuration.
- * @param config - The configuration object.
- * @returns The deny settings object.
- */
-export function prepareDenySettings(config: Config): DenySettings {
-  return {
-    mode: config.inputs.denySettings,
-    applyToChildScopes: config.inputs.applyToChildScopes,
-    excludedActions: config.inputs.excludedActions,
-    excludedPrincipals: config.inputs.excludedPrincipals
-  }
 }

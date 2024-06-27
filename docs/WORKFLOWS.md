@@ -1,8 +1,6 @@
-# Documentation
+# Workflows
 
-## Workflows
-
-### Create
+## Create
 
 ```yaml
 name: Stack (Create)
@@ -50,7 +48,7 @@ jobs:
           wait: true
 ```
 
-### Delete
+## Delete
 
 ```yaml
 name: Stack (Delete)
@@ -90,7 +88,7 @@ jobs:
           wait: true
 ```
 
-### Validate
+## Validate
 
 ```yaml
 name: Stack (Validate)

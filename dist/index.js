@@ -50266,7 +50266,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.initializeConfig = void 0;
+exports.initializeConfig = initializeConfig;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const models_1 = __nccwpck_require__(2859);
@@ -50419,7 +50419,6 @@ async function initializeConfig() {
     core.debug(`Configuration: ${JSON.stringify(config)}`);
     return config;
 }
-exports.initializeConfig = initializeConfig;
 
 
 /***/ }),
@@ -50480,7 +50479,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logValidateResult = exports.logResult = exports.newDeploymentStack = exports.newCredential = void 0;
+exports.newCredential = newCredential;
+exports.newDeploymentStack = newDeploymentStack;
+exports.logResult = logResult;
+exports.logValidateResult = logValidateResult;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
 /**
@@ -50517,7 +50519,6 @@ function instanceOfDeploymentStackValidateResult(result) {
 function newCredential() {
     return new identity_1.DefaultAzureCredential();
 }
-exports.newCredential = newCredential;
 /**
  * Creates a new deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
@@ -50565,7 +50566,6 @@ async function newDeploymentStack(config) {
         }
     };
 }
-exports.newDeploymentStack = newDeploymentStack;
 /**
  * Parses the result of a deployment stack operation and logs the deployed resources.
  * @param result - The result of the deployment stack operation.
@@ -50604,7 +50604,6 @@ function logResult(result) {
         core.debug(`Payload: ${JSON.stringify(result)}`);
     }
 }
-exports.logResult = logResult;
 function logValidateResult(validateResult) {
     if (validateResult === undefined) {
         core.warning('No result returned from operation');
@@ -50625,7 +50624,6 @@ function logValidateResult(validateResult) {
         core.debug(`Payload: ${JSON.stringify(validateResult)}`);
     }
 }
-exports.logValidateResult = logValidateResult;
 /**
  * Prepares the properties for unmanaging resources based on the specified value.
  * @param value - The value indicating the action to be performed on unmanaging resources.
@@ -50702,7 +50700,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseParametersFile = exports.parseTemplateFile = exports.checkBicepInstall = exports.installBicep = void 0;
+exports.installBicep = installBicep;
+exports.checkBicepInstall = checkBicepInstall;
+exports.parseTemplateFile = parseTemplateFile;
+exports.parseParametersFile = parseParametersFile;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(2186));
@@ -50754,7 +50755,6 @@ async function installBicep() {
             throw new Error('Unsupported platform');
     }
 }
-exports.installBicep = installBicep;
 /**
  * Checks if Bicep is installed and displays its version.
  * @returns A promise that resolves to a boolean indicating if Bicep is installed.
@@ -50781,7 +50781,6 @@ async function checkBicepInstall() {
         throw new Error('Bicep is not installed');
     }
 }
-exports.checkBicepInstall = checkBicepInstall;
 /**
  * Builds a Bicep file and returns the path of the output file.
  * @param filePath The path of the Bicep file to build.
@@ -50867,7 +50866,6 @@ async function parseTemplateFile(config) {
     }
     return JSON.parse(fs.readFileSync(filePath).toString());
 }
-exports.parseTemplateFile = parseTemplateFile;
 /**
  * Parses the parameters file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the inputs.
@@ -50899,7 +50897,6 @@ async function parseParametersFile(config) {
         throw new Error('Invalid parameters file content');
     }
 }
-exports.parseParametersFile = parseParametersFile;
 
 
 /***/ }),
@@ -50933,7 +50930,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const operations = __importStar(__nccwpck_require__(8921));
 const helpers = __importStar(__nccwpck_require__(3202));
@@ -50965,7 +50962,6 @@ async function run() {
             core.setFailed(error.message);
     }
 }
-exports.run = run;
 
 
 /***/ }),
@@ -50976,7 +50972,7 @@ exports.run = run;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createDefaultConfig = void 0;
+exports.createDefaultConfig = createDefaultConfig;
 /**
  * Default inputs for the deployment stack.
  */
@@ -51024,7 +51020,6 @@ function createDefaultConfig(overrides) {
         outputs: { ...defaultOutputs, ...(overrides?.outputs || {}) }
     };
 }
-exports.createDefaultConfig = createDefaultConfig;
 
 
 /***/ }),
@@ -51108,7 +51103,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.validateDeploymentStack = exports.deleteDeploymentStack = exports.createDeploymentStack = void 0;
+exports.createDeploymentStack = createDeploymentStack;
+exports.deleteDeploymentStack = deleteDeploymentStack;
+exports.validateDeploymentStack = validateDeploymentStack;
 const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helpers = __importStar(__nccwpck_require__(3202));
@@ -51170,7 +51167,6 @@ async function createDeploymentStack(config) {
     helpers.logResult(await operationPromise);
     core.info(`Created deployment stack`);
 }
-exports.createDeploymentStack = createDeploymentStack;
 /**
  * Deletes a deployment stack based on the provided configuration.
  * @param config - The configuration object containing the necessary parameters.
@@ -51207,7 +51203,6 @@ async function deleteDeploymentStack(config) {
     await operationPromise;
     core.debug(`Deleted deployment stack`);
 }
-exports.deleteDeploymentStack = deleteDeploymentStack;
 /**
  * Validates the deployment stack based on the provided configuration.
  * @param config - The configuration object.
@@ -51240,7 +51235,6 @@ async function validateDeploymentStack(config) {
     helpers.logValidateResult(await operationPromise);
     core.info(`Validated deployment stack`);
 }
-exports.validateDeploymentStack = validateDeploymentStack;
 
 
 /***/ }),

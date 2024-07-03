@@ -1,23 +1,94 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Azure Deployment Stacks Action'
+description: 'GitHub Actions for deploying to Azure Deployment Stacks'
+author: 'Lyon Till'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'cloud'
+  color: 'blue'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  name:
+    description: 'The name of the deployment stack.'
     required: true
-    default: '1000'
+  description:
+    description: 'The description of deployment stack.'
+    required: false
 
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  location:
+    description: 'The location to store deployment stack.'
+    required: false
+    default: 'eastus'
+
+  scope:
+    description: 'The scope of the deployment stack.'
+    required: true
+  mode:
+    description: 'The mode of the deployment stack action.'
+    required: true
+
+  actionOnUnmanage:
+    description:
+      'Defines what happens to resources that are no longer managed after the
+      stack is updated or deleted.'
+    required: false
+
+  denySettings:
+    description:
+      'Define which operations are denied on resources managed by the stack.'
+    required: false
+  applyToChildScopes:
+    description: 'DenySettings will be applied to child scopes.'
+    required: false
+  excludedActions:
+    description:
+      'List of role-based management operations that are excluded from the
+      denySettings.'
+    required: false
+  excludedPrincipals:
+    description: 'List of Entra principal IDs excluded from the lock.'
+    required: false
+
+  managementGroupId:
+    description:
+      'The management group id where the deployment stack will be created.'
+    required: false
+  subscriptionId:
+    description:
+      'The subscription id where the deployment stack will be created.'
+    required: false
+  resourceGroupName:
+    description:
+      'The resource group name where the deployment stack will be created.'
+    required: false
+
+  templateFile:
+    description: 'A path to a ARM or Bicep file in the file system.'
+    required: false
+  templateSpec:
+    description: 'The template spec resource id.'
+    required: false
+  templateUri:
+    description: 'A uri to a remote template file.'
+    required: false
+
+  parametersFile:
+    description: 'A path to a ARM or Bicep paramter file in the file system.'
+    required: false
+  parametersUri:
+    description: 'A uri to a remote parameters file.'
+    required: false
+
+  bypassStackOutOfSyncError:
+    description:
+      'Flag to bypass service errors that indicate the stack resource list is
+      not correctly synchronized.'
+    required: false
+    default: 'false'
+
+  wait:
+    description: 'Wait for the deployment to complete.'
+    required: false
+    default: 'false'
 
 runs:
   using: node20

@@ -3,9 +3,9 @@ import { OperationState, SimplePollerLike } from '@azure/core-lro'
 import { DefaultAzureCredential } from '@azure/identity'
 import {
   DeploymentStack,
-  DeploymentStackValidateResult
+  DeploymentStackValidateResult,
+  DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
-import * as helpers from '../helpers'
 import { Config } from '../models'
 
 /**
@@ -82,23 +82,43 @@ export function newCredential(): DefaultAzureCredential {
 export async function newDeploymentStack(
   config: Config
 ): Promise<DeploymentStack> {
-  const template = await helpers.parseTemplateFile(config)
-  const parameters = config.inputs.parametersFile
-    ? await helpers.parseParametersFile(config)
-    : {}
+  const properties: DeploymentStackProperties = {
+    description: config.inputs.description,
+    actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+    denySettings: prepareDenySettings(config),
+    bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
+  }
+
+  switch (config.context.templateType) {
+    case 'templateFile':
+      properties.template = config.context.template
+      break
+    case 'templateSpec':
+      properties.templateLink = {
+        id: config.inputs.templateSpec
+      }
+      break
+    case 'templateUri':
+      properties.templateLink = {
+        uri: config.inputs.templateUri
+      }
+      break
+  }
+
+  switch (config.context.parametersType) {
+    case 'parametersFile':
+      properties.parameters = config.context.parameters
+      break
+    case 'parametersUri':
+      properties.parametersLink = {
+        uri: config.inputs.parametersUri
+      }
+      break
+  }
 
   return {
     location: config.inputs.location,
-    properties: {
-      description: config.inputs.description,
-      actionOnUnmanage: prepareUnmanageProperties(
-        config.inputs.actionOnUnmanage
-      ),
-      denySettings: prepareDenySettings(config),
-      template,
-      parameters,
-      bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
-    },
+    properties,
     tags: {
       repository: config.context.repository,
       commit: config.context.commit,

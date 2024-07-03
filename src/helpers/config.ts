@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { Config, createDefaultConfig } from '../models'
+import * as helpers from '../helpers'
 
 /**
  * Retrieves the value of the specified input key from the workflow run context.
@@ -23,63 +24,11 @@ function getInput(
   return value
 }
 
-function setCommonInputs(config: Config) {
-  config.inputs.name = getInput('name', true)
-  config.inputs.location = getInput('location', false)
-  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
-  config.inputs.wait = getInput('wait', false) === 'true'
-}
-
-function setModeInputs(config: Config) {
-  if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
-    config.inputs.description = getInput('description', false)
-
-    // Action on unmanage
-    config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-      'deleteAll',
-      'deleteResources',
-      'detachAll'
-    ])
-
-    // Deny settings
-    config.inputs.denySettings = getInput('denySettings', true, [
-      'denyDelete',
-      'denyWriteAndDelete',
-      'none'
-    ])
-
-    // Apply to child scopes
-    config.inputs.applyToChildScopes =
-      getInput('applyToChildScopes', false) === 'true'
-
-    // Excluded actions
-    const excludedActions = getInput('excludedActions', false)
-    config.inputs.excludedActions = excludedActions
-      ? excludedActions.split(',')
-      : []
-
-    // Excluded principals
-    const excludedPrincipals = getInput('excludedPrincipals', false)
-    config.inputs.excludedPrincipals = excludedPrincipals
-      ? excludedPrincipals.split(',')
-      : []
-
-    // Template and parameters files
-    config.inputs.templateFile = getInput('templateFile', true)
-    config.inputs.parametersFile = getInput('parametersFile', false)
-
-    // Runtime context
-    config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
-    config.context.commit = github.context.sha
-    config.context.branch = github.context.ref
-
-    // Bypass stack out of sync error
-    config.inputs.bypassStackOutOfSyncError =
-      getInput('bypassStackOutOfSyncError', false) === 'true'
-  }
-}
-
-function setScopeInputs(config: Config) {
+/**
+ * Sets the scope inputs based on the provided configuration.
+ * @param config - The configuration object.
+ */
+function setScopeInputs(config: Config): void {
   config.inputs.scope = getInput('scope', true, [
     'managementGroup',
     'subscription',
@@ -100,15 +49,131 @@ function setScopeInputs(config: Config) {
 }
 
 /**
- * Creates a new configuration object based on user inputs.
+ * Sets the mode inputs based on the provided configuration.
+ * @param config - The configuration object.
+ */
+function setModeInputs(config: Config): void {
+  // Action on unmanage
+  config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+    'deleteAll',
+    'deleteResources',
+    'detachAll'
+  ])
+
+  // Deny settings
+  config.inputs.denySettings = getInput('denySettings', true, [
+    'denyDelete',
+    'denyWriteAndDelete',
+    'none'
+  ])
+
+  // Apply to child scopes
+  config.inputs.applyToChildScopes =
+    getInput('applyToChildScopes', false) === 'true'
+
+  // Excluded actions
+  const excludedActions = getInput('excludedActions', false)
+  config.inputs.excludedActions = excludedActions
+    ? excludedActions.split(',')
+    : []
+
+  // Excluded principals
+  const excludedPrincipals = getInput('excludedPrincipals', false)
+  config.inputs.excludedPrincipals = excludedPrincipals
+    ? excludedPrincipals.split(',')
+    : []
+
+  // Runtime context
+  config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`
+  config.context.commit = github.context.sha
+  config.context.branch = github.context.ref
+
+  // Out of sync error
+  config.inputs.bypassStackOutOfSyncError =
+    getInput('bypassStackOutOfSyncError', false) === 'true'
+}
+
+/**
+ * Sets the template context based on the provided configuration.
+ * @param config - The configuration object.
+ */
+async function setTemplateContext(config: Config): Promise<void> {
+  const templateFile = getInput('templateFile', false)
+  const templateSpec = getInput('templateSpec', false)
+  const templateUri = getInput('templateUri', false)
+
+  const templateInputs = [templateFile, templateSpec, templateUri]
+  const validTemplateInputs = templateInputs.filter(Boolean)
+
+  if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
+    throw new Error(
+      "Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set."
+    )
+  }
+
+  if (templateFile) {
+    config.context.templateType = 'templateFile'
+    config.inputs.templateFile = templateFile
+    config.context.template = await helpers.parseTemplateFile(config)
+  } else if (templateSpec) {
+    config.context.templateType = 'templateSpec'
+    config.inputs.templateSpec = templateSpec
+  } else if (templateUri) {
+    config.context.templateType = 'templateUri'
+    config.inputs.templateUri = templateUri
+  }
+}
+
+/**
+ * Sets the parameters context based on the provided configuration.
+ * @param config - The configuration object.
+ */
+async function setParametersContext(config: Config): Promise<void> {
+  const parametersFile = getInput('parametersFile', false)
+  const parametersUri = getInput('parametersUri', false)
+
+  const parametersInputs = [parametersFile, parametersUri]
+  const validParametersInputs = parametersInputs.filter(Boolean)
+
+  if (validParametersInputs.length > 1) {
+    throw new Error(
+      "Only one of 'parametersFile' or 'parametersUri' can be set."
+    )
+  }
+
+  if (parametersFile) {
+    config.context.parametersType = 'parametersFile'
+    config.inputs.parametersFile = parametersFile
+    config.context.parameters = await helpers.parseParametersFile(config)
+  } else if (parametersUri) {
+    config.context.parametersType = 'parametersUri'
+    config.inputs.parametersUri = parametersUri
+  } else {
+    config.context.parametersType = 'none'
+  }
+}
+
+/**
+ * Creates a new configuration object based on workflow inputs.
  * @returns The new configuration object.
  */
-export function newConfig(): Config {
+export async function initializeConfig(): Promise<Config> {
   const config: Config = createDefaultConfig()
 
-  setCommonInputs(config)
-  setModeInputs(config)
+  // Standard inputs
+  config.inputs.name = getInput('name', true)
+  config.inputs.description = getInput('description', false)
+  config.inputs.location = getInput('location', false)
+  config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate'])
+  config.inputs.wait = getInput('wait', false) === 'true'
+
   setScopeInputs(config)
+
+  if (['create', 'validate'].includes(config.inputs.mode)) {
+    setModeInputs(config)
+    await setTemplateContext(config)
+    await setParametersContext(config)
+  }
 
   core.debug(`Configuration: ${JSON.stringify(config)}`)
 

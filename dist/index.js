@@ -5960,7 +5960,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var tslib = __nccwpck_require__(4351);
 var coreClient = __nccwpck_require__(7611);
 var coreRestPipeline = __nccwpck_require__(9146);
-var coreLro = __nccwpck_require__(5069);
+var coreLro = __nccwpck_require__(334);
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
@@ -13679,7 +13679,7 @@ exports.AbortSignal = AbortSignal;
 
 /***/ }),
 
-/***/ 334:
+/***/ 9379:
 /***/ ((module) => {
 
 "use strict";
@@ -13797,7 +13797,7 @@ var import_universal_user_agent = __nccwpck_require__(5030);
 var import_before_after_hook = __nccwpck_require__(3682);
 var import_request = __nccwpck_require__(6234);
 var import_graphql = __nccwpck_require__(8467);
-var import_auth_token = __nccwpck_require__(334);
+var import_auth_token = __nccwpck_require__(9379);
 
 // pkg/dist-src/version.js
 var VERSION = "5.2.0";
@@ -50266,10 +50266,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newConfig = void 0;
+exports.initializeConfig = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const models_1 = __nccwpck_require__(2859);
+const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * Retrieves the value of the specified input key from the workflow run context.
  * @param key - The name of the input key.
@@ -50285,52 +50286,10 @@ function getInput(key, required, validValues) {
     }
     return value;
 }
-function setCommonInputs(config) {
-    config.inputs.name = getInput('name', true);
-    config.inputs.location = getInput('location', false);
-    config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
-    config.inputs.wait = getInput('wait', false) === 'true';
-}
-function setModeInputs(config) {
-    if (config.inputs.mode === 'create' || config.inputs.mode === 'validate') {
-        config.inputs.description = getInput('description', false);
-        // Action on unmanage
-        config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
-            'deleteAll',
-            'deleteResources',
-            'detachAll'
-        ]);
-        // Deny settings
-        config.inputs.denySettings = getInput('denySettings', true, [
-            'denyDelete',
-            'denyWriteAndDelete',
-            'none'
-        ]);
-        // Apply to child scopes
-        config.inputs.applyToChildScopes =
-            getInput('applyToChildScopes', false) === 'true';
-        // Excluded actions
-        const excludedActions = getInput('excludedActions', false);
-        config.inputs.excludedActions = excludedActions
-            ? excludedActions.split(',')
-            : [];
-        // Excluded principals
-        const excludedPrincipals = getInput('excludedPrincipals', false);
-        config.inputs.excludedPrincipals = excludedPrincipals
-            ? excludedPrincipals.split(',')
-            : [];
-        // Template and parameters files
-        config.inputs.templateFile = getInput('templateFile', true);
-        config.inputs.parametersFile = getInput('parametersFile', false);
-        // Runtime context
-        config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
-        config.context.commit = github.context.sha;
-        config.context.branch = github.context.ref;
-        // Bypass stack out of sync error
-        config.inputs.bypassStackOutOfSyncError =
-            getInput('bypassStackOutOfSyncError', false) === 'true';
-    }
-}
+/**
+ * Sets the scope inputs based on the provided configuration.
+ * @param config - The configuration object.
+ */
 function setScopeInputs(config) {
     config.inputs.scope = getInput('scope', true, [
         'managementGroup',
@@ -50350,18 +50309,117 @@ function setScopeInputs(config) {
     }
 }
 /**
- * Creates a new configuration object based on user inputs.
+ * Sets the mode inputs based on the provided configuration.
+ * @param config - The configuration object.
+ */
+function setModeInputs(config) {
+    // Action on unmanage
+    config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+        'deleteAll',
+        'deleteResources',
+        'detachAll'
+    ]);
+    // Deny settings
+    config.inputs.denySettings = getInput('denySettings', true, [
+        'denyDelete',
+        'denyWriteAndDelete',
+        'none'
+    ]);
+    // Apply to child scopes
+    config.inputs.applyToChildScopes =
+        getInput('applyToChildScopes', false) === 'true';
+    // Excluded actions
+    const excludedActions = getInput('excludedActions', false);
+    config.inputs.excludedActions = excludedActions
+        ? excludedActions.split(',')
+        : [];
+    // Excluded principals
+    const excludedPrincipals = getInput('excludedPrincipals', false);
+    config.inputs.excludedPrincipals = excludedPrincipals
+        ? excludedPrincipals.split(',')
+        : [];
+    // Runtime context
+    config.context.repository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+    config.context.commit = github.context.sha;
+    config.context.branch = github.context.ref;
+    // Out of sync error
+    config.inputs.bypassStackOutOfSyncError =
+        getInput('bypassStackOutOfSyncError', false) === 'true';
+}
+/**
+ * Sets the template context based on the provided configuration.
+ * @param config - The configuration object.
+ */
+async function setTemplateContext(config) {
+    const templateFile = getInput('templateFile', false);
+    const templateSpec = getInput('templateSpec', false);
+    const templateUri = getInput('templateUri', false);
+    const templateInputs = [templateFile, templateSpec, templateUri];
+    const validTemplateInputs = templateInputs.filter(Boolean);
+    if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
+        throw new Error("Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set.");
+    }
+    if (templateFile) {
+        config.context.templateType = 'templateFile';
+        config.inputs.templateFile = templateFile;
+        config.context.template = await helpers.parseTemplateFile(config);
+    }
+    else if (templateSpec) {
+        config.context.templateType = 'templateSpec';
+        config.inputs.templateSpec = templateSpec;
+    }
+    else if (templateUri) {
+        config.context.templateType = 'templateUri';
+        config.inputs.templateUri = templateUri;
+    }
+}
+/**
+ * Sets the parameters context based on the provided configuration.
+ * @param config - The configuration object.
+ */
+async function setParametersContext(config) {
+    const parametersFile = getInput('parametersFile', false);
+    const parametersUri = getInput('parametersUri', false);
+    const parametersInputs = [parametersFile, parametersUri];
+    const validParametersInputs = parametersInputs.filter(Boolean);
+    if (validParametersInputs.length > 1) {
+        throw new Error("Only one of 'parametersFile' or 'parametersUri' can be set.");
+    }
+    if (parametersFile) {
+        config.context.parametersType = 'parametersFile';
+        config.inputs.parametersFile = parametersFile;
+        config.context.parameters = await helpers.parseParametersFile(config);
+    }
+    else if (parametersUri) {
+        config.context.parametersType = 'parametersUri';
+        config.inputs.parametersUri = parametersUri;
+    }
+    else {
+        config.context.parametersType = 'none';
+    }
+}
+/**
+ * Creates a new configuration object based on workflow inputs.
  * @returns The new configuration object.
  */
-function newConfig() {
+async function initializeConfig() {
     const config = (0, models_1.createDefaultConfig)();
-    setCommonInputs(config);
-    setModeInputs(config);
+    // Standard inputs
+    config.inputs.name = getInput('name', true);
+    config.inputs.description = getInput('description', false);
+    config.inputs.location = getInput('location', false);
+    config.inputs.mode = getInput('mode', true, ['create', 'delete', 'validate']);
+    config.inputs.wait = getInput('wait', false) === 'true';
     setScopeInputs(config);
+    if (['create', 'validate'].includes(config.inputs.mode)) {
+        setModeInputs(config);
+        await setTemplateContext(config);
+        await setParametersContext(config);
+    }
     core.debug(`Configuration: ${JSON.stringify(config)}`);
     return config;
 }
-exports.newConfig = newConfig;
+exports.initializeConfig = initializeConfig;
 
 
 /***/ }),
@@ -50425,7 +50483,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.logValidateResult = exports.logResult = exports.newDeploymentStack = exports.newCredential = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
-const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * Checks if the provided result is an instance of 'DeploymentStack'.
  * @param result - The result to check.
@@ -50467,20 +50524,40 @@ exports.newCredential = newCredential;
  * @returns A promise that resolves to the created DeploymentStack.
  */
 async function newDeploymentStack(config) {
-    const template = await helpers.parseTemplateFile(config);
-    const parameters = config.inputs.parametersFile
-        ? await helpers.parseParametersFile(config)
-        : {};
+    const properties = {
+        description: config.inputs.description,
+        actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
+        denySettings: prepareDenySettings(config),
+        bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
+    };
+    switch (config.context.templateType) {
+        case 'templateFile':
+            properties.template = config.context.template;
+            break;
+        case 'templateSpec':
+            properties.templateLink = {
+                id: config.inputs.templateSpec
+            };
+            break;
+        case 'templateUri':
+            properties.templateLink = {
+                uri: config.inputs.templateUri
+            };
+            break;
+    }
+    switch (config.context.parametersType) {
+        case 'parametersFile':
+            properties.parameters = config.context.parameters;
+            break;
+        case 'parametersUri':
+            properties.parametersLink = {
+                uri: config.inputs.parametersUri
+            };
+            break;
+    }
     return {
         location: config.inputs.location,
-        properties: {
-            description: config.inputs.description,
-            actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
-            denySettings: prepareDenySettings(config),
-            template,
-            parameters,
-            bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
-        },
+        properties,
         tags: {
             repository: config.context.repository,
             commit: config.context.commit,
@@ -50754,6 +50831,18 @@ async function buildBicepParametersFile(filePath) {
     return outputPath;
 }
 /**
+ * Represents the content of the template file.
+ */
+// interface TemplateContent {
+//   $schema: string
+//   contentVersion: string
+//   parameters?: object
+//   functions?: object[]
+//   variables?: object
+//   resources?: object[]
+//   outputs?: object
+// }
+/**
  * Parses the template file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the input parameters.
  * @returns A Promise that resolves to the parsed template content.
@@ -50762,7 +50851,6 @@ async function buildBicepParametersFile(filePath) {
 async function parseTemplateFile(config) {
     let filePath = config.inputs.templateFile;
     const fileExtension = path.extname(filePath);
-    // Check file exists
     if (fs.existsSync(filePath)) {
         if (fileExtension === '.bicep') {
             filePath = await buildBicepFile(filePath);
@@ -50847,7 +50935,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const operations = __importStar(__nccwpck_require__(921));
+const operations = __importStar(__nccwpck_require__(8921));
 const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * The main function for the action.
@@ -50857,7 +50945,7 @@ async function run() {
     try {
         core.debug(`Starting action`);
         await helpers.checkBicepInstall();
-        const config = helpers.newConfig();
+        const config = await helpers.initializeConfig();
         switch (config.inputs.mode) {
             case 'create':
                 await operations.createDeploymentStack(config);
@@ -50907,12 +50995,17 @@ const defaultInputs = {
     subscriptionId: '',
     resourceGroupName: '',
     templateFile: '',
+    templateSpec: '',
+    templateUri: '',
     parametersFile: '',
+    parametersUri: '',
     bypassStackOutOfSyncError: false,
     wait: false
 };
 const defaultContext = {
+    templateType: '',
     template: {},
+    parametersType: '',
     parameters: {},
     repository: '',
     commit: '',
@@ -50961,7 +51054,7 @@ __exportStar(__nccwpck_require__(6087), exports);
 
 /***/ }),
 
-/***/ 921:
+/***/ 8921:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -50981,12 +51074,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__nccwpck_require__(438), exports);
+__exportStar(__nccwpck_require__(9438), exports);
 
 
 /***/ }),
 
-/***/ 438:
+/***/ 9438:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -54303,7 +54396,7 @@ exports.createHttpPoller = createHttpPoller;
 
 /***/ }),
 
-/***/ 5069:
+/***/ 334:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";

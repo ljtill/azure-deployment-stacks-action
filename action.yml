@@ -2,12 +2,10 @@ name: 'Azure Deployment Stacks Action'
 description: 'GitHub Actions for deploying to Azure Deployment Stacks'
 author: 'Lyon Till'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: 'cloud'
   color: 'blue'
 
-# Define your inputs here.
 inputs:
   name:
     description: 'The name of the deployment stack.'
@@ -66,9 +64,18 @@ inputs:
   templateFile:
     description: 'A path to a ARM or Bicep file in the file system.'
     required: false
+  templateSpec:
+    description: 'The template spec resource id.'
+    required: false
+  templateUri:
+    description: 'A uri to a remote template file.'
+    required: false
 
   parametersFile:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
+    required: false
+  parametersUri:
+    description: 'A uri to a remote parameters file.'
     required: false
 
   bypassStackOutOfSyncError:

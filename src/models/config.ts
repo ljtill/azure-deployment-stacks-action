@@ -25,17 +25,35 @@ interface Inputs {
   subscriptionId: string
   resourceGroupName: string
   templateFile: string
+  templateSpec: string
+  templateUri: string
   parametersFile: string
+  parametersUri: string
   bypassStackOutOfSyncError: boolean
   wait: boolean
+}
+
+// TODO: Duplicate of ParametersContent in template.ts
+interface Parameters {
+  [key: string]: {
+    value: string | Reference
+  }
+}
+interface Reference {
+  keyVault: {
+    id: string
+  }
+  secretName: string
 }
 
 /**
  * Represents the context for the deployment stacks action.
  */
 interface Context {
+  templateType: string // 'template' | 'templateLink'
   template: Record<string, unknown>
-  parameters: Record<string, unknown>
+  parametersType: string // 'parameters' | 'parametersLink'
+  parameters: Parameters
   repository: string
   commit: string
   branch: string
@@ -64,12 +82,17 @@ const defaultInputs: Inputs = {
   subscriptionId: '',
   resourceGroupName: '',
   templateFile: '',
+  templateSpec: '',
+  templateUri: '',
   parametersFile: '',
+  parametersUri: '',
   bypassStackOutOfSyncError: false,
   wait: false
 }
 const defaultContext: Context = {
+  templateType: '',
   template: {},
+  parametersType: '',
   parameters: {},
   repository: '',
   commit: '',

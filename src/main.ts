@@ -12,7 +12,7 @@ export async function run(): Promise<void> {
 
     await helpers.checkBicepInstall()
 
-    const config = helpers.newConfig()
+    const config = await helpers.initializeConfig()
 
     switch (config.inputs.mode) {
       case 'create':

@@ -152,6 +152,19 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 }
 
 /**
+ * Represents the content of the template file.
+ */
+// interface TemplateContent {
+//   $schema: string
+//   contentVersion: string
+//   parameters?: object
+//   functions?: object[]
+//   variables?: object
+//   resources?: object[]
+//   outputs?: object
+// }
+
+/**
  * Parses the template file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the input parameters.
  * @returns A Promise that resolves to the parsed template content.
@@ -163,7 +176,6 @@ export async function parseTemplateFile(
   let filePath = config.inputs.templateFile
   const fileExtension = path.extname(filePath)
 
-  // Check file exists
   if (fs.existsSync(filePath)) {
     if (fileExtension === '.bicep') {
       filePath = await buildBicepFile(filePath)

@@ -19,7 +19,10 @@ environment:
 | subscriptionId            | create, delete, validate | false    | string  | The subscription id where the deployment stack will be created.                                     |                                              |
 | resourceGroupName         | create, delete, validate | false    | string  | The resource group name where the deployment stack will be created.                                 |                                              |
 | templateFile              | create, validate         | false    | string  | A path to a ARM or Bicep file in the file system.                                                   |                                              |
+| templateSpec              | create, validate         | false    | string  | The template spec resource id.                                                                      |                                              |
+| templateUri               | create, validate         | false    | string  | A uri to a remote template file.                                                                    |                                              |
 | parametersFile            | create, validate         | false    | string  | A path to a ARM or Bicep paramter file in the file system.                                          |                                              |
+| parametersUri             | create, validate         | false    | string  | A uri to a remote parameters file.                                                                  |                                              |
 | bypassStackOutOfSyncError | create, validate         | false    | boolean | Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.  | true, false                                  |
 | wait                      | create, delete, validate | false    | boolean | Wait for the deployment to complete.                                                                | true, false                                  |
 

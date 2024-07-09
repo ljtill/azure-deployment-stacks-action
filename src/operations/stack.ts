@@ -1,10 +1,66 @@
 import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
-  DeploymentStack
+  DeploymentStack,
+  DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
 import * as helpers from '../helpers'
 import { Config } from '../models'
+
+/**
+ * Creates a new deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A promise that resolves to the created DeploymentStack.
+ */
+export async function newDeploymentStack(
+  config: Config
+): Promise<DeploymentStack> {
+  const properties: DeploymentStackProperties = {
+    description: config.inputs.description,
+    actionOnUnmanage: helpers.prepareUnmanageProperties(
+      config.inputs.actionOnUnmanage
+    ),
+    denySettings: helpers.prepareDenySettings(config),
+    bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
+  }
+
+  switch (config.context.templateType) {
+    case 'templateFile':
+      properties.template = config.context.template
+      break
+    case 'templateSpec':
+      properties.templateLink = {
+        id: config.inputs.templateSpec
+      }
+      break
+    case 'templateUri':
+      properties.templateLink = {
+        uri: config.inputs.templateUri
+      }
+      break
+  }
+
+  switch (config.context.parametersType) {
+    case 'parametersFile':
+      properties.parameters = config.context.parameters
+      break
+    case 'parametersUri':
+      properties.parametersLink = {
+        uri: config.inputs.parametersUri
+      }
+      break
+  }
+
+  return {
+    location: config.inputs.location,
+    properties,
+    tags: {
+      repository: config.context.repository,
+      commit: config.context.commit,
+      branch: config.context.branch
+    }
+  }
+}
 
 /**
  * Retrieves the deployment stack based on the provided configuration.
@@ -58,7 +114,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Creating deployment stack`)
 
   const client = new DeploymentStacksClient(helpers.newCredential())
-  const deploymentStack = await helpers.newDeploymentStack(config)
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -196,7 +252,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
 
   core.info(`Validating deployment stack`)
 
-  const deploymentStack = await helpers.newDeploymentStack(config)
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise

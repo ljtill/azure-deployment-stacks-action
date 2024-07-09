@@ -175,7 +175,8 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  core.debug(`Configuration: ${JSON.stringify(config)}`)
+  // TODO(ljtill): Optional output artifact
+  core.debug(`Configuration: ${JSON.stringify(config.inputs)}`)
 
   return config
 }

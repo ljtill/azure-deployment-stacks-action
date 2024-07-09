@@ -1,63 +1,10 @@
 import * as path from 'path'
 import * as fs from 'fs'
+import * as os from 'os'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
-import * as cache from '@actions/tool-cache'
 import { Config } from '../models'
-
-/**
- * Installs the Bicep binary based on the current platform and architecture.
- * @returns A Promise that resolves when the installation is complete.
- * @throws {Error} If the platform, architecture, or binary is not supported.
- */
-export async function installBicep(): Promise<void> {
-  const url = 'https://github.com/azure/bicep/releases/latest/download/'
-
-  switch (process.platform) {
-    case 'win32':
-      switch (process.arch) {
-        case 'arm64':
-          // TODO: Implement - bicep-win-arm64.exe
-          throw new Error('Not implemented')
-        case 'x64':
-          // TODO: Implement - bicep-win-x64.exe
-          throw new Error('Not implemented')
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    case 'darwin':
-      switch (process.arch) {
-        case 'arm64':
-          // TODO: Implement - bicep-osx-arm64
-          throw new Error('Not implemented')
-        case 'x64':
-          // TODO: Implement - bicep-osx-x64
-          throw new Error('Not implemented')
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    case 'linux':
-      switch (process.arch) {
-        case 'arm64':
-          await cache.downloadTool(
-            `${url}bicep-linux-arm64`,
-            `/usr/local/bin/bicep`
-          )
-          return
-        case 'x64':
-          await cache.downloadTool(
-            `${url}bicep-linux-x64`,
-            `/usr/local/bin/bicep`
-          )
-          return
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    default:
-      throw new Error('Unsupported platform')
-  }
-}
 
 /**
  * Checks if Bicep is installed and displays its version.
@@ -93,9 +40,8 @@ export async function checkBicepInstall(): Promise<boolean> {
  * @returns A promise that resolves to the path of the output file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
-  const outputPath = '/tmp/main.json'
+  const outputPath = `${os.tmpdir()}/main.json`
 
   const execOptions: exec.ExecOptions = {
     listeners: {
@@ -125,9 +71,9 @@ async function buildBicepFile(filePath: string): Promise<string> {
  * @returns A Promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
-  // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
-  const outputPath = '/tmp/params.json'
+
+  const outputPath = `${os.tmpdir()}/params.json`
 
   const execOptions: exec.ExecOptions = {
     listeners: {

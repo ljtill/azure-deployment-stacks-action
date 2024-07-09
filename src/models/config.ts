@@ -37,7 +37,7 @@ interface Inputs {
 // TODO: Duplicate of ParametersContent in template.ts
 interface Parameters {
   [key: string]: {
-    value: string | Reference
+    value: string | number | boolean | Reference
   }
 }
 interface Reference {

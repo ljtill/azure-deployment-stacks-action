@@ -200,14 +200,25 @@ export async function parseParametersObject(
 
         // TODO(ljtill): Reference object
 
+        const name: string = parts[0].trim()
+        let value: string | number | boolean = parts[1].trim()
+
+        if (helpers.isNumeric(value)) {
+          value = parseInt(value)
+        } else if (helpers.isBoolean(value)) {
+          value = value === 'true'
+        }
+
         parametersContent.parameters[parts[0].trim()] = {
-          value: parts[1].trim()
+          value: value
         }
       }
     } catch {
       throw new Error('Unable to parse parameters object')
     }
   }
+
+  core.debug(`Parameters: ${JSON.stringify(parametersContent)}`)
 
   return parametersContent
 }

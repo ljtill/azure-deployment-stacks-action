@@ -48205,8 +48205,16 @@ async function parseParametersObject(config) {
                     throw new Error('Invalid parameters object');
                 }
                 // TODO(ljtill): Reference object
+                const name = parts[0].trim();
+                let value = parts[1].trim();
+                if (helpers.isNumeric(value)) {
+                    value = parseInt(value);
+                }
+                else if (helpers.isBoolean(value)) {
+                    value = value === 'true';
+                }
                 parametersContent.parameters[parts[0].trim()] = {
-                    value: parts[1].trim()
+                    value: value
                 };
             }
         }
@@ -48214,6 +48222,7 @@ async function parseParametersObject(config) {
             throw new Error('Unable to parse parameters object');
         }
     }
+    core.debug(`Parameters: ${JSON.stringify(parametersContent)}`);
     return parametersContent;
 }
 
@@ -48227,6 +48236,8 @@ async function parseParametersObject(config) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isJson = isJson;
+exports.isNumeric = isNumeric;
+exports.isBoolean = isBoolean;
 /**
  * Checks if a given string is a valid JSON.
  * @param input - The string to be checked.
@@ -48240,6 +48251,12 @@ function isJson(input) {
         return false;
     }
     return true;
+}
+function isNumeric(value) {
+    return /^-?\d+$/.test(value);
+}
+function isBoolean(value) {
+    return /^(true|false)$/i.test(value);
 }
 
 

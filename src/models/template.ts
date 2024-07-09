@@ -21,7 +21,7 @@ export interface ParametersContent {
 }
 export interface Parameters {
   [key: string]: {
-    value: string | Reference
+    value: string | number | boolean | Reference
   }
 }
 interface Reference {

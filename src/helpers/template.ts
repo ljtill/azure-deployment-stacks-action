@@ -4,7 +4,8 @@ import * as os from 'os'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
-import { Config } from '../models'
+import * as helpers from '../helpers'
+import { Config, ParametersContent } from '../models'
 
 /**
  * Checks if Bicep is installed and displays its version.
@@ -98,19 +99,6 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 }
 
 /**
- * Represents the content of the template file.
- */
-// interface TemplateContent {
-//   $schema: string
-//   contentVersion: string
-//   parameters?: object
-//   functions?: object[]
-//   variables?: object
-//   resources?: object[]
-//   outputs?: object
-// }
-
-/**
  * Parses the template file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the input parameters.
  * @returns A Promise that resolves to the parsed template content.
@@ -138,32 +126,14 @@ export async function parseTemplateFile(
 }
 
 /**
- * Represents the content of the parameters file.
- */
-interface ParametersContent {
-  $schema: string
-  contentVersion: string
-  parameters: Parameters
-}
-interface Parameters {
-  [key: string]: {
-    value: string | Reference
-  }
-}
-interface Reference {
-  keyVault: {
-    id: string
-  }
-  secretName: string
-}
-
-/**
  * Parses the parameters file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the inputs.
  * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
  * @throws An error if the parameters file path is invalid.
  */
-export async function parseParametersFile(config: Config): Promise<Parameters> {
+export async function parseParametersFile(
+  config: Config
+): Promise<ParametersContent> {
   let filePath = config.inputs.parametersFile
   const fileExtension = path.extname(filePath)
 
@@ -180,11 +150,64 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
   }
 
   try {
-    const deploymentParameters: ParametersContent = JSON.parse(
-      fs.readFileSync(filePath).toString()
-    )
-    return deploymentParameters.parameters
+    return JSON.parse(fs.readFileSync(filePath).toString())
   } catch {
     throw new Error('Invalid parameters file content')
   }
+}
+
+/**
+ * Parses the parameters object from the config and returns a ParametersContent object.
+ * @param config - The config object containing the parameters.
+ * @returns A Promise that resolves to a ParametersContent object.
+ * @throws Error if the parameters object is invalid.
+ */
+export async function parseParametersObject(
+  config: Config
+): Promise<ParametersContent> {
+  // TODO(ljtill): Support bicepparams object
+  const parameters = config.inputs.parameters
+
+  const parametersContent: ParametersContent = {
+    $schema:
+      'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#',
+    contentVersion: '1.0.0.0',
+    parameters: {}
+  }
+
+  // Accepts either a JSON string or a key-value pair string
+  //
+  // parameters: |
+  //   {"name": { "value": "test" }, "location": { "value": "westus"}}
+  //
+  // parameters: |
+  //   name:test
+  //   location:westus
+
+  if (helpers.isJson(parameters)) {
+    // TODO(ljtill): Implement
+  } else {
+    try {
+      // Iterate over each line
+      for (const line of parameters.split(/\r|\n/)) {
+        // Split on either ':' or '=' seperator
+        const parts = line.split(/[:=]/)
+
+        // Check if the line is valid
+        if (parts.length < 2) {
+          throw new Error('Invalid parameters object')
+        }
+
+        // TODO(ljtill): Reference object
+
+        parametersContent.parameters[parts[0].trim()] = {
+          value: parts[1].trim()
+        }
+      }
+    } catch {
+      throw new Error('Unable to parse parameters object')
+    }
+  }
+
+  return parametersContent
 }

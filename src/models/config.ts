@@ -28,6 +28,7 @@ interface Inputs {
   templateSpec: string
   templateUri: string
   parametersFile: string
+  parameters: string
   parametersUri: string
   bypassStackOutOfSyncError: boolean
   wait: boolean
@@ -85,6 +86,7 @@ const defaultInputs: Inputs = {
   templateSpec: '',
   templateUri: '',
   parametersFile: '',
+  parameters: '',
   parametersUri: '',
   bypassStackOutOfSyncError: false,
   wait: false

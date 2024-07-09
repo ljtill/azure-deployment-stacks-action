@@ -47748,16 +47748,22 @@ async function setTemplateContext(config) {
  */
 async function setParametersContext(config) {
     const parametersFile = getInput('parametersFile', false);
+    const parameters = getInput('parameters', false);
     const parametersUri = getInput('parametersUri', false);
-    const parametersInputs = [parametersFile, parametersUri];
+    const parametersInputs = [parametersFile, parameters, parametersUri];
     const validParametersInputs = parametersInputs.filter(Boolean);
     if (validParametersInputs.length > 1) {
-        throw new Error("Only one of 'parametersFile' or 'parametersUri' can be set.");
+        throw new Error("Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set.");
     }
     if (parametersFile) {
         config.context.parametersType = 'parametersFile';
         config.inputs.parametersFile = parametersFile;
-        config.context.parameters = await helpers.parseParametersFile(config);
+        config.context.parameters = (await helpers.parseParametersFile(config)).parameters;
+    }
+    else if (parameters) {
+        config.context.parametersType = 'parameters';
+        config.inputs.parameters = parameters;
+        config.context.parameters = (await helpers.parseParametersObject(config)).parameters;
     }
     else if (parametersUri) {
         config.context.parametersType = 'parametersUri';
@@ -47816,6 +47822,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(6165), exports);
 __exportStar(__nccwpck_require__(9167), exports);
 __exportStar(__nccwpck_require__(2552), exports);
+__exportStar(__nccwpck_require__(7134), exports);
 
 
 /***/ }),
@@ -48027,12 +48034,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkBicepInstall = checkBicepInstall;
 exports.parseTemplateFile = parseTemplateFile;
 exports.parseParametersFile = parseParametersFile;
+exports.parseParametersObject = parseParametersObject;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const io = __importStar(__nccwpck_require__(7436));
+const helpers = __importStar(__nccwpck_require__(3202));
 /**
  * Checks if Bicep is installed and displays its version.
  * @returns A promise that resolves to a boolean indicating if Bicep is installed.
@@ -48106,18 +48115,6 @@ async function buildBicepParametersFile(filePath) {
     return outputPath;
 }
 /**
- * Represents the content of the template file.
- */
-// interface TemplateContent {
-//   $schema: string
-//   contentVersion: string
-//   parameters?: object
-//   functions?: object[]
-//   variables?: object
-//   resources?: object[]
-//   outputs?: object
-// }
-/**
  * Parses the template file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the input parameters.
  * @returns A Promise that resolves to the parsed template content.
@@ -48166,12 +48163,83 @@ async function parseParametersFile(config) {
         throw new Error('Invalid parameters file path: ${filePath}');
     }
     try {
-        const deploymentParameters = JSON.parse(fs.readFileSync(filePath).toString());
-        return deploymentParameters.parameters;
+        return JSON.parse(fs.readFileSync(filePath).toString());
     }
     catch {
         throw new Error('Invalid parameters file content');
     }
+}
+/**
+ * Parses the parameters object from the config and returns a ParametersContent object.
+ * @param config - The config object containing the parameters.
+ * @returns A Promise that resolves to a ParametersContent object.
+ * @throws Error if the parameters object is invalid.
+ */
+async function parseParametersObject(config) {
+    // TODO(ljtill): Support bicepparams object
+    const parameters = config.inputs.parameters;
+    const parametersContent = {
+        $schema: 'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#',
+        contentVersion: '1.0.0.0',
+        parameters: {}
+    };
+    // Accepts either a JSON string or a key-value pair string
+    //
+    // parameters: |
+    //   {"name": { "value": "test" }, "location": { "value": "westus"}}
+    //
+    // parameters: |
+    //   name:test
+    //   location:westus
+    if (helpers.isJson(parameters)) {
+        // TODO(ljtill): Implement
+    }
+    else {
+        try {
+            // Iterate over each line
+            for (const line of parameters.split(/\r|\n/)) {
+                // Split on either ':' or '=' seperator
+                const parts = line.split(/[:=]/);
+                // Check if the line is valid
+                if (parts.length < 2) {
+                    throw new Error('Invalid parameters object');
+                }
+                // TODO(ljtill): Reference object
+                parametersContent.parameters[parts[0].trim()] = {
+                    value: parts[1].trim()
+                };
+            }
+        }
+        catch {
+            throw new Error('Unable to parse parameters object');
+        }
+    }
+    return parametersContent;
+}
+
+
+/***/ }),
+
+/***/ 7134:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isJson = isJson;
+/**
+ * Checks if a given string is a valid JSON.
+ * @param input - The string to be checked.
+ * @returns A boolean indicating whether the input is valid JSON or not.
+ */
+function isJson(input) {
+    try {
+        JSON.parse(input);
+    }
+    catch {
+        return false;
+    }
+    return true;
 }
 
 
@@ -48270,6 +48338,7 @@ const defaultInputs = {
     templateSpec: '',
     templateUri: '',
     parametersFile: '',
+    parameters: '',
     parametersUri: '',
     bypassStackOutOfSyncError: false,
     wait: false
@@ -48321,6 +48390,17 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(6087), exports);
+__exportStar(__nccwpck_require__(2747), exports);
+
+
+/***/ }),
+
+/***/ 2747:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
@@ -48415,6 +48495,9 @@ async function newDeploymentStack(config) {
     }
     switch (config.context.parametersType) {
         case 'parametersFile':
+            properties.parameters = config.context.parameters;
+            break;
+        case 'parameters':
             properties.parameters = config.context.parameters;
             break;
         case 'parametersUri':

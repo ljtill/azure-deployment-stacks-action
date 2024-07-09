@@ -74,6 +74,9 @@ inputs:
   parametersFile:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false
+  parameters:
+    description: ''
+    required: false
   parametersUri:
     description: 'A uri to a remote parameters file.'
     required: false

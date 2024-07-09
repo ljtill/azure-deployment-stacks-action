@@ -44,6 +44,9 @@ export async function newDeploymentStack(
     case 'parametersFile':
       properties.parameters = config.context.parameters
       break
+    case 'parameters':
+      properties.parameters = config.context.parameters
+      break
     case 'parametersUri':
       properties.parametersLink = {
         uri: config.inputs.parametersUri

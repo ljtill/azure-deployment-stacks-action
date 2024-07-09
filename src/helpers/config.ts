@@ -130,21 +130,30 @@ async function setTemplateContext(config: Config): Promise<void> {
  */
 async function setParametersContext(config: Config): Promise<void> {
   const parametersFile = getInput('parametersFile', false)
+  const parameters = getInput('parameters', false)
   const parametersUri = getInput('parametersUri', false)
 
-  const parametersInputs = [parametersFile, parametersUri]
+  const parametersInputs = [parametersFile, parameters, parametersUri]
   const validParametersInputs = parametersInputs.filter(Boolean)
 
   if (validParametersInputs.length > 1) {
     throw new Error(
-      "Only one of 'parametersFile' or 'parametersUri' can be set."
+      "Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set."
     )
   }
 
   if (parametersFile) {
     config.context.parametersType = 'parametersFile'
     config.inputs.parametersFile = parametersFile
-    config.context.parameters = await helpers.parseParametersFile(config)
+    config.context.parameters = (
+      await helpers.parseParametersFile(config)
+    ).parameters
+  } else if (parameters) {
+    config.context.parametersType = 'parameters'
+    config.inputs.parameters = parameters
+    config.context.parameters = (
+      await helpers.parseParametersObject(config)
+    ).parameters
   } else if (parametersUri) {
     config.context.parametersType = 'parametersUri'
     config.inputs.parametersUri = parametersUri

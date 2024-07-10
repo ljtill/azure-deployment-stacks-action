@@ -179,14 +179,13 @@ export async function parseParametersObject(
 
   if (helpers.isJson(parameters)) {
     const data = JSON.parse(parameters)
-
-    core.debug(`Parsed: ${JSON.stringify(data)}`)
-
     const extractedData: Parameters = {}
 
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
-        extractedData[key] = data[key].value
+        extractedData[key] = {
+          value: data[key].value
+        }
       }
     }
 

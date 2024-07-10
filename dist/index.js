@@ -47729,16 +47729,16 @@ async function setTemplateContext(config) {
         throw new Error("Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set.");
     }
     if (templateFile) {
-        config.context.templateType = 'template-file';
+        config.context.templateType = 'templateFile';
         config.inputs.templateFile = templateFile;
         config.context.template = await helpers.parseTemplateFile(config);
     }
     else if (templateSpec) {
-        config.context.templateType = 'template-spec';
+        config.context.templateType = 'templateSpec';
         config.inputs.templateSpec = templateSpec;
     }
     else if (templateUri) {
-        config.context.templateType = 'template-uri';
+        config.context.templateType = 'templateUri';
         config.inputs.templateUri = templateUri;
     }
 }

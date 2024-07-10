@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+
 /**
  * Represents the template object.
  */
@@ -6,6 +8,7 @@ export type Template = Record<string, unknown>
 /**
  * Represents the type of the template.
  */
+
 export enum TemplateType {
   File,
   Spec,

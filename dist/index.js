@@ -48187,7 +48187,7 @@ async function parseParametersObject(config) {
     };
     if (helpers.isJson(parameters)) {
         const data = JSON.parse(parameters);
-        data.replace(/\\/g, '');
+        core.debug(`Parsed: ${JSON.stringify(data)}`);
         const extractedData = {};
         for (const key in data) {
             if (data.hasOwnProperty(key)) {

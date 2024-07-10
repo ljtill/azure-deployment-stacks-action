@@ -179,7 +179,8 @@ export async function parseParametersObject(
 
   if (helpers.isJson(parameters)) {
     const data = JSON.parse(parameters)
-    data.replace(/\\/g, '')
+
+    core.debug(`Parsed: ${JSON.stringify(data)}`)
 
     const extractedData: Parameters = {}
 

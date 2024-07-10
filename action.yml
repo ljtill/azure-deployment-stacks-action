@@ -26,59 +26,62 @@ inputs:
     description: 'The mode of the deployment stack action.'
     required: true
 
-  actionOnUnmanage:
+  action-on-unmanage:
     description:
       'Defines what happens to resources that are no longer managed after the
       stack is updated or deleted.'
     required: false
 
-  denySettings:
+  deny-settings:
     description:
       'Define which operations are denied on resources managed by the stack.'
     required: false
-  applyToChildScopes:
+  apply-to-child-scopes:
     description: 'DenySettings will be applied to child scopes.'
     required: false
-  excludedActions:
+  excluded-actions:
     description:
       'List of role-based management operations that are excluded from the
       denySettings.'
     required: false
-  excludedPrincipals:
+  excluded-principals:
     description: 'List of Entra principal IDs excluded from the lock.'
     required: false
 
-  managementGroupId:
+  management-group-id:
     description:
       'The management group id where the deployment stack will be created.'
     required: false
-  subscriptionId:
+  subscription-id:
     description:
       'The subscription id where the deployment stack will be created.'
     required: false
-  resourceGroupName:
+  resource-group-name:
     description:
       'The resource group name where the deployment stack will be created.'
     required: false
 
-  templateFile:
+  template-file:
     description: 'A path to a ARM or Bicep file in the file system.'
     required: false
-  templateSpec:
+  template-spec:
     description: 'The template spec resource id.'
     required: false
-  templateUri:
+  template-uri:
     description: 'A uri to a remote template file.'
     required: false
 
-  parametersFile:
+  parameters-file:
     description: 'A path to a ARM or Bicep paramter file in the file system.'
     required: false
-  parametersUri:
+  parameters:
+    description: ''
+    required: false
+  parameters-uri:
     description: 'A uri to a remote parameters file.'
     required: false
 
-  bypassStackOutOfSyncError:
+  bypass-stack-out-of-sync-error:
     description:
       'Flag to bypass service errors that indicate the stack resource list is
       not correctly synchronized.'

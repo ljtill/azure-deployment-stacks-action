@@ -1,63 +1,11 @@
 import * as path from 'path'
 import * as fs from 'fs'
+import * as os from 'os'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
-import * as cache from '@actions/tool-cache'
-import { Config } from '../models'
-
-/**
- * Installs the Bicep binary based on the current platform and architecture.
- * @returns A Promise that resolves when the installation is complete.
- * @throws {Error} If the platform, architecture, or binary is not supported.
- */
-export async function installBicep(): Promise<void> {
-  const url = 'https://github.com/azure/bicep/releases/latest/download/'
-
-  switch (process.platform) {
-    case 'win32':
-      switch (process.arch) {
-        case 'arm64':
-          // TODO: Implement - bicep-win-arm64.exe
-          throw new Error('Not implemented')
-        case 'x64':
-          // TODO: Implement - bicep-win-x64.exe
-          throw new Error('Not implemented')
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    case 'darwin':
-      switch (process.arch) {
-        case 'arm64':
-          // TODO: Implement - bicep-osx-arm64
-          throw new Error('Not implemented')
-        case 'x64':
-          // TODO: Implement - bicep-osx-x64
-          throw new Error('Not implemented')
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    case 'linux':
-      switch (process.arch) {
-        case 'arm64':
-          await cache.downloadTool(
-            `${url}bicep-linux-arm64`,
-            `/usr/local/bin/bicep`
-          )
-          return
-        case 'x64':
-          await cache.downloadTool(
-            `${url}bicep-linux-x64`,
-            `/usr/local/bin/bicep`
-          )
-          return
-        default:
-          throw new Error('Unsupported architecture')
-      }
-    default:
-      throw new Error('Unsupported platform')
-  }
-}
+import * as helpers from '../helpers'
+import { Config, Parameters } from '../models'
 
 /**
  * Checks if Bicep is installed and displays its version.
@@ -93,9 +41,8 @@ export async function checkBicepInstall(): Promise<boolean> {
  * @returns A promise that resolves to the path of the output file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
-  const outputPath = '/tmp/main.json'
+  const outputPath = `${os.tmpdir()}/main.json`
 
   const execOptions: exec.ExecOptions = {
     listeners: {
@@ -125,9 +72,9 @@ async function buildBicepFile(filePath: string): Promise<string> {
  * @returns A Promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
-  // TODO(ljtill): Implement cross platform support
   const bicepPath = await io.which('bicep', true)
-  const outputPath = '/tmp/params.json'
+
+  const outputPath = `${os.tmpdir()}/params.json`
 
   const execOptions: exec.ExecOptions = {
     listeners: {
@@ -150,19 +97,6 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 
   return outputPath
 }
-
-/**
- * Represents the content of the template file.
- */
-// interface TemplateContent {
-//   $schema: string
-//   contentVersion: string
-//   parameters?: object
-//   functions?: object[]
-//   variables?: object
-//   resources?: object[]
-//   outputs?: object
-// }
 
 /**
  * Parses the template file and returns the parsed content as a JSON object.
@@ -192,26 +126,6 @@ export async function parseTemplateFile(
 }
 
 /**
- * Represents the content of the parameters file.
- */
-interface ParametersContent {
-  $schema: string
-  contentVersion: string
-  parameters: Parameters
-}
-interface Parameters {
-  [key: string]: {
-    value: string | Reference
-  }
-}
-interface Reference {
-  keyVault: {
-    id: string
-  }
-  secretName: string
-}
-
-/**
  * Parses the parameters file and returns the parsed content as a JSON object.
  * @param config - The configuration object containing the inputs.
  * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
@@ -234,11 +148,79 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
   }
 
   try {
-    const deploymentParameters: ParametersContent = JSON.parse(
-      fs.readFileSync(filePath).toString()
-    )
-    return deploymentParameters.parameters
+    return JSON.parse(fs.readFileSync(filePath).toString()).parameters
   } catch {
     throw new Error('Invalid parameters file content')
   }
+}
+
+/**
+ * Parses the parameters object from the config and returns a ParametersContent object.
+ * @param config - The config object containing the parameters.
+ * @returns A Promise that resolves to a ParametersContent object.
+ * @throws Error if the parameters object is invalid.
+ *
+ * TODO(ljtill): Support Reference (Key Vault) object
+ */
+export async function parseParametersObject(
+  config: Config
+): Promise<Parameters> {
+  // TODO(ljtill): Support bicepparams object
+  const inputsParameters = config.inputs.parameters
+
+  let parameters: Parameters = {}
+
+  if (helpers.isJson(inputsParameters)) {
+    const data = JSON.parse(inputsParameters)
+    const extractedData: Parameters = {}
+
+    for (const key in data) {
+      if (Object.hasOwn(data, key)) {
+        if (helpers.isNumeric(data[key].value)) {
+          extractedData[key] = {
+            value: parseInt(data[key].value)
+          }
+        } else if (helpers.isBoolean(data[key].value)) {
+          extractedData[key] = {
+            value: data[key].value === 'true'
+          }
+        } else {
+          extractedData[key] = {
+            value: data[key].value
+          }
+        }
+      }
+    }
+
+    parameters = extractedData
+  } else {
+    try {
+      for (const line of inputsParameters.split(/\r|\n/)) {
+        const parts = line.split(/[:=]/)
+        if (parts.length < 2) {
+          throw new Error('Invalid parameters object')
+        }
+
+        const name: string = parts[0].trim()
+        let value: string | number | boolean = parts[1].trim()
+
+        // TODO(ljtill): Hanle other types
+        if (helpers.isNumeric(value)) {
+          value = parseInt(value)
+        } else if (helpers.isBoolean(value)) {
+          value = value === 'true'
+        }
+
+        parameters[name] = {
+          value
+        }
+      }
+    } catch {
+      throw new Error('Unable to parse parameters object')
+    }
+  }
+
+  core.debug(`Parameters: ${JSON.stringify(parameters)}`)
+
+  return parameters
 }

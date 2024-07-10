@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
+import { Template, Parameters, ParametersType, TemplateType } from './template'
+
 /**
  * Represents the configuration object.
  */
@@ -28,31 +32,19 @@ interface Inputs {
   templateSpec: string
   templateUri: string
   parametersFile: string
+  parameters: string
   parametersUri: string
   bypassStackOutOfSyncError: boolean
   wait: boolean
-}
-
-// TODO: Duplicate of ParametersContent in template.ts
-interface Parameters {
-  [key: string]: {
-    value: string | Reference
-  }
-}
-interface Reference {
-  keyVault: {
-    id: string
-  }
-  secretName: string
 }
 
 /**
  * Represents the context for the deployment stacks action.
  */
 interface Context {
-  templateType: string // 'template' | 'templateLink'
-  template: Record<string, unknown>
-  parametersType: string // 'parameters' | 'parametersLink'
+  templateType: TemplateType | undefined
+  template: Template
+  parametersType: ParametersType | undefined
   parameters: Parameters
   repository: string
   commit: string
@@ -85,14 +77,15 @@ const defaultInputs: Inputs = {
   templateSpec: '',
   templateUri: '',
   parametersFile: '',
+  parameters: '',
   parametersUri: '',
   bypassStackOutOfSyncError: false,
   wait: false
 }
 const defaultContext: Context = {
-  templateType: '',
+  templateType: undefined,
   template: {},
-  parametersType: '',
+  parametersType: undefined,
   parameters: {},
   repository: '',
   commit: '',

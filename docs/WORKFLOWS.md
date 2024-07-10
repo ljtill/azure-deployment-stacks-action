@@ -41,10 +41,10 @@ jobs:
           location: uksouth
           scope: subscription
           mode: create
-          actionOnUnmanage: deleteAll
-          denySettings: denyWriteAndDelete
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          templateFile: ./src/main.bicep
+          action-on-unmanage: deleteAll
+          deny-settings: denyWriteAndDelete
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          template-file: ./src/main.bicep
           wait: true
 ```
 
@@ -84,7 +84,7 @@ jobs:
           location: uksouth
           scope: subscription
           mode: delete
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           wait: true
 ```
 
@@ -129,9 +129,9 @@ jobs:
           location: uksouth
           scope: subscription
           mode: validate
-          actionOnUnmanage: deleteAll
-          denySettings: denyWriteAndDelete
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          templateFile: ./src/main.bicep
+          action-on-unmanage: deleteAll
+          deny-settings: denyWriteAndDelete
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          template-file: ./src/main.bicep
           wait: true
 ```

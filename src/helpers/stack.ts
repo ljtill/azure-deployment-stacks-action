@@ -1,10 +1,11 @@
+/* eslint-disable import/named */
+
 import * as core from '@actions/core'
 import { OperationState, SimplePollerLike } from '@azure/core-lro'
 import { DefaultAzureCredential } from '@azure/identity'
 import {
   DeploymentStack,
-  DeploymentStackValidateResult,
-  DeploymentStackProperties
+  DeploymentStackValidateResult
 } from '@azure/arm-resourcesdeploymentstacks'
 import { Config } from '../models'
 
@@ -72,59 +73,6 @@ function instanceOfDeploymentStackValidateResult(
  */
 export function newCredential(): DefaultAzureCredential {
   return new DefaultAzureCredential()
-}
-
-/**
- * Creates a new deployment stack based on the provided configuration.
- * @param config - The configuration object for the deployment stack.
- * @returns A promise that resolves to the created DeploymentStack.
- */
-export async function newDeploymentStack(
-  config: Config
-): Promise<DeploymentStack> {
-  const properties: DeploymentStackProperties = {
-    description: config.inputs.description,
-    actionOnUnmanage: prepareUnmanageProperties(config.inputs.actionOnUnmanage),
-    denySettings: prepareDenySettings(config),
-    bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
-  }
-
-  switch (config.context.templateType) {
-    case 'templateFile':
-      properties.template = config.context.template
-      break
-    case 'templateSpec':
-      properties.templateLink = {
-        id: config.inputs.templateSpec
-      }
-      break
-    case 'templateUri':
-      properties.templateLink = {
-        uri: config.inputs.templateUri
-      }
-      break
-  }
-
-  switch (config.context.parametersType) {
-    case 'parametersFile':
-      properties.parameters = config.context.parameters
-      break
-    case 'parametersUri':
-      properties.parametersLink = {
-        uri: config.inputs.parametersUri
-      }
-      break
-  }
-
-  return {
-    location: config.inputs.location,
-    properties,
-    tags: {
-      repository: config.context.repository,
-      commit: config.context.commit,
-      branch: config.context.branch
-    }
-  }
 }
 
 /**
@@ -209,7 +157,7 @@ interface ActionOnUnmanage {
  * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
  * @throws {Error} If the specified value is invalid.
  */
-function prepareUnmanageProperties(value: string): ActionOnUnmanage {
+export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
     case 'deleteResources':
       return {
@@ -249,7 +197,7 @@ interface DenySettings {
  * @param config - The configuration object.
  * @returns The deny settings object.
  */
-function prepareDenySettings(config: Config): DenySettings {
+export function prepareDenySettings(config: Config): DenySettings {
   return {
     mode: config.inputs.denySettings,
     applyToChildScopes: config.inputs.applyToChildScopes,

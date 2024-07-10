@@ -1,6 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { Config, createDefaultConfig } from '../models'
+import {
+  Config,
+  createDefaultConfig,
+  TemplateType,
+  ParametersType
+} from '../models'
 import * as helpers from '../helpers'
 
 /**
@@ -37,13 +42,13 @@ function setScopeInputs(config: Config): void {
 
   switch (config.inputs.scope) {
     case 'managementGroup':
-      config.inputs.managementGroupId = getInput('managementGroupId', true)
+      config.inputs.managementGroupId = getInput('management-group-id', true)
       break
     case 'subscription':
-      config.inputs.subscriptionId = getInput('subscriptionId', true)
+      config.inputs.subscriptionId = getInput('subscription-id', true)
       break
     case 'resourceGroup':
-      config.inputs.resourceGroupName = getInput('resourceGroupName', true)
+      config.inputs.resourceGroupName = getInput('resource-group-name', true)
       break
   }
 }
@@ -54,14 +59,14 @@ function setScopeInputs(config: Config): void {
  */
 function setModeInputs(config: Config): void {
   // Action on unmanage
-  config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+  config.inputs.actionOnUnmanage = getInput('action-on-unmanage', true, [
     'deleteAll',
     'deleteResources',
     'detachAll'
   ])
 
   // Deny settings
-  config.inputs.denySettings = getInput('denySettings', true, [
+  config.inputs.denySettings = getInput('deny-settings', true, [
     'denyDelete',
     'denyWriteAndDelete',
     'none'
@@ -72,13 +77,13 @@ function setModeInputs(config: Config): void {
     getInput('applyToChildScopes', false) === 'true'
 
   // Excluded actions
-  const excludedActions = getInput('excludedActions', false)
+  const excludedActions = getInput('excluded-actions', false)
   config.inputs.excludedActions = excludedActions
     ? excludedActions.split(',')
     : []
 
   // Excluded principals
-  const excludedPrincipals = getInput('excludedPrincipals', false)
+  const excludedPrincipals = getInput('excluded-principals', false)
   config.inputs.excludedPrincipals = excludedPrincipals
     ? excludedPrincipals.split(',')
     : []
@@ -90,7 +95,7 @@ function setModeInputs(config: Config): void {
 
   // Out of sync error
   config.inputs.bypassStackOutOfSyncError =
-    getInput('bypassStackOutOfSyncError', false) === 'true'
+    getInput('bypass-stack-out-of-sync-error', false) === 'true'
 }
 
 /**
@@ -98,9 +103,9 @@ function setModeInputs(config: Config): void {
  * @param config - The configuration object.
  */
 async function setTemplateContext(config: Config): Promise<void> {
-  const templateFile = getInput('templateFile', false)
-  const templateSpec = getInput('templateSpec', false)
-  const templateUri = getInput('templateUri', false)
+  const templateFile = getInput('template-file', false)
+  const templateSpec = getInput('template-spec', false)
+  const templateUri = getInput('template-uri', false)
 
   const templateInputs = [templateFile, templateSpec, templateUri]
   const validTemplateInputs = templateInputs.filter(Boolean)
@@ -112,14 +117,14 @@ async function setTemplateContext(config: Config): Promise<void> {
   }
 
   if (templateFile) {
-    config.context.templateType = 'templateFile'
+    config.context.templateType = TemplateType.File
     config.inputs.templateFile = templateFile
     config.context.template = await helpers.parseTemplateFile(config)
   } else if (templateSpec) {
-    config.context.templateType = 'templateSpec'
+    config.context.templateType = TemplateType.Spec
     config.inputs.templateSpec = templateSpec
   } else if (templateUri) {
-    config.context.templateType = 'templateUri'
+    config.context.templateType = TemplateType.Uri
     config.inputs.templateUri = templateUri
   }
 }
@@ -129,27 +134,32 @@ async function setTemplateContext(config: Config): Promise<void> {
  * @param config - The configuration object.
  */
 async function setParametersContext(config: Config): Promise<void> {
-  const parametersFile = getInput('parametersFile', false)
-  const parametersUri = getInput('parametersUri', false)
+  const parametersFile = getInput('parameters-file', false)
+  const parameters = getInput('parameters', false)
+  const parametersUri = getInput('parameters-uri', false)
 
-  const parametersInputs = [parametersFile, parametersUri]
+  const parametersInputs = [parametersFile, parameters, parametersUri]
   const validParametersInputs = parametersInputs.filter(Boolean)
 
   if (validParametersInputs.length > 1) {
     throw new Error(
-      "Only one of 'parametersFile' or 'parametersUri' can be set."
+      "Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set."
     )
   }
 
   if (parametersFile) {
-    config.context.parametersType = 'parametersFile'
+    config.context.parametersType = ParametersType.File
     config.inputs.parametersFile = parametersFile
     config.context.parameters = await helpers.parseParametersFile(config)
+  } else if (parameters) {
+    config.context.parametersType = ParametersType.Object
+    config.inputs.parameters = parameters
+    config.context.parameters = await helpers.parseParametersObject(config)
   } else if (parametersUri) {
-    config.context.parametersType = 'parametersUri'
+    config.context.parametersType = ParametersType.Link
     config.inputs.parametersUri = parametersUri
   } else {
-    config.context.parametersType = 'none'
+    config.context.parametersType = ParametersType.Undefined
   }
 }
 
@@ -175,7 +185,8 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  core.debug(`Configuration: ${JSON.stringify(config)}`)
+  // TODO(ljtill): Optional output artifact
+  core.debug(`Configuration: ${JSON.stringify(config.inputs)}`)
 
   return config
 }

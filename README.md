@@ -2,12 +2,6 @@
 
 ![Icon](./docs/static/stacks.jpg)
 
-[![GitHub Super-Linter](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/ci.yml/badge.svg)
-[![Check dist/](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ljtill/azure-deployment-stacks-action/actions/workflows/codeql-analysis.yml)
-[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
-
 This repository contains a [GitHub Action](https://docs.github.com/actions) that
 allows engineers to create, update, delete, and validate
 [Azure Deployment Stacks](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks)
@@ -39,11 +33,11 @@ efficient and automated deployments.
     location: uksouth
     scope: subscription
     mode: create
-    actionOnUnmanage: deleteAll
-    denySettings: denyWriteAndDelete
-    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    templateFile: ./src/main.bicep
-    parametersFile: ./src/main.bicepparam
+    action-on-unmanage: deleteAll
+    deny-settings: denyWriteAndDelete
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    template-file: ./src/main.bicep
+    parameters-file: ./src/main.bicepparam
     wait: true
 ```
 
@@ -99,7 +93,7 @@ Stamps Action:
 ## Customisation
 
 For a complete list of customisation options, please refer to the
-[Parameters](./docs/PARAMETERS.md) document.
+[Inputs](./docs/INPUTS.md) document.
 
 ## Documentation
 

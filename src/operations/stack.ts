@@ -1,10 +1,71 @@
+/* eslint-disable import/named */
+
 import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
-  DeploymentStack
+  DeploymentStack,
+  DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
 import * as helpers from '../helpers'
-import { Config } from '../models'
+import { Config, TemplateType, ParametersType } from '../models'
+
+/**
+ * Creates a new deployment stack based on the provided configuration.
+ * @param config - The configuration object for the deployment stack.
+ * @returns A promise that resolves to the created DeploymentStack.
+ */
+export async function newDeploymentStack(
+  config: Config
+): Promise<DeploymentStack> {
+  const properties: DeploymentStackProperties = {
+    description: config.inputs.description,
+    actionOnUnmanage: helpers.prepareUnmanageProperties(
+      config.inputs.actionOnUnmanage
+    ),
+    denySettings: helpers.prepareDenySettings(config),
+    bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
+  }
+
+  switch (config.context.templateType) {
+    case TemplateType.File:
+      properties.template = config.context.template
+      break
+    case TemplateType.Spec:
+      properties.templateLink = {
+        id: config.inputs.templateSpec
+      }
+      break
+    case TemplateType.Uri:
+      properties.templateLink = {
+        uri: config.inputs.templateUri
+      }
+      break
+  }
+
+  switch (config.context.parametersType) {
+    case ParametersType.File:
+      properties.parameters = config.context.parameters
+      break
+    case ParametersType.Object:
+      properties.parameters = config.context.parameters
+      break
+    case ParametersType.Link:
+      properties.parametersLink = {
+        uri: config.inputs.parametersUri
+      }
+      break
+  }
+
+  return {
+    location: config.inputs.location,
+    properties,
+    tags: {
+      repository: config.context.repository,
+      commit: config.context.commit,
+      branch: config.context.branch
+    }
+  }
+}
 
 /**
  * Retrieves the deployment stack based on the provided configuration.
@@ -58,7 +119,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Creating deployment stack`)
 
   const client = new DeploymentStacksClient(helpers.newCredential())
-  const deploymentStack = await helpers.newDeploymentStack(config)
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -196,7 +257,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
 
   core.info(`Validating deployment stack`)
 
-  const deploymentStack = await helpers.newDeploymentStack(config)
+  const deploymentStack = await newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise

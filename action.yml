@@ -26,7 +26,7 @@ inputs:
     description: 'The mode of the deployment stack action.'
     required: true
 
-  actione-on-unmanage:
+  action-on-unmanage:
     description:
       'Defines what happens to resources that are no longer managed after the
       stack is updated or deleted.'

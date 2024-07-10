@@ -47667,13 +47667,13 @@ function setScopeInputs(config) {
     ]);
     switch (config.inputs.scope) {
         case 'managementGroup':
-            config.inputs.managementGroupId = getInput('managementGroupId', true);
+            config.inputs.managementGroupId = getInput('management-group-id', true);
             break;
         case 'subscription':
-            config.inputs.subscriptionId = getInput('subscriptionId', true);
+            config.inputs.subscriptionId = getInput('subscription-id', true);
             break;
         case 'resourceGroup':
-            config.inputs.resourceGroupName = getInput('resourceGroupName', true);
+            config.inputs.resourceGroupName = getInput('resource-group-name', true);
             break;
     }
 }
@@ -47683,13 +47683,13 @@ function setScopeInputs(config) {
  */
 function setModeInputs(config) {
     // Action on unmanage
-    config.inputs.actionOnUnmanage = getInput('actionOnUnmanage', true, [
+    config.inputs.actionOnUnmanage = getInput('action-on-unmanage', true, [
         'deleteAll',
         'deleteResources',
         'detachAll'
     ]);
     // Deny settings
-    config.inputs.denySettings = getInput('denySettings', true, [
+    config.inputs.denySettings = getInput('deny-settings', true, [
         'denyDelete',
         'denyWriteAndDelete',
         'none'
@@ -47698,12 +47698,12 @@ function setModeInputs(config) {
     config.inputs.applyToChildScopes =
         getInput('applyToChildScopes', false) === 'true';
     // Excluded actions
-    const excludedActions = getInput('excludedActions', false);
+    const excludedActions = getInput('excluded-actions', false);
     config.inputs.excludedActions = excludedActions
         ? excludedActions.split(',')
         : [];
     // Excluded principals
-    const excludedPrincipals = getInput('excludedPrincipals', false);
+    const excludedPrincipals = getInput('excluded-principals', false);
     config.inputs.excludedPrincipals = excludedPrincipals
         ? excludedPrincipals.split(',')
         : [];
@@ -47713,32 +47713,32 @@ function setModeInputs(config) {
     config.context.branch = github.context.ref;
     // Out of sync error
     config.inputs.bypassStackOutOfSyncError =
-        getInput('bypassStackOutOfSyncError', false) === 'true';
+        getInput('bypass-stack-out-of-sync-error', false) === 'true';
 }
 /**
  * Sets the template context based on the provided configuration.
  * @param config - The configuration object.
  */
 async function setTemplateContext(config) {
-    const templateFile = getInput('templateFile', false);
-    const templateSpec = getInput('templateSpec', false);
-    const templateUri = getInput('templateUri', false);
+    const templateFile = getInput('template-file', false);
+    const templateSpec = getInput('template-spec', false);
+    const templateUri = getInput('template-uri', false);
     const templateInputs = [templateFile, templateSpec, templateUri];
     const validTemplateInputs = templateInputs.filter(Boolean);
     if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
         throw new Error("Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set.");
     }
     if (templateFile) {
-        config.context.templateType = 'templateFile';
+        config.context.templateType = 'template-file';
         config.inputs.templateFile = templateFile;
         config.context.template = await helpers.parseTemplateFile(config);
     }
     else if (templateSpec) {
-        config.context.templateType = 'templateSpec';
+        config.context.templateType = 'template-spec';
         config.inputs.templateSpec = templateSpec;
     }
     else if (templateUri) {
-        config.context.templateType = 'templateUri';
+        config.context.templateType = 'template-uri';
         config.inputs.templateUri = templateUri;
     }
 }
@@ -47747,9 +47747,9 @@ async function setTemplateContext(config) {
  * @param config - The configuration object.
  */
 async function setParametersContext(config) {
-    const parametersFile = getInput('parametersFile', false);
+    const parametersFile = getInput('parameters-file', false);
     const parameters = getInput('parameters', false);
-    const parametersUri = getInput('parametersUri', false);
+    const parametersUri = getInput('parameters-uri', false);
     const parametersInputs = [parametersFile, parameters, parametersUri];
     const validParametersInputs = parametersInputs.filter(Boolean);
     if (validParametersInputs.length > 1) {
@@ -48174,6 +48174,8 @@ async function parseParametersFile(config) {
  * @param config - The config object containing the parameters.
  * @returns A Promise that resolves to a ParametersContent object.
  * @throws Error if the parameters object is invalid.
+ *
+ * TODO(ljtill): Support Reference (Key Vault) object
  */
 async function parseParametersObject(config) {
     // TODO(ljtill): Support bicepparams object
@@ -48183,16 +48185,15 @@ async function parseParametersObject(config) {
         contentVersion: '1.0.0.0',
         parameters: {}
     };
-    // Accepts either a JSON string or a key-value pair string
-    //
-    // parameters: |
-    //   {"name": { "value": "test" }, "location": { "value": "westus"}}
-    //
-    // parameters: |
-    //   name:test
-    //   location:westus
     if (helpers.isJson(parameters)) {
-        // TODO(ljtill): Implement
+        const data = JSON.parse(parameters);
+        const extractedData = {};
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                extractedData[key] = data[key].value;
+            }
+        }
+        parametersContent.parameters = extractedData;
     }
     else {
         try {
@@ -48204,9 +48205,9 @@ async function parseParametersObject(config) {
                 if (parts.length < 2) {
                     throw new Error('Invalid parameters object');
                 }
-                // TODO(ljtill): Reference object
                 const name = parts[0].trim();
                 let value = parts[1].trim();
+                // TODO(ljtill): Check any other types
                 if (helpers.isNumeric(value)) {
                     value = parseInt(value);
                 }

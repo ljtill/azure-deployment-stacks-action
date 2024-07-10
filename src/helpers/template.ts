@@ -5,7 +5,7 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as helpers from '../helpers'
-import { Config, ParametersContent } from '../models'
+import { Config, Parameters, ParametersContent } from '../models'
 
 /**
  * Checks if Bicep is installed and displays its version.
@@ -161,6 +161,8 @@ export async function parseParametersFile(
  * @param config - The config object containing the parameters.
  * @returns A Promise that resolves to a ParametersContent object.
  * @throws Error if the parameters object is invalid.
+ *
+ * TODO(ljtill): Support Reference (Key Vault) object
  */
 export async function parseParametersObject(
   config: Config
@@ -175,17 +177,17 @@ export async function parseParametersObject(
     parameters: {}
   }
 
-  // Accepts either a JSON string or a key-value pair string
-  //
-  // parameters: |
-  //   {"name": { "value": "test" }, "location": { "value": "westus"}}
-  //
-  // parameters: |
-  //   name:test
-  //   location:westus
-
   if (helpers.isJson(parameters)) {
-    // TODO(ljtill): Implement
+    const data = JSON.parse(parameters)
+    const extractedData: Parameters = {}
+
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        extractedData[key] = data[key].value
+      }
+    }
+
+    parametersContent.parameters = extractedData
   } else {
     try {
       // Iterate over each line
@@ -198,11 +200,10 @@ export async function parseParametersObject(
           throw new Error('Invalid parameters object')
         }
 
-        // TODO(ljtill): Reference object
-
         const name: string = parts[0].trim()
         let value: string | number | boolean = parts[1].trim()
 
+        // TODO(ljtill): Check any other types
         if (helpers.isNumeric(value)) {
           value = parseInt(value)
         } else if (helpers.isBoolean(value)) {

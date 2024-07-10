@@ -39,11 +39,11 @@ efficient and automated deployments.
     location: uksouth
     scope: subscription
     mode: create
-    actionOnUnmanage: deleteAll
-    denySettings: denyWriteAndDelete
-    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    templateFile: ./src/main.bicep
-    parametersFile: ./src/main.bicepparam
+    action-on-unmanage: deleteAll
+    deny-settings: denyWriteAndDelete
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    template-file: ./src/main.bicep
+    parameters-file: ./src/main.bicepparam
     wait: true
 ```
 

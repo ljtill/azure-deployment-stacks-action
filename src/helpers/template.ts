@@ -183,8 +183,18 @@ export async function parseParametersObject(
 
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
-        extractedData[key] = {
-          value: data[key].value
+        if (helpers.isNumeric(data[key].value)) {
+          extractedData[key] = {
+            value: parseInt(data[key].value)
+          }
+        } else if (helpers.isBoolean(data[key].value)) {
+          extractedData[key] = {
+            value: data[key].value === 'true'
+          }
+        } else {
+          extractedData[key] = {
+            value: data[key].value
+          }
         }
       }
     }
@@ -192,12 +202,8 @@ export async function parseParametersObject(
     parametersContent.parameters = extractedData
   } else {
     try {
-      // Iterate over each line
       for (const line of parameters.split(/\r|\n/)) {
-        // Split on either ':' or '=' seperator
         const parts = line.split(/[:=]/)
-
-        // Check if the line is valid
         if (parts.length < 2) {
           throw new Error('Invalid parameters object')
         }
@@ -205,7 +211,7 @@ export async function parseParametersObject(
         const name: string = parts[0].trim()
         let value: string | number | boolean = parts[1].trim()
 
-        // TODO(ljtill): Check any other types
+        // TODO(ljtill): Hanle other types
         if (helpers.isNumeric(value)) {
           value = parseInt(value)
         } else if (helpers.isBoolean(value)) {

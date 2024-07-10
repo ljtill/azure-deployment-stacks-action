@@ -48186,8 +48186,8 @@ async function parseParametersObject(config) {
         parameters: {}
     };
     if (helpers.isJson(parameters)) {
-        parameters.replace(/\\/g, '');
         const data = JSON.parse(parameters);
+        data.replace(/\\/g, '');
         const extractedData = {};
         for (const key in data) {
             if (data.hasOwnProperty(key)) {

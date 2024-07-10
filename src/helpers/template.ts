@@ -178,6 +178,8 @@ export async function parseParametersObject(
   }
 
   if (helpers.isJson(parameters)) {
+    parameters.replace(/\\/g, '')
+
     const data = JSON.parse(parameters)
     const extractedData: Parameters = {}
 

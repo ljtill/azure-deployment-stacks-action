@@ -3,6 +3,8 @@
 The following inputs can be customized to tailor the Actions to your
 environment:
 
+<!-- textlint-disable -->
+
 | Parameter                      | Mode                     | Required | Type    | Description                                                                                         | Values                                       |
 | ------------------------------ | ------------------------ | -------- | ------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | name                           | create, delete, validate | true     | string  | The name of the deployment stack.                                                                   |                                              |
@@ -26,6 +28,8 @@ environment:
 | parameters-uri                 | create, validate         | false    | string  | A uri to a remote parameters file.                                                                  |                                              |
 | bypass-stack-out-of-sync-error | create, validate         | false    | boolean | Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.  | true, false                                  |
 | wait                           | create, delete, validate | false    | boolean | Wait for the deployment to complete.                                                                | true, false                                  |
+
+<!-- textlint-enable -->
 
 The `excludedActions` and `excludedPrincipals` parameters are defined by comma
 separated.

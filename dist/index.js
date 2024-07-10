@@ -48185,7 +48185,7 @@ async function parseParametersObject(config) {
         const data = JSON.parse(inputsParameters);
         const extractedData = {};
         for (const key in data) {
-            if (data.hasOwnProperty(key)) {
+            if (Object.hasOwn(data, key)) {
                 if (helpers.isNumeric(data[key].value)) {
                     extractedData[key] = {
                         value: parseInt(data[key].value)
@@ -48221,8 +48221,8 @@ async function parseParametersObject(config) {
                 else if (helpers.isBoolean(value)) {
                     value = value === 'true';
                 }
-                parameters[parts[0].trim()] = {
-                    value: value
+                parameters[name] = {
+                    value
                 };
             }
         }

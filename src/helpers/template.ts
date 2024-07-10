@@ -175,7 +175,7 @@ export async function parseParametersObject(
     const extractedData: Parameters = {}
 
     for (const key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.hasOwn(data, key)) {
         if (helpers.isNumeric(data[key].value)) {
           extractedData[key] = {
             value: parseInt(data[key].value)
@@ -211,8 +211,8 @@ export async function parseParametersObject(
           value = value === 'true'
         }
 
-        parameters[parts[0].trim()] = {
-          value: value
+        parameters[name] = {
+          value
         }
       }
     } catch {

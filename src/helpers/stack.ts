@@ -1,3 +1,5 @@
+/* eslint-disable import/named */
+
 import * as core from '@actions/core'
 import { OperationState, SimplePollerLike } from '@azure/core-lro'
 import { DefaultAzureCredential } from '@azure/identity'

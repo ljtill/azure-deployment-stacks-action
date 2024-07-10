@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { Template, Parameters, ParametersType, TemplateType } from './template'
 
 /**

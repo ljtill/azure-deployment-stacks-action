@@ -1,3 +1,5 @@
+/* eslint-disable import/named */
+
 import * as core from '@actions/core'
 import {
   DeploymentStacksClient,

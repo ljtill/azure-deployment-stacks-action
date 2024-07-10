@@ -1,5 +1,10 @@
 {
   "rules": {
-    "terminology": false
+    "terminology": {
+      "terms": [
+        "ID",
+        "URI"
+      ]
+    }
   }
 }

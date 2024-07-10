@@ -5,7 +5,7 @@ import {
   DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
 import * as helpers from '../helpers'
-import { Config } from '../models'
+import { Config, TemplateType, ParametersType } from '../models'
 
 /**
  * Creates a new deployment stack based on the provided configuration.
@@ -25,15 +25,15 @@ export async function newDeploymentStack(
   }
 
   switch (config.context.templateType) {
-    case 'templateFile':
+    case TemplateType.File:
       properties.template = config.context.template
       break
-    case 'templateSpec':
+    case TemplateType.Spec:
       properties.templateLink = {
         id: config.inputs.templateSpec
       }
       break
-    case 'templateUri':
+    case TemplateType.Uri:
       properties.templateLink = {
         uri: config.inputs.templateUri
       }
@@ -41,13 +41,13 @@ export async function newDeploymentStack(
   }
 
   switch (config.context.parametersType) {
-    case 'parametersFile':
+    case ParametersType.File:
       properties.parameters = config.context.parameters
       break
-    case 'parameters':
+    case ParametersType.Object:
       properties.parameters = config.context.parameters
       break
-    case 'parametersUri':
+    case ParametersType.Link:
       properties.parametersLink = {
         uri: config.inputs.parametersUri
       }

@@ -1,32 +1,38 @@
 /**
- * Represents the content of the template file.
+ * Represents the template object.
  */
-export interface TemplateContent {
-  $schema: string
-  contentVersion: string
-  parameters?: object
-  functions?: object[]
-  variables?: object
-  resources?: object[]
-  outputs?: object
+export type Template = Record<string, unknown>
+
+/**
+ * Represents the type of the template.
+ */
+export enum TemplateType {
+  File,
+  Spec,
+  Uri
 }
 
 /**
- * Represents the content of the parameters file.
+ * Represents the parameters object.
  */
-export interface ParametersContent {
-  $schema: string
-  contentVersion: string
-  parameters: Parameters
-}
-export interface Parameters {
-  [key: string]: {
-    value: string | number | boolean | Reference
-  }
-}
-interface Reference {
+type Reference = {
   keyVault: {
     id: string
   }
   secretName: string
+}
+export type Parameters = {
+  [key: string]: {
+    value: string | number | boolean | Reference
+  }
+}
+
+/**
+ * Represents the type of the parameters.
+ */
+export enum ParametersType {
+  Object,
+  File,
+  Link,
+  Undefined
 }

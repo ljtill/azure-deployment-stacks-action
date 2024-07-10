@@ -1,6 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { Config, createDefaultConfig } from '../models'
+import {
+  Config,
+  createDefaultConfig,
+  TemplateType,
+  ParametersType
+} from '../models'
 import * as helpers from '../helpers'
 
 /**
@@ -112,14 +117,14 @@ async function setTemplateContext(config: Config): Promise<void> {
   }
 
   if (templateFile) {
-    config.context.templateType = 'templateFile'
+    config.context.templateType = TemplateType.File
     config.inputs.templateFile = templateFile
     config.context.template = await helpers.parseTemplateFile(config)
   } else if (templateSpec) {
-    config.context.templateType = 'templateSpec'
+    config.context.templateType = TemplateType.Spec
     config.inputs.templateSpec = templateSpec
   } else if (templateUri) {
-    config.context.templateType = 'templateUri'
+    config.context.templateType = TemplateType.Uri
     config.inputs.templateUri = templateUri
   }
 }
@@ -143,22 +148,18 @@ async function setParametersContext(config: Config): Promise<void> {
   }
 
   if (parametersFile) {
-    config.context.parametersType = 'parametersFile'
+    config.context.parametersType = ParametersType.File
     config.inputs.parametersFile = parametersFile
-    config.context.parameters = (
-      await helpers.parseParametersFile(config)
-    ).parameters
+    config.context.parameters = await helpers.parseParametersFile(config)
   } else if (parameters) {
-    config.context.parametersType = 'parameters'
+    config.context.parametersType = ParametersType.Object
     config.inputs.parameters = parameters
-    config.context.parameters = (
-      await helpers.parseParametersObject(config)
-    ).parameters
+    config.context.parameters = await helpers.parseParametersObject(config)
   } else if (parametersUri) {
-    config.context.parametersType = 'parametersUri'
+    config.context.parametersType = ParametersType.Link
     config.inputs.parametersUri = parametersUri
   } else {
-    config.context.parametersType = 'none'
+    config.context.parametersType = ParametersType.Undefined
   }
 }
 

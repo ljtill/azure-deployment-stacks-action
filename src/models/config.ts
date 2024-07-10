@@ -1,3 +1,5 @@
+import { Template, Parameters, ParametersType, TemplateType } from './template'
+
 /**
  * Represents the configuration object.
  */
@@ -34,26 +36,13 @@ interface Inputs {
   wait: boolean
 }
 
-// TODO: Duplicate of ParametersContent in template.ts
-interface Parameters {
-  [key: string]: {
-    value: string | number | boolean | Reference
-  }
-}
-interface Reference {
-  keyVault: {
-    id: string
-  }
-  secretName: string
-}
-
 /**
  * Represents the context for the deployment stacks action.
  */
 interface Context {
-  templateType: string // 'template' | 'templateLink'
-  template: Record<string, unknown>
-  parametersType: string // 'parameters' | 'parametersLink'
+  templateType: TemplateType | undefined
+  template: Template
+  parametersType: ParametersType | undefined
   parameters: Parameters
   repository: string
   commit: string
@@ -92,9 +81,9 @@ const defaultInputs: Inputs = {
   wait: false
 }
 const defaultContext: Context = {
-  templateType: '',
+  templateType: undefined,
   template: {},
-  parametersType: '',
+  parametersType: undefined,
   parameters: {},
   repository: '',
   commit: '',

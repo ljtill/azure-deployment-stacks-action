@@ -47729,16 +47729,16 @@ async function setTemplateContext(config) {
         throw new Error("Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set.");
     }
     if (templateFile) {
-        config.context.templateType = 'templateFile';
+        config.context.templateType = models_1.TemplateType.File;
         config.inputs.templateFile = templateFile;
         config.context.template = await helpers.parseTemplateFile(config);
     }
     else if (templateSpec) {
-        config.context.templateType = 'templateSpec';
+        config.context.templateType = models_1.TemplateType.Spec;
         config.inputs.templateSpec = templateSpec;
     }
     else if (templateUri) {
-        config.context.templateType = 'templateUri';
+        config.context.templateType = models_1.TemplateType.Uri;
         config.inputs.templateUri = templateUri;
     }
 }
@@ -47756,21 +47756,21 @@ async function setParametersContext(config) {
         throw new Error("Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set.");
     }
     if (parametersFile) {
-        config.context.parametersType = 'parametersFile';
+        config.context.parametersType = models_1.ParametersType.File;
         config.inputs.parametersFile = parametersFile;
-        config.context.parameters = (await helpers.parseParametersFile(config)).parameters;
+        config.context.parameters = await helpers.parseParametersFile(config);
     }
     else if (parameters) {
-        config.context.parametersType = 'parameters';
+        config.context.parametersType = models_1.ParametersType.Object;
         config.inputs.parameters = parameters;
-        config.context.parameters = (await helpers.parseParametersObject(config)).parameters;
+        config.context.parameters = await helpers.parseParametersObject(config);
     }
     else if (parametersUri) {
-        config.context.parametersType = 'parametersUri';
+        config.context.parametersType = models_1.ParametersType.Link;
         config.inputs.parametersUri = parametersUri;
     }
     else {
-        config.context.parametersType = 'none';
+        config.context.parametersType = models_1.ParametersType.Undefined;
     }
 }
 /**
@@ -48163,7 +48163,7 @@ async function parseParametersFile(config) {
         throw new Error('Invalid parameters file path: ${filePath}');
     }
     try {
-        return JSON.parse(fs.readFileSync(filePath).toString());
+        return JSON.parse(fs.readFileSync(filePath).toString()).parameters;
     }
     catch {
         throw new Error('Invalid parameters file content');
@@ -48179,14 +48179,10 @@ async function parseParametersFile(config) {
  */
 async function parseParametersObject(config) {
     // TODO(ljtill): Support bicepparams object
-    const parameters = config.inputs.parameters;
-    const parametersContent = {
-        $schema: 'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#',
-        contentVersion: '1.0.0.0',
-        parameters: {}
-    };
-    if (helpers.isJson(parameters)) {
-        const data = JSON.parse(parameters);
+    const inputsParameters = config.inputs.parameters;
+    let parameters = {};
+    if (helpers.isJson(inputsParameters)) {
+        const data = JSON.parse(inputsParameters);
         const extractedData = {};
         for (const key in data) {
             if (data.hasOwnProperty(key)) {
@@ -48207,11 +48203,11 @@ async function parseParametersObject(config) {
                 }
             }
         }
-        parametersContent.parameters = extractedData;
+        parameters = extractedData;
     }
     else {
         try {
-            for (const line of parameters.split(/\r|\n/)) {
+            for (const line of inputsParameters.split(/\r|\n/)) {
                 const parts = line.split(/[:=]/);
                 if (parts.length < 2) {
                     throw new Error('Invalid parameters object');
@@ -48225,7 +48221,7 @@ async function parseParametersObject(config) {
                 else if (helpers.isBoolean(value)) {
                     value = value === 'true';
                 }
-                parametersContent.parameters[parts[0].trim()] = {
+                parameters[parts[0].trim()] = {
                     value: value
                 };
             }
@@ -48234,8 +48230,8 @@ async function parseParametersObject(config) {
             throw new Error('Unable to parse parameters object');
         }
     }
-    core.debug(`Parameters: ${JSON.stringify(parametersContent)}`);
-    return parametersContent;
+    core.debug(`Parameters: ${JSON.stringify(parameters)}`);
+    return parameters;
 }
 
 
@@ -48373,9 +48369,9 @@ const defaultInputs = {
     wait: false
 };
 const defaultContext = {
-    templateType: '',
+    templateType: undefined,
     template: {},
-    parametersType: '',
+    parametersType: undefined,
     parameters: {},
     repository: '',
     commit: '',
@@ -48430,6 +48426,26 @@ __exportStar(__nccwpck_require__(2747), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ParametersType = exports.TemplateType = void 0;
+/**
+ * Represents the type of the template.
+ */
+var TemplateType;
+(function (TemplateType) {
+    TemplateType[TemplateType["File"] = 0] = "File";
+    TemplateType[TemplateType["Spec"] = 1] = "Spec";
+    TemplateType[TemplateType["Uri"] = 2] = "Uri";
+})(TemplateType || (exports.TemplateType = TemplateType = {}));
+/**
+ * Represents the type of the parameters.
+ */
+var ParametersType;
+(function (ParametersType) {
+    ParametersType[ParametersType["Object"] = 0] = "Object";
+    ParametersType[ParametersType["File"] = 1] = "File";
+    ParametersType[ParametersType["Link"] = 2] = "Link";
+    ParametersType[ParametersType["Undefined"] = 3] = "Undefined";
+})(ParametersType || (exports.ParametersType = ParametersType = {}));
 
 
 /***/ }),
@@ -48495,6 +48511,7 @@ exports.validateDeploymentStack = validateDeploymentStack;
 const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helpers = __importStar(__nccwpck_require__(3202));
+const models_1 = __nccwpck_require__(2859);
 /**
  * Creates a new deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
@@ -48508,28 +48525,28 @@ async function newDeploymentStack(config) {
         bypassStackOutOfSyncError: config.inputs.bypassStackOutOfSyncError
     };
     switch (config.context.templateType) {
-        case 'templateFile':
+        case models_1.TemplateType.File:
             properties.template = config.context.template;
             break;
-        case 'templateSpec':
+        case models_1.TemplateType.Spec:
             properties.templateLink = {
                 id: config.inputs.templateSpec
             };
             break;
-        case 'templateUri':
+        case models_1.TemplateType.Uri:
             properties.templateLink = {
                 uri: config.inputs.templateUri
             };
             break;
     }
     switch (config.context.parametersType) {
-        case 'parametersFile':
+        case models_1.ParametersType.File:
             properties.parameters = config.context.parameters;
             break;
-        case 'parameters':
+        case models_1.ParametersType.Object:
             properties.parameters = config.context.parameters;
             break;
-        case 'parametersUri':
+        case models_1.ParametersType.Link:
             properties.parametersLink = {
                 uri: config.inputs.parametersUri
             };

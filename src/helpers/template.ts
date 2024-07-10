@@ -5,7 +5,7 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as helpers from '../helpers'
-import { Config, Parameters, ParametersContent } from '../models'
+import { Config, Parameters } from '../models'
 
 /**
  * Checks if Bicep is installed and displays its version.
@@ -131,9 +131,7 @@ export async function parseTemplateFile(
  * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
  * @throws An error if the parameters file path is invalid.
  */
-export async function parseParametersFile(
-  config: Config
-): Promise<ParametersContent> {
+export async function parseParametersFile(config: Config): Promise<Parameters> {
   let filePath = config.inputs.parametersFile
   const fileExtension = path.extname(filePath)
 
@@ -150,7 +148,7 @@ export async function parseParametersFile(
   }
 
   try {
-    return JSON.parse(fs.readFileSync(filePath).toString())
+    return JSON.parse(fs.readFileSync(filePath).toString()).parameters
   } catch {
     throw new Error('Invalid parameters file content')
   }
@@ -166,19 +164,14 @@ export async function parseParametersFile(
  */
 export async function parseParametersObject(
   config: Config
-): Promise<ParametersContent> {
+): Promise<Parameters> {
   // TODO(ljtill): Support bicepparams object
-  const parameters = config.inputs.parameters
+  const inputsParameters = config.inputs.parameters
 
-  const parametersContent: ParametersContent = {
-    $schema:
-      'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#',
-    contentVersion: '1.0.0.0',
-    parameters: {}
-  }
+  let parameters: Parameters = {}
 
-  if (helpers.isJson(parameters)) {
-    const data = JSON.parse(parameters)
+  if (helpers.isJson(inputsParameters)) {
+    const data = JSON.parse(inputsParameters)
     const extractedData: Parameters = {}
 
     for (const key in data) {
@@ -199,10 +192,10 @@ export async function parseParametersObject(
       }
     }
 
-    parametersContent.parameters = extractedData
+    parameters = extractedData
   } else {
     try {
-      for (const line of parameters.split(/\r|\n/)) {
+      for (const line of inputsParameters.split(/\r|\n/)) {
         const parts = line.split(/[:=]/)
         if (parts.length < 2) {
           throw new Error('Invalid parameters object')
@@ -218,7 +211,7 @@ export async function parseParametersObject(
           value = value === 'true'
         }
 
-        parametersContent.parameters[parts[0].trim()] = {
+        parameters[parts[0].trim()] = {
           value: value
         }
       }
@@ -227,7 +220,7 @@ export async function parseParametersObject(
     }
   }
 
-  core.debug(`Parameters: ${JSON.stringify(parametersContent)}`)
+  core.debug(`Parameters: ${JSON.stringify(parameters)}`)
 
-  return parametersContent
+  return parameters
 }

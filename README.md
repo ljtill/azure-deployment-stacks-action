@@ -93,7 +93,7 @@ Stamps Action:
 ## Customisation
 
 For a complete list of customisation options, please refer to the
-[Parameters](./docs/PARAMETERS.md) document.
+[Inputs](./docs/INPUTS.md) document.
 
 ## Documentation
 

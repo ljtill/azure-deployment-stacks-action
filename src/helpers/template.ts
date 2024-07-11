@@ -8,11 +8,11 @@ import * as helpers from '../helpers'
 import { Config, Parameters } from '../models'
 
 /**
- * Checks if Bicep is installed and displays its version.
- * @returns A promise that resolves to a boolean indicating if Bicep is installed.
- * @throws An error if Bicep is not installed.
+ * Verifies if Bicep is installed by checking its version.
+ * @returns {Promise<void>} A promise that resolves when the verification is complete.
+ * @throws {Error} If Bicep is not installed.
  */
-export async function checkBicepInstall(): Promise<boolean> {
+export async function verifyBicep(): Promise<void> {
   try {
     const bicepPath = await io.which('bicep', false)
     const execOptions: exec.ExecOptions = {
@@ -28,8 +28,6 @@ export async function checkBicepInstall(): Promise<boolean> {
     }
 
     await exec.exec(bicepPath, ['--version'], execOptions)
-
-    return true
   } catch {
     throw new Error('Bicep is not installed')
   }

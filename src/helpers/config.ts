@@ -11,7 +11,7 @@ import * as helpers from '../helpers'
 /**
  * Retrieves the value of the specified input key from the workflow run context.
  * @param key - The name of the input key.
- * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
+ * @param required - Indicates whether the input is required. If set to true and the input is not provided, an error will be thrown.
  * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
  * @returns The value of the input key.
  * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
@@ -35,19 +35,20 @@ function getInput(
  */
 function setScopeInputs(config: Config): void {
   config.inputs.scope = getInput('scope', true, [
-    'managementGroup',
+    'management-group',
     'subscription',
-    'resourceGroup'
+    'resource-group'
   ])
 
+  // Handle scope properties
   switch (config.inputs.scope) {
-    case 'managementGroup':
+    case 'management-group':
       config.inputs.managementGroupId = getInput('management-group-id', true)
       break
     case 'subscription':
       config.inputs.subscriptionId = getInput('subscription-id', true)
       break
-    case 'resourceGroup':
+    case 'resource-group':
       config.inputs.resourceGroupName = getInput('resource-group-name', true)
       break
   }
@@ -60,21 +61,21 @@ function setScopeInputs(config: Config): void {
 function setModeInputs(config: Config): void {
   // Action on unmanage
   config.inputs.actionOnUnmanage = getInput('action-on-unmanage', true, [
-    'deleteAll',
-    'deleteResources',
-    'detachAll'
+    'delete-all',
+    'delete-resources',
+    'detach-all'
   ])
 
   // Deny settings
   config.inputs.denySettings = getInput('deny-settings', true, [
-    'denyDelete',
-    'denyWriteAndDelete',
+    'deny-delete',
+    'deny-write-and-delete',
     'none'
   ])
 
   // Apply to child scopes
   config.inputs.applyToChildScopes =
-    getInput('applyToChildScopes', false) === 'true'
+    getInput('apply-to-child-scopes', false) === 'true'
 
   // Excluded actions
   const excludedActions = getInput('excluded-actions', false)
@@ -112,7 +113,7 @@ async function setTemplateContext(config: Config): Promise<void> {
 
   if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
     throw new Error(
-      "Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set."
+      "Only one of 'template-file', 'template-spec', or 'template-uri' can be set."
     )
   }
 
@@ -143,7 +144,7 @@ async function setParametersContext(config: Config): Promise<void> {
 
   if (validParametersInputs.length > 1) {
     throw new Error(
-      "Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set."
+      "Only one of 'parameters-file', 'parameters', or 'parameters-uri' can be set."
     )
   }
 
@@ -185,8 +186,7 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  // TODO(ljtill): Optional output artifact
-  core.debug(`Configuration: ${JSON.stringify(config.inputs)}`)
+  core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
 
   return config
 }

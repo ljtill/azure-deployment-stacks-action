@@ -10,7 +10,7 @@ export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
 
-    await helpers.checkBicepInstall()
+    await helpers.verifyBicep()
 
     const config = await helpers.initializeConfig()
 

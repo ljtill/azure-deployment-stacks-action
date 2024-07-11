@@ -33,8 +33,8 @@ efficient and automated deployments.
     location: uksouth
     scope: subscription
     mode: create
-    action-on-unmanage: deleteAll
-    deny-settings: denyWriteAndDelete
+    action-on-unmanage: delete-all
+    deny-settings: deny-write-and-delete
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     template-file: ./src/main.bicep
     parameters-file: ./src/main.bicepparam

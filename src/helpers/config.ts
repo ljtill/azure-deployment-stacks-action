@@ -1,17 +1,18 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import * as helpers from '../helpers'
+import { logger } from '../logger'
 import {
   Config,
   createDefaultConfig,
   TemplateType,
   ParametersType
 } from '../models'
-import * as helpers from '../helpers'
 
 /**
  * Retrieves the value of the specified input key from the workflow run context.
  * @param key - The name of the input key.
- * @param required - Indicates whether the input is required. If set to true and the input is not provided, an error will be thrown.
+ * @param required - Specifies whether the input is required. If set to true and the input is not provided, an error will be thrown.
  * @param validValues - An optional array of valid values for the input. If provided, the retrieved value must be one of the valid values, otherwise an error will be thrown.
  * @returns The value of the input key.
  * @throws Error if the input is required but not provided, or if the retrieved value is not one of the valid values (if specified).
@@ -30,7 +31,7 @@ function getInput(
 }
 
 /**
- * Sets the scope inputs based on the provided configuration.
+ * Sets the scope inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setScopeInputs(config: Config): void {
@@ -55,7 +56,7 @@ function setScopeInputs(config: Config): void {
 }
 
 /**
- * Sets the mode inputs based on the provided configuration.
+ * Sets the mode inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setModeInputs(config: Config): void {
@@ -102,6 +103,8 @@ function setModeInputs(config: Config): void {
 /**
  * Sets the template context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A Promise that resolves when the template context is set.
+ * @throws An error if more than one or none of the template inputs are set.
  */
 async function setTemplateContext(config: Config): Promise<void> {
   const templateFile = getInput('template-file', false)
@@ -133,6 +136,7 @@ async function setTemplateContext(config: Config): Promise<void> {
 /**
  * Sets the parameters context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A promise that resolves when the parameters context is set.
  */
 async function setParametersContext(config: Config): Promise<void> {
   const parametersFile = getInput('parameters-file', false)
@@ -165,8 +169,8 @@ async function setParametersContext(config: Config): Promise<void> {
 }
 
 /**
- * Creates a new configuration object based on workflow inputs.
- * @returns The new configuration object.
+ * Initializes the configuration for the deployment stack action.
+ * @returns A promise that resolves to the initialized configuration.
  */
 export async function initializeConfig(): Promise<Config> {
   const config: Config = createDefaultConfig()
@@ -186,7 +190,7 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
+  logger.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
 
   return config
 }

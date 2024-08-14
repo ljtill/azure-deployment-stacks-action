@@ -47638,8 +47638,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.initializeConfig = initializeConfig;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const models_1 = __nccwpck_require__(2859);
 const helpers = __importStar(__nccwpck_require__(3202));
+const models_1 = __nccwpck_require__(2859);
 /**
  * Retrieves the value of the specified input key from the workflow run context.
  * @param key - The name of the input key.
@@ -47656,47 +47656,48 @@ function getInput(key, required, validValues) {
     return value;
 }
 /**
- * Sets the scope inputs based on the provided configuration.
+ * Sets the scope inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setScopeInputs(config) {
     config.inputs.scope = getInput('scope', true, [
-        'managementGroup',
+        'management-group',
         'subscription',
-        'resourceGroup'
+        'resource-group'
     ]);
+    // Handle scope properties
     switch (config.inputs.scope) {
-        case 'managementGroup':
+        case 'management-group':
             config.inputs.managementGroupId = getInput('management-group-id', true);
             break;
         case 'subscription':
             config.inputs.subscriptionId = getInput('subscription-id', true);
             break;
-        case 'resourceGroup':
+        case 'resource-group':
             config.inputs.resourceGroupName = getInput('resource-group-name', true);
             break;
     }
 }
 /**
- * Sets the mode inputs based on the provided configuration.
+ * Sets the mode inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setModeInputs(config) {
     // Action on unmanage
     config.inputs.actionOnUnmanage = getInput('action-on-unmanage', true, [
-        'deleteAll',
-        'deleteResources',
-        'detachAll'
+        'delete-all',
+        'delete-resources',
+        'detach-all'
     ]);
     // Deny settings
     config.inputs.denySettings = getInput('deny-settings', true, [
-        'denyDelete',
-        'denyWriteAndDelete',
+        'deny-delete',
+        'deny-write-and-delete',
         'none'
     ]);
     // Apply to child scopes
     config.inputs.applyToChildScopes =
-        getInput('applyToChildScopes', false) === 'true';
+        getInput('apply-to-child-scopes', false) === 'true';
     // Excluded actions
     const excludedActions = getInput('excluded-actions', false);
     config.inputs.excludedActions = excludedActions
@@ -47718,6 +47719,8 @@ function setModeInputs(config) {
 /**
  * Sets the template context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A Promise that resolves when the template context is set.
+ * @throws An error if more than one or none of the template inputs are set.
  */
 async function setTemplateContext(config) {
     const templateFile = getInput('template-file', false);
@@ -47726,7 +47729,7 @@ async function setTemplateContext(config) {
     const templateInputs = [templateFile, templateSpec, templateUri];
     const validTemplateInputs = templateInputs.filter(Boolean);
     if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
-        throw new Error("Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set.");
+        throw new Error("Only one of 'template-file', 'template-spec', or 'template-uri' can be set.");
     }
     if (templateFile) {
         config.context.templateType = models_1.TemplateType.File;
@@ -47745,6 +47748,7 @@ async function setTemplateContext(config) {
 /**
  * Sets the parameters context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A promise that resolves when the parameters context is set.
  */
 async function setParametersContext(config) {
     const parametersFile = getInput('parameters-file', false);
@@ -47753,7 +47757,7 @@ async function setParametersContext(config) {
     const parametersInputs = [parametersFile, parameters, parametersUri];
     const validParametersInputs = parametersInputs.filter(Boolean);
     if (validParametersInputs.length > 1) {
-        throw new Error("Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set.");
+        throw new Error("Only one of 'parameters-file', 'parameters', or 'parameters-uri' can be set.");
     }
     if (parametersFile) {
         config.context.parametersType = models_1.ParametersType.File;
@@ -47774,8 +47778,8 @@ async function setParametersContext(config) {
     }
 }
 /**
- * Creates a new configuration object based on workflow inputs.
- * @returns The new configuration object.
+ * Initializes the configuration for the deployment stack action.
+ * @returns A promise that resolves to the initialized configuration.
  */
 async function initializeConfig() {
     const config = (0, models_1.createDefaultConfig)();
@@ -47791,8 +47795,7 @@ async function initializeConfig() {
         await setTemplateContext(config);
         await setParametersContext(config);
     }
-    // TODO(ljtill): Optional output artifact
-    core.debug(`Configuration: ${JSON.stringify(config.inputs)}`);
+    core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`);
     return config;
 }
 
@@ -47822,7 +47825,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(6165), exports);
 __exportStar(__nccwpck_require__(9167), exports);
 __exportStar(__nccwpck_require__(2552), exports);
-__exportStar(__nccwpck_require__(7134), exports);
+__exportStar(__nccwpck_require__(8122), exports);
 
 
 /***/ }),
@@ -47832,7 +47835,6 @@ __exportStar(__nccwpck_require__(7134), exports);
 
 "use strict";
 
-/* eslint-disable import/named */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -47858,16 +47860,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.newCredential = newCredential;
-exports.logResult = logResult;
-exports.logValidateResult = logValidateResult;
+exports.logDeploymentStackResult = logDeploymentStackResult;
+exports.logDeploymentStackValidateResult = logDeploymentStackValidateResult;
 exports.prepareUnmanageProperties = prepareUnmanageProperties;
 exports.prepareDenySettings = prepareDenySettings;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
 /**
- * Checks if the provided result is an instance of 'DeploymentStack'.
+ * Checks if the given result is an instance of DeploymentStack.
  * @param result - The result to check.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
+ * @returns True if the result is an instance of DeploymentStack, false otherwise.
  */
 function instanceOfDeploymentStack(result) {
     return (!!result &&
@@ -47880,9 +47882,9 @@ function instanceOfDeploymentStack(result) {
         'properties' in result);
 }
 /**
- * Checks if the provided result is an instance of `DeploymentStackValidateResult`.
+ * Checks if the provided result is an instance of DeploymentStackValidateResult.
  * @param result - The result to be checked.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStackValidateResult.
+ * @returns True if the result is an instance of DeploymentStackValidateResult, false otherwise.
  */
 function instanceOfDeploymentStackValidateResult(result) {
     return (!!result &&
@@ -47899,10 +47901,10 @@ function newCredential() {
     return new identity_1.DefaultAzureCredential();
 }
 /**
- * Parses the result of a deployment stack operation and logs the deployed resources.
- * @param result - The result of the deployment stack operation.
+ * Logs the deployment stack result.
+ * @param result - The deployment stack result.
  */
-function logResult(result) {
+function logDeploymentStackResult(result) {
     if (result === undefined) {
         core.warning('No result returned from operation');
         return;
@@ -47936,15 +47938,18 @@ function logResult(result) {
         core.debug(`Payload: ${JSON.stringify(result)}`);
     }
 }
-function logValidateResult(validateResult) {
+/**
+ * Logs the result of validating a deployment stack.
+ * @param validateResult - The result of the validation operation.
+ */
+function logDeploymentStackValidateResult(validateResult) {
     if (validateResult === undefined) {
         core.warning('No result returned from operation');
         return;
     }
     if (instanceOfDeploymentStackValidateResult(validateResult)) {
         if (validateResult.error?.code) {
-            core.setFailed(`Validation failed with error: ${validateResult.error.code}`);
-            return;
+            throw new Error(`Validation failed with error: ${validateResult.error.code}`);
         }
         core.startGroup('Resources');
         for (const item of validateResult.properties?.validatedResources || []) {
@@ -47957,10 +47962,10 @@ function logValidateResult(validateResult) {
     }
 }
 /**
- * Prepares the properties for unmanaging resources based on the specified value.
- * @param value - The value indicating the action to be performed on unmanaging resources.
- * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
- * @throws {Error} If the specified value is invalid.
+ * Prepares the unmanage properties based on the provided value.
+ * @param value - The value indicating the action to be performed on unmanage.
+ * @returns The ActionOnUnmanage object with the corresponding properties set.
+ * @throws Error if the provided value is invalid.
  */
 function prepareUnmanageProperties(value) {
     switch (value) {
@@ -48032,7 +48037,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkBicepInstall = checkBicepInstall;
+exports.logBicepVersion = logBicepVersion;
 exports.parseTemplateFile = parseTemplateFile;
 exports.parseParametersFile = parseParametersFile;
 exports.parseParametersObject = parseParametersObject;
@@ -48044,38 +48049,46 @@ const exec = __importStar(__nccwpck_require__(1514));
 const io = __importStar(__nccwpck_require__(7436));
 const helpers = __importStar(__nccwpck_require__(3202));
 /**
- * Checks if Bicep is installed and displays its version.
- * @returns A promise that resolves to a boolean indicating if Bicep is installed.
- * @throws An error if Bicep is not installed.
+ * Retrieves the path of the Bicep executable.
+ * @returns A promise that resolves to the path of the Bicep executable.
  */
-async function checkBicepInstall() {
+async function getBicepPath() {
+    let path;
     try {
-        const bicepPath = await io.which('bicep', false);
-        const execOptions = {
-            listeners: {
-                stdout: (data) => {
-                    core.debug(data.toString().trim());
-                },
-                stderr: (data) => {
-                    core.error(data.toString().trim());
-                }
-            },
-            silent: true
-        };
-        await exec.exec(bicepPath, ['--version'], execOptions);
-        return true;
+        path = await io.which('bicep', true);
     }
     catch {
-        throw new Error('Bicep is not installed');
+        throw new Error('Bicep CLI is not installed');
     }
+    return path;
 }
 /**
- * Builds a Bicep file and returns the path of the output file.
- * @param filePath The path of the Bicep file to build.
- * @returns A promise that resolves to the path of the output file.
+ * Verifies if Bicep is installed by checking its version.
+ * @returns {Promise<void>} A promise that resolves when the verification is complete.
+ * @throws {Error} If Bicep is not installed.
+ */
+async function logBicepVersion() {
+    let bicepPath = await getBicepPath();
+    const execOptions = {
+        listeners: {
+            stdout: (data) => {
+                core.debug(data.toString().trim());
+            },
+            stderr: (data) => {
+                core.error(data.toString().trim());
+            }
+        },
+        silent: true
+    };
+    await exec.exec(bicepPath, ['--version'], execOptions);
+}
+/**
+ * Builds a Bicep file by invoking the Bicep compiler.
+ * @param filePath The path to the Bicep file.
+ * @returns A Promise that resolves to the path of the compiled Bicep file.
  */
 async function buildBicepFile(filePath) {
-    const bicepPath = await io.which('bicep', true);
+    const bicepPath = await getBicepPath();
     const outputPath = `${os.tmpdir()}/main.json`;
     const execOptions = {
         listeners: {
@@ -48088,14 +48101,14 @@ async function buildBicepFile(filePath) {
         },
         silent: true
     };
-    core.debug(`bicep build --outfile ${outputPath}`);
+    core.debug(`Command - bicep build --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
 /**
  * Builds a Bicep parameters file for the given Bicep file path.
- * @param filePath The path to the Bicep file.
- * @returns A Promise that resolves to the path of the generated parameters file.
+ * @param filePath - The path to the Bicep file.
+ * @returns A promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath) {
     const bicepPath = await io.which('bicep', true);
@@ -48111,15 +48124,15 @@ async function buildBicepParametersFile(filePath) {
         },
         silent: true
     };
-    core.debug(`bicep build-params --outfile ${outputPath}`);
+    core.debug(`Command - bicep build-params --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
 /**
- * Parses the template file and returns the parsed content as a JSON object.
- * @param config - The configuration object containing the input parameters.
- * @returns A Promise that resolves to the parsed template content.
- * @throws An error if the template file path is invalid.
+ * Parses the template file based on the provided configuration.
+ * @param config - The configuration object containing the template file path.
+ * @returns A promise that resolves to a record representing the parsed template.
+ * @throws An error if the file type is unsupported or the file path is invalid.
  */
 async function parseTemplateFile(config) {
     let filePath = config.inputs.templateFile;
@@ -48141,10 +48154,10 @@ async function parseTemplateFile(config) {
     return JSON.parse(fs.readFileSync(filePath).toString());
 }
 /**
- * Parses the parameters file and returns the parsed content as a JSON object.
- * @param config - The configuration object containing the inputs.
- * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
- * @throws An error if the parameters file path is invalid.
+ * Parses the parameters file based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A promise that resolves to the parsed parameters.
+ * @throws An error if the file type is unsupported, the file path is invalid, or the file content is invalid.
  */
 async function parseParametersFile(config) {
     let filePath = config.inputs.parametersFile;
@@ -48171,15 +48184,12 @@ async function parseParametersFile(config) {
     }
 }
 /**
- * Parses the parameters object from the config and returns a ParametersContent object.
- * @param config - The config object containing the parameters.
- * @returns A Promise that resolves to a ParametersContent object.
- * @throws Error if the parameters object is invalid.
- *
- * TODO(ljtill): Support Reference (Key Vault) object
+ * Parses the parameters object from the config and returns a Promise of Parameters.
+ * @param config - The config object containing the inputs and parameters.
+ * @returns A Promise of Parameters object.
+ * @throws Error if the parameters object is invalid or unable to parse.
  */
 async function parseParametersObject(config) {
-    // TODO(ljtill): Support bicepparams object
     const inputsParameters = config.inputs.parameters;
     let parameters = {};
     if (helpers.isJson(inputsParameters)) {
@@ -48238,7 +48248,7 @@ async function parseParametersObject(config) {
 
 /***/ }),
 
-/***/ 7134:
+/***/ 8122:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -48261,9 +48271,19 @@ function isJson(input) {
     }
     return true;
 }
+/**
+ * Checks if a given value is numeric.
+ * @param value - The value to check.
+ * @returns `true` if the value is numeric, `false` otherwise.
+ */
 function isNumeric(value) {
     return /^-?\d+$/.test(value);
 }
+/**
+ * Checks if a given value is a boolean.
+ * @param value - The value to check.
+ * @returns True if the value is a boolean, false otherwise.
+ */
 function isBoolean(value) {
     return /^(true|false)$/i.test(value);
 }
@@ -48311,7 +48331,7 @@ const helpers = __importStar(__nccwpck_require__(3202));
 async function run() {
     try {
         core.debug(`Starting action`);
-        await helpers.checkBicepInstall();
+        await helpers.logBicepVersion();
         const config = await helpers.initializeConfig();
         switch (config.inputs.mode) {
             case 'create':
@@ -48341,12 +48361,8 @@ async function run() {
 
 "use strict";
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createDefaultConfig = createDefaultConfig;
-/**
- * Default inputs for the deployment stack.
- */
 const defaultInputs = {
     name: '',
     description: '',
@@ -48427,21 +48443,16 @@ __exportStar(__nccwpck_require__(2747), exports);
 
 "use strict";
 
-/* eslint-disable no-shadow */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ParametersType = exports.TemplateType = void 0;
-/**
- * Represents the type of the template.
- */
+// eslint-disable-next-line no-shadow
 var TemplateType;
 (function (TemplateType) {
     TemplateType[TemplateType["File"] = 0] = "File";
     TemplateType[TemplateType["Spec"] = 1] = "Spec";
     TemplateType[TemplateType["Uri"] = 2] = "Uri";
 })(TemplateType || (exports.TemplateType = TemplateType = {}));
-/**
- * Represents the type of the parameters.
- */
+// eslint-disable-next-line no-shadow
 var ParametersType;
 (function (ParametersType) {
     ParametersType[ParametersType["Object"] = 0] = "Object";
@@ -48483,7 +48494,6 @@ __exportStar(__nccwpck_require__(9438), exports);
 
 "use strict";
 
-/* eslint-disable import/named */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -48508,7 +48518,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newDeploymentStack = newDeploymentStack;
 exports.createDeploymentStack = createDeploymentStack;
 exports.deleteDeploymentStack = deleteDeploymentStack;
 exports.validateDeploymentStack = validateDeploymentStack;
@@ -48519,9 +48528,9 @@ const models_1 = __nccwpck_require__(2859);
 /**
  * Creates a new deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
- * @returns A promise that resolves to the created DeploymentStack.
+ * @returns A DeploymentStack object representing the new deployment stack.
  */
-async function newDeploymentStack(config) {
+function newDeploymentStack(config) {
     const properties = {
         description: config.inputs.description,
         actionOnUnmanage: helpers.prepareUnmanageProperties(config.inputs.actionOnUnmanage),
@@ -48568,10 +48577,10 @@ async function newDeploymentStack(config) {
 }
 /**
  * Retrieves the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @param client - The DeploymentStacksClient instance.
- * @returns A Promise that resolves to the DeploymentStack object.
- * @throws An error if the deployment stack is not found.
+ * @param config - The configuration object containing the inputs for retrieving the deployment stack.
+ * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
+ * @returns A Promise that resolves to the retrieved DeploymentStack.
+ * @throws An Error if the deployment stack is not found.
  */
 async function getDeploymentStack(config, client) {
     let deploymentStack;
@@ -48600,7 +48609,7 @@ async function getDeploymentStack(config, client) {
 async function createDeploymentStack(config) {
     core.info(`Creating deployment stack`);
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
-    const deploymentStack = await newDeploymentStack(config);
+    const deploymentStack = newDeploymentStack(config);
     const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
@@ -48621,13 +48630,13 @@ async function createDeploymentStack(config) {
                 : client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
             break;
     }
-    helpers.logResult(await operationPromise);
+    helpers.logDeploymentStackResult(await operationPromise);
     core.info(`Created deployment stack`);
 }
 /**
  * Deletes a deployment stack based on the provided configuration.
- * @param config - The configuration object containing the necessary parameters.
- * @returns A Promise that resolves when the deletion operation is complete.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the deployment stack is deleted.
  */
 async function deleteDeploymentStack(config) {
     core.info(`Deleting deployment stack`);
@@ -48658,17 +48667,17 @@ async function deleteDeploymentStack(config) {
             break;
     }
     await operationPromise;
-    core.debug(`Deleted deployment stack`);
+    core.info(`Deleted deployment stack`);
 }
 /**
  * Validates the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @returns A Promise that resolves when the validation is complete.
+ * @param config - The configuration object containing the inputs for the deployment stack validation.
+ * @returns A Promise that resolves to void.
  */
 async function validateDeploymentStack(config) {
-    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
     core.info(`Validating deployment stack`);
-    const deploymentStack = await newDeploymentStack(config);
+    const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
+    const deploymentStack = newDeploymentStack(config);
     const optionalParams = {};
     let operationPromise;
     switch (config.inputs.scope) {
@@ -48689,7 +48698,7 @@ async function validateDeploymentStack(config) {
                 : client.deploymentStacks.beginValidateStackAtResourceGroup(config.inputs.resourceGroupName, config.inputs.name, deploymentStack, optionalParams);
             break;
     }
-    helpers.logValidateResult(await operationPromise);
+    helpers.logDeploymentStackValidateResult(await operationPromise);
     core.info(`Validated deployment stack`);
 }
 

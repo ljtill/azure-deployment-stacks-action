@@ -1,12 +1,13 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+
+import * as helpers from '../helpers'
 import {
   Config,
   createDefaultConfig,
   TemplateType,
   ParametersType
 } from '../models'
-import * as helpers from '../helpers'
 
 /**
  * Retrieves the value of the specified input key from the workflow run context.
@@ -30,51 +31,52 @@ function getInput(
 }
 
 /**
- * Sets the scope inputs based on the provided configuration.
+ * Sets the scope inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setScopeInputs(config: Config): void {
   config.inputs.scope = getInput('scope', true, [
-    'managementGroup',
+    'management-group',
     'subscription',
-    'resourceGroup'
+    'resource-group'
   ])
 
+  // Handle scope properties
   switch (config.inputs.scope) {
-    case 'managementGroup':
+    case 'management-group':
       config.inputs.managementGroupId = getInput('management-group-id', true)
       break
     case 'subscription':
       config.inputs.subscriptionId = getInput('subscription-id', true)
       break
-    case 'resourceGroup':
+    case 'resource-group':
       config.inputs.resourceGroupName = getInput('resource-group-name', true)
       break
   }
 }
 
 /**
- * Sets the mode inputs based on the provided configuration.
+ * Sets the mode inputs in the configuration object.
  * @param config - The configuration object.
  */
 function setModeInputs(config: Config): void {
   // Action on unmanage
   config.inputs.actionOnUnmanage = getInput('action-on-unmanage', true, [
-    'deleteAll',
-    'deleteResources',
-    'detachAll'
+    'delete-all',
+    'delete-resources',
+    'detach-all'
   ])
 
   // Deny settings
   config.inputs.denySettings = getInput('deny-settings', true, [
-    'denyDelete',
-    'denyWriteAndDelete',
+    'deny-delete',
+    'deny-write-and-delete',
     'none'
   ])
 
   // Apply to child scopes
   config.inputs.applyToChildScopes =
-    getInput('applyToChildScopes', false) === 'true'
+    getInput('apply-to-child-scopes', false) === 'true'
 
   // Excluded actions
   const excludedActions = getInput('excluded-actions', false)
@@ -101,6 +103,8 @@ function setModeInputs(config: Config): void {
 /**
  * Sets the template context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A Promise that resolves when the template context is set.
+ * @throws An error if more than one or none of the template inputs are set.
  */
 async function setTemplateContext(config: Config): Promise<void> {
   const templateFile = getInput('template-file', false)
@@ -112,7 +116,7 @@ async function setTemplateContext(config: Config): Promise<void> {
 
   if (validTemplateInputs.length > 1 || validTemplateInputs.length === 0) {
     throw new Error(
-      "Only one of 'templateFile', 'templateSpec', or 'templateUri' can be set."
+      "Only one of 'template-file', 'template-spec', or 'template-uri' can be set."
     )
   }
 
@@ -132,6 +136,7 @@ async function setTemplateContext(config: Config): Promise<void> {
 /**
  * Sets the parameters context based on the provided configuration.
  * @param config - The configuration object.
+ * @returns A promise that resolves when the parameters context is set.
  */
 async function setParametersContext(config: Config): Promise<void> {
   const parametersFile = getInput('parameters-file', false)
@@ -143,7 +148,7 @@ async function setParametersContext(config: Config): Promise<void> {
 
   if (validParametersInputs.length > 1) {
     throw new Error(
-      "Only one of 'parametersFile', 'parameters', or 'parametersUri' can be set."
+      "Only one of 'parameters-file', 'parameters', or 'parameters-uri' can be set."
     )
   }
 
@@ -164,8 +169,8 @@ async function setParametersContext(config: Config): Promise<void> {
 }
 
 /**
- * Creates a new configuration object based on workflow inputs.
- * @returns The new configuration object.
+ * Initializes the configuration for the deployment stack action.
+ * @returns A promise that resolves to the initialized configuration.
  */
 export async function initializeConfig(): Promise<Config> {
   const config: Config = createDefaultConfig()
@@ -185,8 +190,7 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  // TODO(ljtill): Optional output artifact
-  core.debug(`Configuration: ${JSON.stringify(config.inputs)}`)
+  core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
 
   return config
 }

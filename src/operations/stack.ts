@@ -1,22 +1,19 @@
-/* eslint-disable import/named */
-
 import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
   DeploymentStack,
   DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
+
 import * as helpers from '../helpers'
 import { Config, TemplateType, ParametersType } from '../models'
 
 /**
  * Creates a new deployment stack based on the provided configuration.
  * @param config - The configuration object for the deployment stack.
- * @returns A promise that resolves to the created DeploymentStack.
+ * @returns A DeploymentStack object representing the new deployment stack.
  */
-export async function newDeploymentStack(
-  config: Config
-): Promise<DeploymentStack> {
+function newDeploymentStack(config: Config): DeploymentStack {
   const properties: DeploymentStackProperties = {
     description: config.inputs.description,
     actionOnUnmanage: helpers.prepareUnmanageProperties(
@@ -69,10 +66,10 @@ export async function newDeploymentStack(
 
 /**
  * Retrieves the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @param client - The DeploymentStacksClient instance.
- * @returns A Promise that resolves to the DeploymentStack object.
- * @throws An error if the deployment stack is not found.
+ * @param config - The configuration object containing the inputs for retrieving the deployment stack.
+ * @param client - The DeploymentStacksClient used to interact with the deployment stacks.
+ * @returns A Promise that resolves to the retrieved DeploymentStack.
+ * @throws An Error if the deployment stack is not found.
  */
 async function getDeploymentStack(
   config: Config,
@@ -119,7 +116,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
   core.info(`Creating deployment stack`)
 
   const client = new DeploymentStacksClient(helpers.newCredential())
-  const deploymentStack = await newDeploymentStack(config)
+  const deploymentStack = newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -173,15 +170,15 @@ export async function createDeploymentStack(config: Config): Promise<void> {
       break
   }
 
-  helpers.logResult(await operationPromise)
+  helpers.logDeploymentStackResult(await operationPromise)
 
   core.info(`Created deployment stack`)
 }
 
 /**
  * Deletes a deployment stack based on the provided configuration.
- * @param config - The configuration object containing the necessary parameters.
- * @returns A Promise that resolves when the deletion operation is complete.
+ * @param config - The configuration object.
+ * @returns A Promise that resolves when the deployment stack is deleted.
  */
 export async function deleteDeploymentStack(config: Config): Promise<void> {
   core.info(`Deleting deployment stack`)
@@ -244,20 +241,19 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
 
   await operationPromise
 
-  core.debug(`Deleted deployment stack`)
+  core.info(`Deleted deployment stack`)
 }
 
 /**
  * Validates the deployment stack based on the provided configuration.
- * @param config - The configuration object.
- * @returns A Promise that resolves when the validation is complete.
+ * @param config - The configuration object containing the inputs for the deployment stack validation.
+ * @returns A Promise that resolves to void.
  */
 export async function validateDeploymentStack(config: Config): Promise<void> {
-  const client = new DeploymentStacksClient(helpers.newCredential())
-
   core.info(`Validating deployment stack`)
 
-  const deploymentStack = await newDeploymentStack(config)
+  const client = new DeploymentStacksClient(helpers.newCredential())
+  const deploymentStack = newDeploymentStack(config)
   const optionalParams = {}
 
   let operationPromise
@@ -311,7 +307,7 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
       break
   }
 
-  helpers.logValidateResult(await operationPromise)
+  helpers.logDeploymentStackValidateResult(await operationPromise)
 
   core.info(`Validated deployment stack`)
 }

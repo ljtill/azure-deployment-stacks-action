@@ -1,23 +1,5 @@
-/* eslint-disable no-shadow */
-
-/**
- * Represents the template object.
- */
 export type Template = Record<string, unknown>
 
-/**
- * Represents the type of the template.
- */
-
-export enum TemplateType {
-  File,
-  Spec,
-  Uri
-}
-
-/**
- * Represents the parameters object.
- */
 type Reference = {
   keyVault: {
     id: string
@@ -30,9 +12,14 @@ export type Parameters = {
   }
 }
 
-/**
- * Represents the type of the parameters.
- */
+// eslint-disable-next-line no-shadow
+export enum TemplateType {
+  File,
+  Spec,
+  Uri
+}
+
+// eslint-disable-next-line no-shadow
 export enum ParametersType {
   Object,
   File,

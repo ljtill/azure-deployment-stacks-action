@@ -1,19 +1,11 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 import { Template, Parameters, ParametersType, TemplateType } from './template'
 
-/**
- * Represents the configuration object.
- */
 export interface Config {
   inputs: Inputs
   context: Context
   outputs: Outputs
 }
 
-/**
- * Represents the inputs for the deployment stack action.
- */
 interface Inputs {
   name: string
   description: string
@@ -38,9 +30,6 @@ interface Inputs {
   wait: boolean
 }
 
-/**
- * Represents the context for the deployment stacks action.
- */
 interface Context {
   templateType: TemplateType | undefined
   template: Template
@@ -51,14 +40,9 @@ interface Context {
   branch: string
 }
 
-/**
- * Represents the outputs of a deployment.
- */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Outputs {}
 
-/**
- * Default inputs for the deployment stack.
- */
 const defaultInputs: Inputs = {
   name: '',
   description: '',
@@ -82,6 +66,7 @@ const defaultInputs: Inputs = {
   bypassStackOutOfSyncError: false,
   wait: false
 }
+
 const defaultContext: Context = {
   templateType: undefined,
   template: {},
@@ -91,6 +76,7 @@ const defaultContext: Context = {
   commit: '',
   branch: ''
 }
+
 const defaultOutputs: Outputs = {}
 
 /**

@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+
 import * as operations from './operations'
 import * as helpers from './helpers'
 
@@ -10,7 +11,7 @@ export async function run(): Promise<void> {
   try {
     core.debug(`Starting action`)
 
-    await helpers.checkBicepInstall()
+    await helpers.logBicepVersion()
 
     const config = await helpers.initializeConfig()
 

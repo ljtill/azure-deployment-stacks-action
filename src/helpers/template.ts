@@ -4,44 +4,56 @@ import * as os from 'os'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
+
 import * as helpers from '../helpers'
 import { Config, Parameters } from '../models'
 
 /**
- * Checks if Bicep is installed and displays its version.
- * @returns A promise that resolves to a boolean indicating if Bicep is installed.
- * @throws An error if Bicep is not installed.
+ * Retrieves the path of the Bicep executable.
+ * @returns A promise that resolves to the path of the Bicep executable.
  */
-export async function checkBicepInstall(): Promise<boolean> {
+async function getBicepPath(): Promise<string> {
+  let path: string
+
   try {
-    const bicepPath = await io.which('bicep', false)
-    const execOptions: exec.ExecOptions = {
-      listeners: {
-        stdout: (data: Buffer) => {
-          core.debug(data.toString().trim())
-        },
-        stderr: (data: Buffer) => {
-          core.error(data.toString().trim())
-        }
-      },
-      silent: true
-    }
-
-    await exec.exec(bicepPath, ['--version'], execOptions)
-
-    return true
+    path = await io.which('bicep', true)
   } catch {
-    throw new Error('Bicep is not installed')
+    throw new Error('Bicep CLI is not installed')
   }
+
+  return path
 }
 
 /**
- * Builds a Bicep file and returns the path of the output file.
- * @param filePath The path of the Bicep file to build.
- * @returns A promise that resolves to the path of the output file.
+ * Verifies if Bicep is installed by checking its version.
+ * @returns {Promise<void>} A promise that resolves when the verification is complete.
+ * @throws {Error} If Bicep is not installed.
+ */
+export async function logBicepVersion(): Promise<void> {
+  let bicepPath = await getBicepPath()
+
+  const execOptions: exec.ExecOptions = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString().trim())
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString().trim())
+      }
+    },
+    silent: true
+  }
+
+  await exec.exec(bicepPath, ['--version'], execOptions)
+}
+
+/**
+ * Builds a Bicep file by invoking the Bicep compiler.
+ * @param filePath The path to the Bicep file.
+ * @returns A Promise that resolves to the path of the compiled Bicep file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
+  const bicepPath = await getBicepPath()
   const outputPath = `${os.tmpdir()}/main.json`
 
   const execOptions: exec.ExecOptions = {
@@ -56,7 +68,7 @@ async function buildBicepFile(filePath: string): Promise<string> {
     silent: true
   }
 
-  core.debug(`bicep build --outfile ${outputPath}`)
+  core.debug(`Command - bicep build --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build', filePath, '--outfile', outputPath],
@@ -68,8 +80,8 @@ async function buildBicepFile(filePath: string): Promise<string> {
 
 /**
  * Builds a Bicep parameters file for the given Bicep file path.
- * @param filePath The path to the Bicep file.
- * @returns A Promise that resolves to the path of the generated parameters file.
+ * @param filePath - The path to the Bicep file.
+ * @returns A promise that resolves to the path of the generated parameters file.
  */
 async function buildBicepParametersFile(filePath: string): Promise<string> {
   const bicepPath = await io.which('bicep', true)
@@ -88,7 +100,7 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
     silent: true
   }
 
-  core.debug(`bicep build-params --outfile ${outputPath}`)
+  core.debug(`Command - bicep build-params --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build-params', filePath, '--outfile', outputPath],
@@ -99,10 +111,10 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
 }
 
 /**
- * Parses the template file and returns the parsed content as a JSON object.
- * @param config - The configuration object containing the input parameters.
- * @returns A Promise that resolves to the parsed template content.
- * @throws An error if the template file path is invalid.
+ * Parses the template file based on the provided configuration.
+ * @param config - The configuration object containing the template file path.
+ * @returns A promise that resolves to a record representing the parsed template.
+ * @throws An error if the file type is unsupported or the file path is invalid.
  */
 export async function parseTemplateFile(
   config: Config
@@ -126,10 +138,10 @@ export async function parseTemplateFile(
 }
 
 /**
- * Parses the parameters file and returns the parsed content as a JSON object.
- * @param config - The configuration object containing the inputs.
- * @returns A Promise that resolves to a JSON object representing the parsed parameters file.
- * @throws An error if the parameters file path is invalid.
+ * Parses the parameters file based on the provided configuration.
+ * @param config - The configuration object.
+ * @returns A promise that resolves to the parsed parameters.
+ * @throws An error if the file type is unsupported, the file path is invalid, or the file content is invalid.
  */
 export async function parseParametersFile(config: Config): Promise<Parameters> {
   let filePath = config.inputs.parametersFile
@@ -155,17 +167,14 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
 }
 
 /**
- * Parses the parameters object from the config and returns a ParametersContent object.
- * @param config - The config object containing the parameters.
- * @returns A Promise that resolves to a ParametersContent object.
- * @throws Error if the parameters object is invalid.
- *
- * TODO(ljtill): Support Reference (Key Vault) object
+ * Parses the parameters object from the config and returns a Promise of Parameters.
+ * @param config - The config object containing the inputs and parameters.
+ * @returns A Promise of Parameters object.
+ * @throws Error if the parameters object is invalid or unable to parse.
  */
 export async function parseParametersObject(
   config: Config
 ): Promise<Parameters> {
-  // TODO(ljtill): Support bicepparams object
   const inputsParameters = config.inputs.parameters
 
   let parameters: Parameters = {}

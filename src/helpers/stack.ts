@@ -1,5 +1,3 @@
-/* eslint-disable import/named */
-
 import * as core from '@actions/core'
 import { OperationState, SimplePollerLike } from '@azure/core-lro'
 import { DefaultAzureCredential } from '@azure/identity'
@@ -7,23 +5,14 @@ import {
   DeploymentStack,
   DeploymentStackValidateResult
 } from '@azure/arm-resourcesdeploymentstacks'
+
 import { Config } from '../models'
 
-/**
- * Represents the result of a deployment stack operation.
- * It can be either a DeploymentStack object, a SimplePollerLike object,
- * or undefined if the result is not available.
- */
 type Result =
   | DeploymentStack
   | SimplePollerLike<OperationState<DeploymentStack>, DeploymentStack>
   | undefined
 
-/**
- * Represents the result of a deployment stack validation operation.
- * It can be either a DeploymentStackValidateResult object, a SimplePollerLike object,
- * or undefined if the result is not available.
- */
 type ValidateResult =
   | DeploymentStackValidateResult
   | SimplePollerLike<
@@ -33,9 +22,9 @@ type ValidateResult =
   | undefined
 
 /**
- * Checks if the provided result is an instance of 'DeploymentStack'.
+ * Checks if the given result is an instance of DeploymentStack.
  * @param result - The result to check.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStack.
+ * @returns True if the result is an instance of DeploymentStack, false otherwise.
  */
 function instanceOfDeploymentStack(result: Result): result is DeploymentStack {
   return (
@@ -51,9 +40,9 @@ function instanceOfDeploymentStack(result: Result): result is DeploymentStack {
 }
 
 /**
- * Checks if the provided result is an instance of `DeploymentStackValidateResult`.
+ * Checks if the provided result is an instance of DeploymentStackValidateResult.
  * @param result - The result to be checked.
- * @returns A boolean value indicating whether the object is an instance of DeploymentStackValidateResult.
+ * @returns True if the result is an instance of DeploymentStackValidateResult, false otherwise.
  */
 function instanceOfDeploymentStackValidateResult(
   result: ValidateResult
@@ -76,10 +65,10 @@ export function newCredential(): DefaultAzureCredential {
 }
 
 /**
- * Parses the result of a deployment stack operation and logs the deployed resources.
- * @param result - The result of the deployment stack operation.
+ * Logs the deployment stack result.
+ * @param result - The deployment stack result.
  */
-export function logResult(result: Result): void {
+export function logDeploymentStackResult(result: Result): void {
   if (result === undefined) {
     core.warning('No result returned from operation')
     return
@@ -117,7 +106,13 @@ export function logResult(result: Result): void {
   }
 }
 
-export function logValidateResult(validateResult: ValidateResult): void {
+/**
+ * Logs the result of validating a deployment stack.
+ * @param validateResult - The result of the validation operation.
+ */
+export function logDeploymentStackValidateResult(
+  validateResult: ValidateResult
+): void {
   if (validateResult === undefined) {
     core.warning('No result returned from operation')
     return
@@ -125,11 +120,9 @@ export function logValidateResult(validateResult: ValidateResult): void {
 
   if (instanceOfDeploymentStackValidateResult(validateResult)) {
     if (validateResult.error?.code) {
-      core.setFailed(
+      throw new Error(
         `Validation failed with error: ${validateResult.error.code}`
       )
-
-      return
     }
 
     core.startGroup('Resources')
@@ -142,9 +135,6 @@ export function logValidateResult(validateResult: ValidateResult): void {
   }
 }
 
-/**
- * Represents the configuration for performing actions on unmanaged resources.
- */
 interface ActionOnUnmanage {
   managementGroups: string
   resourceGroups: string
@@ -152,10 +142,10 @@ interface ActionOnUnmanage {
 }
 
 /**
- * Prepares the properties for unmanaging resources based on the specified value.
- * @param value - The value indicating the action to be performed on unmanaging resources.
- * @returns The ActionOnUnmanage object containing the properties for unmanaging resources.
- * @throws {Error} If the specified value is invalid.
+ * Prepares the unmanage properties based on the provided value.
+ * @param value - The value indicating the action to be performed on unmanage.
+ * @returns The ActionOnUnmanage object with the corresponding properties set.
+ * @throws Error if the provided value is invalid.
  */
 export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   switch (value) {
@@ -182,9 +172,6 @@ export function prepareUnmanageProperties(value: string): ActionOnUnmanage {
   }
 }
 
-/**
- * Represents the settings for denying access to a resource.
- */
 interface DenySettings {
   mode: string
   applyToChildScopes: boolean

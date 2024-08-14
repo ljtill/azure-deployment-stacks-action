@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+
 import * as helpers from '../helpers'
-import { logger } from '../logger'
 import {
   Config,
   createDefaultConfig,
@@ -190,7 +190,7 @@ export async function initializeConfig(): Promise<Config> {
     await setParametersContext(config)
   }
 
-  logger.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
+  core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`)
 
   return config
 }

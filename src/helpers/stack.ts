@@ -5,7 +5,7 @@ import {
   DeploymentStack,
   DeploymentStackValidateResult
 } from '@azure/arm-resourcesdeploymentstacks'
-import { logger } from '../logger'
+
 import { Config } from '../models'
 
 type Result =
@@ -77,32 +77,32 @@ export function logDeploymentStackResult(result: Result): void {
   if (instanceOfDeploymentStack(result)) {
     core.startGroup('Resources')
     for (const item of result.properties?.resources || []) {
-      logger.info(`- Id:          ${item.id}`)
-      logger.info(`  Status:      ${item.status}`)
-      logger.info(`  Deny Status: ${item.denyStatus}`)
+      core.info(`- Id:          ${item.id}`)
+      core.info(`  Status:      ${item.status}`)
+      core.info(`  Deny Status: ${item.denyStatus}`)
     }
     core.endGroup()
 
     core.startGroup('Deleted Resources')
     for (const item of result.properties?.deletedResources || []) {
-      logger.info(`- Id: ${item.id}`)
+      core.info(`- Id: ${item.id}`)
     }
     core.endGroup()
 
     core.startGroup('Detached Resources')
     for (const item of result.properties?.detachedResources || []) {
-      logger.info(`- Id: ${item.id}`)
+      core.info(`- Id: ${item.id}`)
     }
     core.endGroup()
 
     core.startGroup('Failed Resources')
     for (const item of result.properties?.failedResources || []) {
-      logger.info(`- Id:    ${item.id}`)
-      logger.info(`  Error: ${item.error?.code}`)
+      core.info(`- Id:    ${item.id}`)
+      core.info(`  Error: ${item.error?.code}`)
     }
     core.endGroup()
   } else {
-    logger.debug(`Payload: ${JSON.stringify(result)}`)
+    core.debug(`Payload: ${JSON.stringify(result)}`)
   }
 }
 
@@ -114,7 +114,7 @@ export function logDeploymentStackValidateResult(
   validateResult: ValidateResult
 ): void {
   if (validateResult === undefined) {
-    logger.warning('No result returned from operation')
+    core.warning('No result returned from operation')
     return
   }
 
@@ -127,11 +127,11 @@ export function logDeploymentStackValidateResult(
 
     core.startGroup('Resources')
     for (const item of validateResult.properties?.validatedResources || []) {
-      logger.info(`- Id: ${item.id}`)
+      core.info(`- Id: ${item.id}`)
     }
     core.endGroup()
   } else {
-    logger.debug(`Payload: ${JSON.stringify(validateResult)}`)
+    core.debug(`Payload: ${JSON.stringify(validateResult)}`)
   }
 }
 

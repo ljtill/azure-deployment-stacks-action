@@ -47639,7 +47639,6 @@ exports.initializeConfig = initializeConfig;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const helpers = __importStar(__nccwpck_require__(3202));
-const logger_1 = __nccwpck_require__(4636);
 const models_1 = __nccwpck_require__(2859);
 /**
  * Retrieves the value of the specified input key from the workflow run context.
@@ -47796,7 +47795,7 @@ async function initializeConfig() {
         await setTemplateContext(config);
         await setParametersContext(config);
     }
-    logger_1.logger.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`);
+    core.debug(`Configuration: ${JSON.stringify(config.inputs, null, 2)}`);
     return config;
 }
 
@@ -47867,7 +47866,6 @@ exports.prepareUnmanageProperties = prepareUnmanageProperties;
 exports.prepareDenySettings = prepareDenySettings;
 const core = __importStar(__nccwpck_require__(2186));
 const identity_1 = __nccwpck_require__(3084);
-const logger_1 = __nccwpck_require__(4636);
 /**
  * Checks if the given result is an instance of DeploymentStack.
  * @param result - The result to check.
@@ -47914,30 +47912,30 @@ function logDeploymentStackResult(result) {
     if (instanceOfDeploymentStack(result)) {
         core.startGroup('Resources');
         for (const item of result.properties?.resources || []) {
-            logger_1.logger.info(`- Id:          ${item.id}`);
-            logger_1.logger.info(`  Status:      ${item.status}`);
-            logger_1.logger.info(`  Deny Status: ${item.denyStatus}`);
+            core.info(`- Id:          ${item.id}`);
+            core.info(`  Status:      ${item.status}`);
+            core.info(`  Deny Status: ${item.denyStatus}`);
         }
         core.endGroup();
         core.startGroup('Deleted Resources');
         for (const item of result.properties?.deletedResources || []) {
-            logger_1.logger.info(`- Id: ${item.id}`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
         core.startGroup('Detached Resources');
         for (const item of result.properties?.detachedResources || []) {
-            logger_1.logger.info(`- Id: ${item.id}`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
         core.startGroup('Failed Resources');
         for (const item of result.properties?.failedResources || []) {
-            logger_1.logger.info(`- Id:    ${item.id}`);
-            logger_1.logger.info(`  Error: ${item.error?.code}`);
+            core.info(`- Id:    ${item.id}`);
+            core.info(`  Error: ${item.error?.code}`);
         }
         core.endGroup();
     }
     else {
-        logger_1.logger.debug(`Payload: ${JSON.stringify(result)}`);
+        core.debug(`Payload: ${JSON.stringify(result)}`);
     }
 }
 /**
@@ -47946,7 +47944,7 @@ function logDeploymentStackResult(result) {
  */
 function logDeploymentStackValidateResult(validateResult) {
     if (validateResult === undefined) {
-        logger_1.logger.warning('No result returned from operation');
+        core.warning('No result returned from operation');
         return;
     }
     if (instanceOfDeploymentStackValidateResult(validateResult)) {
@@ -47955,12 +47953,12 @@ function logDeploymentStackValidateResult(validateResult) {
         }
         core.startGroup('Resources');
         for (const item of validateResult.properties?.validatedResources || []) {
-            logger_1.logger.info(`- Id: ${item.id}`);
+            core.info(`- Id: ${item.id}`);
         }
         core.endGroup();
     }
     else {
-        logger_1.logger.debug(`Payload: ${JSON.stringify(validateResult)}`);
+        core.debug(`Payload: ${JSON.stringify(validateResult)}`);
     }
 }
 /**
@@ -48039,41 +48037,50 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.verifyBicep = verifyBicep;
+exports.logBicepVersion = logBicepVersion;
 exports.parseTemplateFile = parseTemplateFile;
 exports.parseParametersFile = parseParametersFile;
 exports.parseParametersObject = parseParametersObject;
 const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
+const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const io = __importStar(__nccwpck_require__(7436));
 const helpers = __importStar(__nccwpck_require__(3202));
-const logger_1 = __nccwpck_require__(4636);
+/**
+ * Retrieves the path of the Bicep executable.
+ * @returns A promise that resolves to the path of the Bicep executable.
+ */
+async function getBicepPath() {
+    let path;
+    try {
+        path = await io.which('bicep', true);
+    }
+    catch {
+        throw new Error('Bicep CLI is not installed');
+    }
+    return path;
+}
 /**
  * Verifies if Bicep is installed by checking its version.
  * @returns {Promise<void>} A promise that resolves when the verification is complete.
  * @throws {Error} If Bicep is not installed.
  */
-async function verifyBicep() {
-    try {
-        const bicepPath = await io.which('bicep', false);
-        const execOptions = {
-            listeners: {
-                stdout: (data) => {
-                    logger_1.logger.debug(data.toString().trim());
-                },
-                stderr: (data) => {
-                    logger_1.logger.error(data.toString().trim());
-                }
+async function logBicepVersion() {
+    let bicepPath = await getBicepPath();
+    const execOptions = {
+        listeners: {
+            stdout: (data) => {
+                core.debug(data.toString().trim());
             },
-            silent: true
-        };
-        await exec.exec(bicepPath, ['--version'], execOptions);
-    }
-    catch {
-        throw new Error('Bicep is not installed');
-    }
+            stderr: (data) => {
+                core.error(data.toString().trim());
+            }
+        },
+        silent: true
+    };
+    await exec.exec(bicepPath, ['--version'], execOptions);
 }
 /**
  * Builds a Bicep file by invoking the Bicep compiler.
@@ -48081,20 +48088,20 @@ async function verifyBicep() {
  * @returns A Promise that resolves to the path of the compiled Bicep file.
  */
 async function buildBicepFile(filePath) {
-    const bicepPath = await io.which('bicep', true);
+    const bicepPath = await getBicepPath();
     const outputPath = `${os.tmpdir()}/main.json`;
     const execOptions = {
         listeners: {
             stdout: (data) => {
-                logger_1.logger.debug(data.toString().trim());
+                core.debug(data.toString().trim());
             },
             stderr: (data) => {
-                logger_1.logger.error(data.toString().trim());
+                core.error(data.toString().trim());
             }
         },
         silent: true
     };
-    logger_1.logger.debug(`Command - bicep build --outfile ${outputPath}`);
+    core.debug(`Command - bicep build --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
@@ -48109,15 +48116,15 @@ async function buildBicepParametersFile(filePath) {
     const execOptions = {
         listeners: {
             stdout: (data) => {
-                logger_1.logger.debug(data.toString().trim());
+                core.debug(data.toString().trim());
             },
             stderr: (data) => {
-                logger_1.logger.error(data.toString().trim());
+                core.error(data.toString().trim());
             }
         },
         silent: true
     };
-    logger_1.logger.debug(`Command - bicep build-params --outfile ${outputPath}`);
+    core.debug(`Command - bicep build-params --outfile ${outputPath}`);
     await exec.exec(bicepPath, ['build-params', filePath, '--outfile', outputPath], execOptions);
     return outputPath;
 }
@@ -48135,7 +48142,7 @@ async function parseTemplateFile(config) {
             filePath = await buildBicepFile(filePath);
         }
         else if (fileExtension === '.json') {
-            logger_1.logger.debug(`Skipping as JSON file provided.`);
+            core.debug(`Skipping as JSON file provided.`);
         }
         else {
             throw new Error('Unsupported file type.');
@@ -48160,7 +48167,7 @@ async function parseParametersFile(config) {
             filePath = await buildBicepParametersFile(filePath);
         }
         else if (fileExtension === '.json') {
-            logger_1.logger.debug(`Skipping as JSON file provided.`);
+            core.debug(`Skipping as JSON file provided.`);
         }
         else {
             throw new Error('Unsupported file type.');
@@ -48234,7 +48241,7 @@ async function parseParametersObject(config) {
             throw new Error('Unable to parse parameters object');
         }
     }
-    logger_1.logger.debug(`Parameters: ${JSON.stringify(parameters)}`);
+    core.debug(`Parameters: ${JSON.stringify(parameters)}`);
     return parameters;
 }
 
@@ -48284,85 +48291,6 @@ function isBoolean(value) {
 
 /***/ }),
 
-/***/ 4636:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logger = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-/**
- * Represents a logger that provides logging functionality for the application.
- */
-class Logger {
-    /**
-     * Logs an informational message.
-     * @param message - The message to be logged.
-     */
-    info(message) {
-        core.info(`${message}`);
-    }
-    /**
-     * Logs a debug message.
-     * @param message - The message to be logged.
-     */
-    debug(message) {
-        core.debug(`=> ${message}`);
-    }
-    /**
-     * Logs an error message.
-     * @param message - The message to be logged.
-     */
-    error(message) {
-        core.error(`${message}`);
-    }
-    /**
-     * Logs a warning message.
-     * @param message - The warning message to log.
-     */
-    warning(message) {
-        core.warning(`${message}`);
-    }
-    /**
-     * Starts a new logging group.
-     * @param name - The name of the group.
-     */
-    startGroup() { }
-    /**
-     * Ends the current logging group.
-     * @param name - The name of the group.
-     */
-    endGroup() { }
-}
-exports.logger = new Logger();
-
-
-/***/ }),
-
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -48396,15 +48324,14 @@ exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const operations = __importStar(__nccwpck_require__(8921));
 const helpers = __importStar(__nccwpck_require__(3202));
-const logger_1 = __nccwpck_require__(4636);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        logger_1.logger.debug(`Starting action`);
-        await helpers.verifyBicep();
+        core.debug(`Starting action`);
+        await helpers.logBicepVersion();
         const config = await helpers.initializeConfig();
         switch (config.inputs.mode) {
             case 'create':
@@ -48417,7 +48344,7 @@ async function run() {
                 await operations.validateDeploymentStack(config);
                 break;
         }
-        logger_1.logger.debug(`Finishing action`);
+        core.debug(`Finishing action`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -48594,9 +48521,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createDeploymentStack = createDeploymentStack;
 exports.deleteDeploymentStack = deleteDeploymentStack;
 exports.validateDeploymentStack = validateDeploymentStack;
+const core = __importStar(__nccwpck_require__(2186));
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const helpers = __importStar(__nccwpck_require__(3202));
-const logger_1 = __nccwpck_require__(4636);
 const models_1 = __nccwpck_require__(2859);
 /**
  * Creates a new deployment stack based on the provided configuration.
@@ -48680,7 +48607,7 @@ async function getDeploymentStack(config, client) {
  * @returns A Promise that resolves when the deployment stack is created.
  */
 async function createDeploymentStack(config) {
-    logger_1.logger.info(`Creating deployment stack`);
+    core.info(`Creating deployment stack`);
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
     const deploymentStack = newDeploymentStack(config);
     const optionalParams = {};
@@ -48704,7 +48631,7 @@ async function createDeploymentStack(config) {
             break;
     }
     helpers.logDeploymentStackResult(await operationPromise);
-    logger_1.logger.info(`Created deployment stack`);
+    core.info(`Created deployment stack`);
 }
 /**
  * Deletes a deployment stack based on the provided configuration.
@@ -48712,7 +48639,7 @@ async function createDeploymentStack(config) {
  * @returns A Promise that resolves when the deployment stack is deleted.
  */
 async function deleteDeploymentStack(config) {
-    logger_1.logger.info(`Deleting deployment stack`);
+    core.info(`Deleting deployment stack`);
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
     const deploymentStack = await getDeploymentStack(config, client);
     const optionalParams = {
@@ -48740,7 +48667,7 @@ async function deleteDeploymentStack(config) {
             break;
     }
     await operationPromise;
-    logger_1.logger.debug(`Deleted deployment stack`);
+    core.info(`Deleted deployment stack`);
 }
 /**
  * Validates the deployment stack based on the provided configuration.
@@ -48748,8 +48675,8 @@ async function deleteDeploymentStack(config) {
  * @returns A Promise that resolves to void.
  */
 async function validateDeploymentStack(config) {
+    core.info(`Validating deployment stack`);
     const client = new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(helpers.newCredential());
-    logger_1.logger.info(`Validating deployment stack`);
     const deploymentStack = newDeploymentStack(config);
     const optionalParams = {};
     let operationPromise;
@@ -48772,7 +48699,7 @@ async function validateDeploymentStack(config) {
             break;
     }
     helpers.logDeploymentStackValidateResult(await operationPromise);
-    logger_1.logger.info(`Validated deployment stack`);
+    core.info(`Validated deployment stack`);
 }
 
 

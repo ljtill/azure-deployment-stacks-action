@@ -1,36 +1,50 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
+import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as io from '@actions/io'
+
 import * as helpers from '../helpers'
-import { logger } from '../logger'
 import { Config, Parameters } from '../models'
+
+/**
+ * Retrieves the path of the Bicep executable.
+ * @returns A promise that resolves to the path of the Bicep executable.
+ */
+async function getBicepPath(): Promise<string> {
+  let path: string
+
+  try {
+    path = await io.which('bicep', true)
+  } catch {
+    throw new Error('Bicep CLI is not installed')
+  }
+
+  return path
+}
 
 /**
  * Verifies if Bicep is installed by checking its version.
  * @returns {Promise<void>} A promise that resolves when the verification is complete.
  * @throws {Error} If Bicep is not installed.
  */
-export async function verifyBicep(): Promise<void> {
-  try {
-    const bicepPath = await io.which('bicep', false)
-    const execOptions: exec.ExecOptions = {
-      listeners: {
-        stdout: (data: Buffer) => {
-          logger.debug(data.toString().trim())
-        },
-        stderr: (data: Buffer) => {
-          logger.error(data.toString().trim())
-        }
-      },
-      silent: true
-    }
+export async function logBicepVersion(): Promise<void> {
+  let bicepPath = await getBicepPath()
 
-    await exec.exec(bicepPath, ['--version'], execOptions)
-  } catch {
-    throw new Error('Bicep is not installed')
+  const execOptions: exec.ExecOptions = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString().trim())
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString().trim())
+      }
+    },
+    silent: true
   }
+
+  await exec.exec(bicepPath, ['--version'], execOptions)
 }
 
 /**
@@ -39,22 +53,22 @@ export async function verifyBicep(): Promise<void> {
  * @returns A Promise that resolves to the path of the compiled Bicep file.
  */
 async function buildBicepFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
+  const bicepPath = await getBicepPath()
   const outputPath = `${os.tmpdir()}/main.json`
 
   const execOptions: exec.ExecOptions = {
     listeners: {
       stdout: (data: Buffer) => {
-        logger.debug(data.toString().trim())
+        core.debug(data.toString().trim())
       },
       stderr: (data: Buffer) => {
-        logger.error(data.toString().trim())
+        core.error(data.toString().trim())
       }
     },
     silent: true
   }
 
-  logger.debug(`Command - bicep build --outfile ${outputPath}`)
+  core.debug(`Command - bicep build --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build', filePath, '--outfile', outputPath],
@@ -77,16 +91,16 @@ async function buildBicepParametersFile(filePath: string): Promise<string> {
   const execOptions: exec.ExecOptions = {
     listeners: {
       stdout: (data: Buffer) => {
-        logger.debug(data.toString().trim())
+        core.debug(data.toString().trim())
       },
       stderr: (data: Buffer) => {
-        logger.error(data.toString().trim())
+        core.error(data.toString().trim())
       }
     },
     silent: true
   }
 
-  logger.debug(`Command - bicep build-params --outfile ${outputPath}`)
+  core.debug(`Command - bicep build-params --outfile ${outputPath}`)
   await exec.exec(
     bicepPath,
     ['build-params', filePath, '--outfile', outputPath],
@@ -112,7 +126,7 @@ export async function parseTemplateFile(
     if (fileExtension === '.bicep') {
       filePath = await buildBicepFile(filePath)
     } else if (fileExtension === '.json') {
-      logger.debug(`Skipping as JSON file provided.`)
+      core.debug(`Skipping as JSON file provided.`)
     } else {
       throw new Error('Unsupported file type.')
     }
@@ -137,7 +151,7 @@ export async function parseParametersFile(config: Config): Promise<Parameters> {
     if (fileExtension === '.bicepparam') {
       filePath = await buildBicepParametersFile(filePath)
     } else if (fileExtension === '.json') {
-      logger.debug(`Skipping as JSON file provided.`)
+      core.debug(`Skipping as JSON file provided.`)
     } else {
       throw new Error('Unsupported file type.')
     }
@@ -215,7 +229,7 @@ export async function parseParametersObject(
     }
   }
 
-  logger.debug(`Parameters: ${JSON.stringify(parameters)}`)
+  core.debug(`Parameters: ${JSON.stringify(parameters)}`)
 
   return parameters
 }

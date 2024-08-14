@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
+
 import * as operations from './operations'
 import * as helpers from './helpers'
-import { logger } from './logger'
 
 /**
  * The main function for the action.
@@ -9,9 +9,9 @@ import { logger } from './logger'
  */
 export async function run(): Promise<void> {
   try {
-    logger.debug(`Starting action`)
+    core.debug(`Starting action`)
 
-    await helpers.verifyBicep()
+    await helpers.logBicepVersion()
 
     const config = await helpers.initializeConfig()
 
@@ -27,7 +27,7 @@ export async function run(): Promise<void> {
         break
     }
 
-    logger.debug(`Finishing action`)
+    core.debug(`Finishing action`)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

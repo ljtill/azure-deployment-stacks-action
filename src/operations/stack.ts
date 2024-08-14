@@ -1,10 +1,11 @@
+import * as core from '@actions/core'
 import {
   DeploymentStacksClient,
   DeploymentStack,
   DeploymentStackProperties
 } from '@azure/arm-resourcesdeploymentstacks'
+
 import * as helpers from '../helpers'
-import { logger } from '../logger'
 import { Config, TemplateType, ParametersType } from '../models'
 
 /**
@@ -112,7 +113,7 @@ async function getDeploymentStack(
  * @returns A Promise that resolves when the deployment stack is created.
  */
 export async function createDeploymentStack(config: Config): Promise<void> {
-  logger.info(`Creating deployment stack`)
+  core.info(`Creating deployment stack`)
 
   const client = new DeploymentStacksClient(helpers.newCredential())
   const deploymentStack = newDeploymentStack(config)
@@ -171,7 +172,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
 
   helpers.logDeploymentStackResult(await operationPromise)
 
-  logger.info(`Created deployment stack`)
+  core.info(`Created deployment stack`)
 }
 
 /**
@@ -180,7 +181,7 @@ export async function createDeploymentStack(config: Config): Promise<void> {
  * @returns A Promise that resolves when the deployment stack is deleted.
  */
 export async function deleteDeploymentStack(config: Config): Promise<void> {
-  logger.info(`Deleting deployment stack`)
+  core.info(`Deleting deployment stack`)
 
   const client = new DeploymentStacksClient(helpers.newCredential())
   const deploymentStack = await getDeploymentStack(config, client)
@@ -240,7 +241,7 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
 
   await operationPromise
 
-  logger.debug(`Deleted deployment stack`)
+  core.info(`Deleted deployment stack`)
 }
 
 /**
@@ -249,10 +250,9 @@ export async function deleteDeploymentStack(config: Config): Promise<void> {
  * @returns A Promise that resolves to void.
  */
 export async function validateDeploymentStack(config: Config): Promise<void> {
+  core.info(`Validating deployment stack`)
+
   const client = new DeploymentStacksClient(helpers.newCredential())
-
-  logger.info(`Validating deployment stack`)
-
   const deploymentStack = newDeploymentStack(config)
   const optionalParams = {}
 
@@ -309,5 +309,5 @@ export async function validateDeploymentStack(config: Config): Promise<void> {
 
   helpers.logDeploymentStackValidateResult(await operationPromise)
 
-  logger.info(`Validated deployment stack`)
+  core.info(`Validated deployment stack`)
 }
